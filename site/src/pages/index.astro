@@ -1,7 +1,19 @@
 ---
 import Base from "../layouts/Base.astro";
+// Los adoptantes salen del registro del repositorio y no de una lista en esta
+// página: dar de alta a uno es un PR a adoptantes/registro.json.
+import registroAdoptantes from "../contenido/adoptantes.json";
+
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+
+// Un adoptante puede estar en los dos lados, con una nota distinta en cada uno.
+const receptores = [];
+const emisores = [];
+for (const a of registroAdoptantes.adoptantes) {
+  if (a.roles.receptor) receptores.push({ ...a, nota: a.roles.receptor });
+  if (a.roles.emisor) emisores.push({ ...a, nota: a.roles.emisor });
+}
 
 // Las tres variantes de "antes" son los falsos positivos que §7.1 enuncia: sin un
 // delimitador, ninguna regla de lectura separa el dato del texto que lo rodea.
@@ -273,7 +285,9 @@ const tabla = [
     </div>
   </section>
 
-  <section class="seccion">
+  {/* La única sección invertida. Es la que niega, y el corte de color hace de
+      pausa a mitad de página sin necesidad de un separador decorativo. */}
+  <section class="seccion seccion--inversa">
     <div class="envoltura">
       <h2 class="seccion__titulo">Qué no es</h2>
       <ul class="no-es">
@@ -340,6 +354,56 @@ const tabla = [
           }
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Adoptantes</h2>
+      <p class="medida">
+        Quién lee el bloque y quién lo escribe hoy. La lista vive en el repositorio:
+        darse de alta es un PR a <code>adoptantes/registro.json</code>, no un trámite
+        con nadie.
+      </p>
+      <div class="lados">
+        <div class="lado">
+          <p class="lado__quien">Cadenas de retail · receptores</p>
+          <ul class="adoptantes">
+            {
+              receptores.map((a) => (
+                <li class="adoptante">
+                  <p class="adoptante__nombre">
+                    <a href={a.sitio}>{a.nombre}</a>
+                    {a.custodio && <span class="adoptante__sello">custodio</span>}
+                  </p>
+                  <p class="adoptante__nota">{a.nota}</p>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="lado">
+          <p class="lado__quien">Proveedores · emisores</p>
+          <ul class="adoptantes">
+            {
+              emisores.map((a) => (
+                <li class="adoptante">
+                  <p class="adoptante__nombre">
+                    <a href={a.sitio}>{a.nombre}</a>
+                    {a.custodio && <span class="adoptante__sello">custodio</span>}
+                  </p>
+                  <p class="adoptante__nota">{a.nota}</p>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+      <p class="seccion__nota">
+        Estar en esta lista es una declaración de quien se lista, no una certificación:
+        la convención no tiene autoridad que certifique a nadie. Lo verificable son los
+        20 casos de conformidad, que cualquiera puede correr contra una implementación.
+      </p>
     </div>
   </section>
 

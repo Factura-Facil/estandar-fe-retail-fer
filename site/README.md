@@ -17,7 +17,9 @@ resolución de §5.2 las oculte. Ese archivo sí es propio del sitio: es lógica
 validación, no de lectura, y no forma parte de la especificación.
 
 `scripts/sync-contenido.mjs` copia además `claves/registro.json` a `public/`, de modo
-que el registro queda servido en una URL estable.
+que el registro queda servido en una URL estable, y `adoptantes/registro.json` a
+`src/contenido/`, desde donde la portada construye la sección de adoptantes. Dar de
+alta a un adoptante es un PR a ese archivo: no hay lista incrustada en la página.
 
 ## Desarrollo
 
@@ -55,9 +57,23 @@ Tipografía IBM Plex, pensada para documentación técnica. Sin sombras, sin esq
 redondeadas, sin degradados.
 
 El marcador usa el color que el manual de marca de Factura Fácil reserva para
-marcadores editoriales. Es el único punto donde la marca del custodio entra en el
-sistema visual; el logo va en el pie, no en la portada, porque la portada es del
-estándar.
+marcadores editoriales. El logo va en el pie, no en la portada, porque la portada es
+del estándar.
+
+El resto del color es funcional y no decorativo. Cada uso está atado a un significado
+y ninguno se repite fuera de él:
+
+| Color | Dónde | Qué significa |
+|---|---|---|
+| Marcador verde | El bloque `#FER1#` | Lo que el receptor extrae |
+| Rojo tenue | Panel «hoy, sin convención» | El estado que la convención elimina |
+| Verde tenue | Panel «con la convención» | El estado que la reemplaza |
+| Azul | Numerales, rótulos de audiencia, enlaces | Señal de navegación o de «esto es para usted» |
+| Azul de banda | Solo la sección «Qué no es» | El único tramo que niega en vez de afirmar |
+| Cian | Regla corta sobre cada título | Acento que ata la página; nunca superficie |
+
+Los rótulos de dato (`.comparativa__emisor`, `.rotulo`) siguen en gris: son etiquetas,
+no señales. Sin sombras, sin esquinas redondeadas ni degradados en ninguno de los dos.
 
 ### Imagen de compartir
 

@@ -68,4 +68,11 @@ writeFileSync(
   readFileSync(join(raiz, "claves", "registro.json"), "utf8")
 );
 
-console.log(`sync: spec + ${n} decisiones + casos + parser + registro`);
+// Adoptantes. La portada los renderiza desde aquí y no desde una lista propia,
+// para que un alta sea un PR al registro y no una edición del sitio.
+writeFileSync(
+  join(destino, "adoptantes.json"),
+  readFileSync(join(raiz, "adoptantes", "registro.json"), "utf8")
+);
+
+console.log(`sync: spec + ${n} decisiones + casos + parser + registro + adoptantes`);

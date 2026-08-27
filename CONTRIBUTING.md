@@ -31,6 +31,22 @@ Un cambio de gramática o de semántica de una clave existente exige versión **
 nuevo centinela. Se documenta con una nota de migración en el CHANGELOG. Estos
 cambios se evitan salvo defecto grave.
 
+## Listarse como adoptante
+
+`adoptantes/registro.json` es la lista pública de quién emite el bloque y quién lo
+lee. Para entrar, abre un PR que agregue una entrada con el nombre de la empresa, su
+sitio, la versión desde la que la implementa y una nota por cada rol —`receptor`,
+`emisor`, o los dos— describiendo qué hace con el bloque. La portada del sitio se
+construye desde ese archivo, así que no hay nada más que editar.
+
+Estar en la lista es una declaración de quien se lista, no una certificación: la
+convención no tiene autoridad que certifique a nadie, y el PR no se revisa contra
+ninguna auditoría. Lo verificable es otra cosa: los casos de `conformidad/casos.json`
+corridos contra la implementación. Un PR se rechaza solo si la entrada no identifica a
+una empresa real o si la nota describe algo que la especificación no contempla.
+
+Para salir de la lista basta un PR que quite la entrada, sin justificación.
+
 ## Registrar una decisión de diseño
 
 Las alternativas descartadas se documentan en `decisiones/` con formato ADR y no se

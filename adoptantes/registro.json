@@ -1,0 +1,16 @@
+{
+  "$comment": "Registro público de adoptantes de FER. Las altas entran por PR, igual que las claves. Estar aquí es una declaración de quien se lista, no una certificación: la convención no tiene autoridad que certifique a nadie.",
+  "version_esquema": 1,
+  "adoptantes": [
+    {
+      "nombre": "Factura Fácil, S.A.",
+      "sitio": "https://facturafacil.com.pa",
+      "custodio": true,
+      "desde": "1.0.0",
+      "roles": {
+        "receptor": "Extrae oc y ref de las facturas que procesa para sus clientes, con la implementación de referencia.",
+        "emisor": "Escribe el bloque en dInfEmFE desde su plataforma de emisión, sin configuración por cadena."
+      }
+    }
+  ]
+}
