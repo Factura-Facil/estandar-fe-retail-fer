@@ -2,6 +2,82 @@
 import Base from "../layouts/Base.astro";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+
+// Las tres variantes de "antes" son los falsos positivos que §7.1 enuncia: sin un
+// delimitador, ninguna regla de lectura separa el dato del texto que lo rodea.
+const antes = [
+  {
+    emisor: "Proveedor A",
+    cadena: "Orden de compra: 4500000001 SUPERMERCADO BUEN PRECIO",
+    nota: "El número queda pegado al nombre de la cadena. Ninguna regla separa uno del otro.",
+  },
+  {
+    emisor: "Distribuidora B",
+    cadena: "OC-4500000001 / Ref.: CADENA ABC",
+    nota: "Otro formato. La cadena mantiene una regla de ingesta distinta para este emisor.",
+  },
+  {
+    emisor: "Importadora C",
+    cadena: "PO 4500000001",
+    nota: "Una tercera variante. Localizar el número vuelve a ser trabajo manual.",
+  },
+];
+
+// El "después" muestra las tres formas que la convención tolera sin cambiar la regla:
+// bloque solo, bloque con texto libre, y bloque con una clave opcional ausente.
+const despues = [
+  {
+    emisor: "Proveedor A",
+    libre: "",
+    bloque: "#FER1# oc=4500000001 | ref=SUPERMERCADO BUEN PRECIO #FER1#",
+    nota: "Número delimitado. El receptor lo extrae sin heurística.",
+  },
+  {
+    emisor: "Distribuidora B",
+    libre: "Gracias por su compra.",
+    bloque: "#FER1# oc=4500000001 | ref=CADENA ABC #FER1#",
+    nota: "El mensaje del emisor sigue ahí, y el receptor lo ignora.",
+  },
+  {
+    emisor: "Importadora C",
+    libre: "",
+    bloque: "#FER1# oc=4500000001 #FER1#",
+    nota: "ref es opcional. La regla de lectura no cambia.",
+  },
+];
+
+const tabla = [
+  {
+    aspecto: "Reglas de ingesta en el ERP",
+    hoy: "Una regla distinta por proveedor, que se mantiene para siempre",
+    fer: "Una sola regla, válida para todos los emisores",
+  },
+  {
+    aspecto: "Desarrollo del emisor",
+    hoy: "Un formato por cada cadena a la que factura",
+    fer: "Un solo desarrollo sirve para todas las cadenas",
+  },
+  {
+    aspecto: "Trabajo en cuentas por pagar",
+    hoy: "Identificar la orden dentro de texto libre heterogéneo",
+    fer: "La orden está siempre en el mismo lugar del mismo campo",
+  },
+  {
+    aspecto: "Código de barra del ítem",
+    hoy: "Cada emisor lo coloca distinto, o no lo incluye",
+    fer: "Un formato uniforme para todo el catálogo",
+  },
+  {
+    aspecto: "Cambio de PAC",
+    hoy: "El formato depende del sistema que use el emisor",
+    fer: "El campo portador es oficial: funciona con cualquier PAC",
+  },
+  {
+    aspecto: "Verificación",
+    hoy: "Se descubre en producción, factura por factura",
+    fer: "20 casos de conformidad que se corren antes de emitir",
+  },
+];
 ---
 
 <Base
@@ -9,27 +85,41 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
   descripcion="Convención abierta para el número de orden de compra y el código de barra en la Factura Electrónica de Panamá. Una sola regla de lectura, independiente del PAC."
 >
   <div class="envoltura portada">
-    <p class="rotulo">Convención abierta · Panamá · versión 1.1.0</p>
-    <h1>Factura Electrónica <em>Retail</em></h1>
+    <p class="rotulo">FER · Factura Electrónica Retail · versión 1.1.0</p>
+    <h1>El número de orden y el código de barra, <em>siempre en el mismo lugar</em>.</h1>
     <p class="portada__bajada">
-      Dónde y cómo viajan el número de orden de compra y el código de barra dentro del
-      XML de la Factura Electrónica de Panamá, para que cualquier cadena los lea con una
-      sola regla, sin importar qué PAC use el proveedor.
+      Una convención abierta que define dónde y cómo viajan esos dos datos dentro del XML
+      de la Factura Electrónica de Panamá, para que cualquier cadena los lea con una sola
+      regla, sin importar qué PAC use el proveedor.
     </p>
 
+    {/* Dos momentos numerados, no tres listas: quién escribe y quién lee. El
+        marcador verde es el vínculo —lo resaltado arriba es lo que sale abajo—,
+        y el saludo del emisor se menciona una sola vez, para que no parezca
+        que el ejemplo se repite. */}
     <div class="campo">
-      <p class="campo__etiqueta">dInfEmFE · campo B29 · nivel documento</p>
+      <p class="campo__paso"><span>1</span> Lo que escribe el emisor</p>
+      <p class="campo__etiqueta">
+        en <code>dInfEmFE</code>, el campo de texto libre que la factura ya trae
+      </p>
       <p class="campo__cadena"><span class="campo__libre"
           >Gracias por su compra.</span
         > <span class="marca">#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</span></p>
+
+      <p class="campo__paso"><span>2</span> Lo que extrae el receptor</p>
+      <p class="campo__etiqueta">
+        del bloque marcado, con una sola regla y sin adivinar
+      </p>
+      {/* Misma forma que la salida del validador, porque es la misma operación. */}
       <dl class="campo__lectura">
-        <dt>lo que el receptor lee</dt>
-        <dd>oc = 4500000001 · ref = TIENDA RETAIL X</dd>
-        <dt>lo que el receptor ignora</dt>
-        <dd>todo lo que está fuera del bloque</dd>
+        <dt>oc</dt>
+        <dd>4500000001</dd>
+        <dt>ref</dt>
+        <dd>TIENDA RETAIL X</dd>
       </dl>
+
       <p class="campo__nota">
-        El bloque convive con el texto libre del emisor. El SKU permanece en <code
+        El saludo queda intacto: fuera del bloque no se toca nada. El SKU sigue en <code
           >dCodProd</code
         >.
       </p>
@@ -45,36 +135,139 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
   <section class="seccion">
     <div class="envoltura">
       <h2 class="seccion__titulo">El problema</h2>
-      <div class="doble">
-        <div>
-          <h3>Cada proveedor habla distinto</h3>
-          <p>
-            Una cadena de retail recibe facturas de cientos o miles de proveedores. Cada
-            proveedor emite a través del PAC que eligió, y coloca el número de pedido y el
-            código de barra donde su desarrollo decida. No hay convención común.
-          </p>
-          <p>
-            El costo se paga en los dos extremos: el proveedor mantiene un mapeo distinto
-            por cada cadena a la que factura, y la cadena mantiene reglas de ingesta
-            distintas por cada proveedor. El resultado son rechazos, reprocesos y trabajo
-            manual en cuentas por pagar.
+      <p class="medida">
+        Una cadena de retail recibe facturas de cientos o miles de proveedores. Cada uno
+        emite a través del PAC que eligió y coloca el número de orden donde su desarrollo
+        decida. El costo se paga en los dos extremos: el proveedor mantiene un mapeo
+        distinto por cada cadena, y la cadena mantiene reglas de ingesta distintas por
+        cada proveedor.
+      </p>
+
+      <div class="comparativa">
+        <div class="comparativa__lado comparativa__lado--antes">
+          <p class="comparativa__titulo">Hoy, sin convención</p>
+          {
+            antes.map((c) => (
+              <div class="comparativa__caso">
+                <p class="comparativa__emisor">{c.emisor}</p>
+                <p class="comparativa__cadena">{c.cadena}</p>
+                <p class="comparativa__nota">{c.nota}</p>
+              </div>
+            ))
+          }
+          <p class="comparativa__cierre">
+            Reglas de ingesta por proveedor, rechazos y reproceso manual.
           </p>
         </div>
-        <div>
-          <h3>Por qué en un campo de texto</h3>
-          <p>
-            El esquema XML de la Factura Electrónica de Panamá no tiene un nodo de
-            extensión libre, y los campos dedicados que parecerían servir imponen
-            restricciones de tipo, longitud u obligatoriedad que dejan fuera los datos
-            reales de un catálogo.
+
+        <div class="comparativa__lado comparativa__lado--despues">
+          <p class="comparativa__titulo">Con la convención</p>
+          {
+            despues.map((c) => (
+              <div class="comparativa__caso">
+                <p class="comparativa__emisor">{c.emisor}</p>
+                {/* Sin saltos de línea entre nodos: .comparativa__cadena es pre-wrap
+                    y cualquier espacio del template se renderiza. */}
+                <p class="comparativa__cadena">{c.libre ? <span class="campo__libre">{c.libre} </span> : null}<span class="marca">{c.bloque}</span></p>
+                <p class="comparativa__nota">{c.nota}</p>
+              </div>
+            ))
+          }
+          <p class="comparativa__cierre">
+            Una sola regla de lectura para todos los emisores, verificable.
           </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Cómo funciona</h2>
+      <p class="medida">
+        La convención no modifica el esquema de la Factura Electrónica. Se apoya en un
+        campo de texto que ya existe en toda factura autorizada.
+      </p>
+      <div class="pasos">
+        <div class="paso">
+          <h3>Un campo que ya está ahí</h3>
           <p>
-            <code>dInfEmFE</code> es la única sede que combina capacidad suficiente, tipo
-            permisivo, cero dependencias con otros nodos y presencia en ambos niveles. El
-            razonamiento completo, con las alternativas descartadas, está en <a
-              href={`${base}/decisiones/`}>las decisiones de diseño</a
-            >.
+            Toda Factura Electrónica panameña tiene <code>dInfEmFE</code>, un campo de
+            información adicional del emisor, a nivel de documento y de ítem. La
+            convención lo usa tal como está: no crea nodos ni toca la Ficha Técnica.
           </p>
+        </div>
+        <div class="paso">
+          <h3>Un bloque que delimita el dato</h3>
+          <p>
+            Dentro de ese campo, un centinela <code>#FER1#</code> abre y cierra un bloque
+            de pares <code>clave=valor</code>. Todo lo que quede fuera del bloque sigue
+            siendo uso libre del emisor.
+          </p>
+        </div>
+        <div class="paso">
+          <h3>Una regla que los lee todos</h3>
+          <p>
+            El receptor programa una sola extracción y le sirve para todos sus
+            proveedores. Hay <a href={`${base}/validador/`}>un validador</a> y 20 casos de
+            conformidad para comprobarlo antes de producción.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Lo ganan los dos lados</h2>
+      <p class="medida">
+        El beneficio es de doble vía, y por eso funciona: ninguno de los dos extremos
+        adopta la convención como favor al otro.
+      </p>
+      <div class="lados">
+        <div class="lado">
+          <p class="lado__quien">Cadenas de retail · receptores</p>
+          <h3>Reciben sin regla por proveedor</h3>
+          <ul>
+            <li>
+              Una extracción única para todas las facturas, sin importar qué sistema use
+              cada proveedor.
+            </li>
+            <li>
+              El número de orden llega limpio, listo para el three-way match entre orden,
+              recepción y factura.
+            </li>
+            <li>
+              El código de barra llega uniforme en el ítem, con la misma clave para todo
+              el catálogo.
+            </li>
+            <li>
+              Menos rechazos por formato, y menos tiempo del equipo de cuentas por pagar
+              en corregirlos.
+            </li>
+          </ul>
+        </div>
+        <div class="lado">
+          <p class="lado__quien">Proveedores · emisores</p>
+          <h3>Desarrollan una vez, facturan a todas</h3>
+          <ul>
+            <li>
+              Un solo desarrollo de emisión válido para todas las cadenas, en lugar de un
+              formato por cliente.
+            </li>
+            <li>
+              El campo sigue siendo suyo: el mensaje al cliente convive con el bloque en
+              el mismo campo.
+            </li>
+            <li>
+              Menos facturas devueltas por formato, y por lo tanto cobros que no se
+              detienen en la puerta.
+            </li>
+            <li>
+              Implementaciones de referencia en Python y JavaScript, sin dependencias,
+              para partir de algo que ya pasa los casos.
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -86,31 +279,114 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
       <ul class="no-es">
         <li>
           <span
-            ><strong>Un requisito de la DGI.</strong> Es una convención de industria. El
-            nombre es un identificador neutral y no representa una posición oficial de la
-            Dirección General de Ingresos.</span
+            ><strong>Un requisito de la DGI.</strong> Es una convención de industria y su
+            adopción es una decisión de negocio. El nombre es un identificador neutral y
+            no representa una posición oficial de la Dirección General de Ingresos.</span
           >
         </li>
         <li>
           <span
             ><strong>Un cambio al esquema XML.</strong> Se apoya enteramente en un campo
-            oficial ya existente de la Ficha Técnica vigente.</span
+            oficial ya existente de la Ficha Técnica vigente. No modifica ningún campo
+            obligatorio ni la estructura del documento.</span
           >
         </li>
         <li>
           <span
-            ><strong>Un cambio de proveedor.</strong> El campo portador es oficial y lo
-            emite cualquier PAC, así que implementar la convención no depende de quién
-            procese la factura.</span
+            ><strong>Un cambio de PAC ni de ERP.</strong> El campo portador es oficial y
+            lo emite cualquier proveedor de autorización calificado, así que implementar
+            la convención no depende de quién procese la factura ni obliga a renegociar
+            contratos.</span
+          >
+        </li>
+        <li>
+          <span
+            ><strong>Algo que haya que comprar.</strong> La especificación es pública, las
+            implementaciones de referencia son de licencia abierta y el campo portador ya
+            viene en la factura. No hay tarifa porque no hay nada que licenciar.</span
           >
         </li>
         <li>
           <span
             ><strong>Un producto.</strong> Es un documento, un registro de claves y un
-            conjunto de casos de prueba.</span
+            conjunto de casos de prueba. Se lee, se implementa y se verifica sin hablar
+            con nadie.</span
           >
         </li>
       </ul>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Antes y después</h2>
+      <table class="datos datos--tres">
+        <thead>
+          <tr>
+            <th scope="col">Aspecto</th>
+            <th scope="col">Hoy</th>
+            <th scope="col">Con la convención</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            tabla.map((f) => (
+              <tr>
+                <th scope="row">{f.aspecto}</th>
+                <td data-rotulo="Hoy">{f.hoy}</td>
+                <td data-rotulo="Con la convención">{f.fer}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Por dónde se empieza</h2>
+      <p class="medida">
+        El valor crece con cada cadena que la implementa: cuando una cadena la lee, sus
+        proveedores la implementan una sola vez y quedan servidos para todas las demás que
+        también la lean.
+      </p>
+      <div class="rutas">
+        <div class="ruta">
+          <p class="ruta__quien">Soy una cadena de retail</p>
+          <h3>Leer el bloque</h3>
+          <p>
+            Implementar la extracción de §5 y publicar a sus proveedores que la cadena lo
+            lee. Desde ese momento un proveedor tiene a quién facturarle así.
+          </p>
+          <a href={`${base}/spec/`}>Algoritmo de recepción</a>
+        </div>
+        <div class="ruta">
+          <p class="ruta__quien">Soy un proveedor</p>
+          <h3>Emitir el bloque</h3>
+          <p>
+            Escribir el bloque en <code>dInfEmFE</code> según §4 y correr los casos de
+            conformidad. Un solo desarrollo, todas las cadenas que lo lean.
+          </p>
+          <a href={`${base}/spec/`}>Reglas de emisión</a>
+        </div>
+        <div class="ruta">
+          <p class="ruta__quien">Soy un PAC o un desarrollador</p>
+          <h3>Ofrecerlo de fábrica</h3>
+          <p>
+            Incluirlo como opción en la plataforma. Hay implementaciones de referencia en
+            Python y JavaScript, sin dependencias, y una batería de casos.
+          </p>
+          <a href={repo}>Repositorio</a>
+        </div>
+      </div>
+
+      <p class="contacto">
+        Para proponer una clave nueva o reportar una ambigüedad del texto, el canal es <a
+          href={`${repo}/issues`}>el repositorio</a
+        >. Las consultas de interpretación normativa sobre los campos de la Ficha Técnica
+        las responde la DGI.
+      </p>
     </div>
   </section>
 

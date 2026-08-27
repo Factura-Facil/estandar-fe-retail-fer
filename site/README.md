@@ -49,7 +49,26 @@ construyen desde `import.meta.env.BASE_URL`.
 
 ## Diseño
 
-Papel, tinta y un marcador amarillo sobre lo único que el receptor lee. El gesto se
-repite en la portada y en el validador: el mismo objeto, primero explicado y después
-manipulable. Tipografía IBM Plex, pensada para documentación técnica. Sin sombras, sin
-esquinas redondeadas, sin degradados.
+Papel, tinta y un marcador sobre lo único que el receptor lee. El gesto se repite en la
+portada y en el validador: el mismo objeto, primero explicado y después manipulable.
+Tipografía IBM Plex, pensada para documentación técnica. Sin sombras, sin esquinas
+redondeadas, sin degradados.
+
+El marcador usa el color que el manual de marca de Factura Fácil reserva para
+marcadores editoriales. Es el único punto donde la marca del custodio entra en el
+sistema visual; el logo va en el pie, no en la portada, porque la portada es del
+estándar.
+
+### Imagen de compartir
+
+`public/og.png` se rinde de `scripts/og.html`, que importa `src/styles/fer.css` para que
+los colores salgan de los tokens y no se desincronicen del sitio. Al cambiar el
+marcador o subir de versión hay que volver a generarla:
+
+```bash
+chromium --headless --window-size=1200,630 \
+  --screenshot=site/public/og.png site/scripts/og.html
+```
+
+Requiere red: las IBM Plex vienen de Google Fonts. Verificar que el texto no quedó en
+la tipografía de reserva antes de dar la imagen por buena.

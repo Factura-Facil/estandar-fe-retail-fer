@@ -1,8 +1,13 @@
 /* FER — sistema visual
  *
  * El artefacto del estándar es una cadena de texto dentro de un campo XML. La página
- * se construye alrededor de ese objeto: papel, tinta y un marcador amarillo sobre lo
- * único que el receptor lee.
+ * se construye alrededor de ese objeto: papel, tinta y un marcador sobre lo único que
+ * el receptor lee.
+ *
+ * El color del marcador es el que el manual de marca de Factura Fácil reserva para
+ * marcadores editoriales (ff-green-light). Es el único punto donde la marca del
+ * custodio entra en el sistema visual: no hay sombras, esquinas redondeadas ni
+ * degradados, y la tipografía sigue siendo IBM Plex.
  */
 
 @font-face {
@@ -25,9 +30,13 @@
   --azul: #1b3a8c;
   --azul-claro: #e8ecf7;
 
-  /* Marcador: lo que el receptor extrae */
-  --marcador: #ffef9e;
-  --marcador-borde: #e0c53a;
+  /* Marcador: lo que el receptor extrae. ff-green-light / ff-green del manual. */
+  --marcador: #b1d451;
+  --marcador-borde: #a3bf40;
+
+  /* Rojo de corrección: el estado que la convención elimina, no un color de marca. */
+  --rojo: #a4342a;
+  --rojo-tenue: #f7ecea;
 
   --linea: #ddd8ce;
   --linea-firme: #b9b2a4;
@@ -187,10 +196,13 @@ body {
 
 /* ---------- el artefacto: campo anotado ---------- */
 
+/* El campo es el objeto del estándar, así que se dibuja como un objeto y no como
+   el hueco entre dos reglas: relleno propio para que tenga cuerpo sobre el papel.
+   Lo comparte el validador, donde cumple el mismo papel de panel de resultado. */
 .campo {
   border-top: 2px solid var(--tinta);
-  border-bottom: 1px solid var(--linea);
-  padding-block: 1.75rem;
+  background: var(--papel-hondo);
+  padding: 1.5rem;
   margin-block: 2rem 0;
   overflow-x: auto;
 }
@@ -242,35 +254,88 @@ body {
 .campo__lectura {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.375rem 1.25rem;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
   font-family: var(--mono);
   font-size: 0.8125rem;
-  margin: 1.5rem 0 0;
-  padding-top: 1.25rem;
-  border-top: 1px dashed var(--linea);
+  margin: 0;
   max-width: 44rem;
+}
+
+/* En el validador la lectura va pegada a la cadena y necesita el corte. En la
+   portada se interpone .campo__salida, así que la adyacencia no se da. */
+.campo__cadena + .campo__lectura {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--linea-firme);
 }
 
 .campo__lectura dt {
   color: var(--tinta-fantasma);
 }
 
+/* El valor extraído es el remate de todo el argumento: se lee, no se consulta. */
 .campo__lectura dd {
   margin: 0;
   color: var(--tinta);
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+
+/* Los dos momentos del campo: quién lo escribe y quién lo lee. Van numerados
+   como los pasos de "Cómo funciona", para que se lean como una secuencia y no
+   como dos listas sueltas. */
+.campo__paso {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta);
+  margin: 2rem 0 0.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--linea-firme);
+}
+
+.campo__paso:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.campo__paso span {
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: 0;
+  margin-right: 0.375rem;
 }
 
 .campo__nota {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--tinta-fantasma);
-  margin: 1rem 0 0;
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--linea);
 }
 
 /* ---------- secciones ---------- */
 
+/* Bandas alternas. El pie ya usaba --papel-hondo, así que la página no estrena
+   color: extiende un recurso que ya estaba en el sistema.
+   nth-of-type en vez de una clase en el markup, para que agregar o quitar una
+   sección no obligue a renumerar la alternancia a mano. */
 .seccion {
-  padding-block: 3.5rem;
+  padding-block: 4.5rem;
+}
+
+.seccion:nth-of-type(even) {
+  background: var(--papel-hondo);
+}
+
+/* Con bandas, cada frontera ya es un cambio de color y la regla de 1px sobra.
+   La primera sí la necesita: viene después de la portada, del mismo papel. */
+.seccion:first-of-type {
   border-top: 1px solid var(--linea);
 }
 
@@ -374,6 +439,40 @@ body {
 .datos code {
   font-family: var(--mono);
   font-size: 0.875em;
+}
+
+/* Tres columnas: aspecto, hoy, con la convención. Cabecera real, no th lateral. */
+.datos--tres {
+  max-width: none;
+}
+
+.datos--tres thead th {
+  width: auto;
+  white-space: normal;
+  border-bottom-color: var(--tinta);
+  padding-right: 1.5rem;
+}
+
+.datos--tres tbody th {
+  width: 26%;
+  white-space: normal;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--tinta);
+  padding-right: 1.5rem;
+}
+
+.datos--tres td {
+  width: 37%;
+  color: var(--tinta-tenue);
+  padding-right: 1.5rem;
+}
+
+.datos--tres td:last-child {
+  color: var(--tinta);
+  padding-right: 0;
 }
 
 /* ---------- enlaces ---------- */
@@ -676,6 +775,294 @@ a:hover {
   font-size: 0.8125rem;
 }
 
+/* ---------- comparativa: el mismo dato, antes y después ---------- */
+
+.comparativa {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 900px) {
+  .comparativa {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 3rem;
+  }
+}
+
+.comparativa__lado {
+  border-top: 2px solid var(--tinta);
+  padding-top: 1.25rem;
+}
+
+.comparativa__lado--antes {
+  border-top-color: var(--rojo);
+}
+
+.comparativa__titulo {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 1.5rem;
+}
+
+.comparativa__lado--antes .comparativa__titulo {
+  color: var(--rojo);
+}
+
+.comparativa__caso {
+  padding-bottom: 1.125rem;
+  margin-bottom: 1.125rem;
+  border-bottom: 1px dashed var(--linea);
+}
+
+.comparativa__emisor {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tinta-fantasma);
+  margin: 0 0 0.5rem;
+}
+
+.comparativa__cadena {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0 0 0.5rem;
+}
+
+.comparativa__nota {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--tinta-tenue);
+  margin: 0;
+  padding-left: 1.125rem;
+  position: relative;
+}
+
+.comparativa__nota::before {
+  position: absolute;
+  left: 0;
+  font-family: var(--mono);
+}
+
+.comparativa__lado--antes .comparativa__nota::before {
+  content: "×";
+  color: var(--rojo);
+}
+
+.comparativa__lado--despues .comparativa__nota::before {
+  content: "→";
+  color: var(--marcador-borde);
+}
+
+.comparativa__cierre {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 0.25rem;
+}
+
+.comparativa__lado--antes .comparativa__cierre {
+  color: var(--rojo);
+}
+
+/* ---------- pasos numerados ---------- */
+
+.pasos {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+  counter-reset: paso;
+}
+
+@media (min-width: 860px) {
+  .pasos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.paso {
+  border-top: 2px solid var(--tinta);
+  padding-top: 1rem;
+  counter-increment: paso;
+}
+
+/* El numeral es el ancla de la secuencia, no una etiqueta: condensada grande en
+   tinta, del mismo tamaño que un título de sección. */
+.paso::before {
+  content: counter(paso, decimal-leading-zero);
+  display: block;
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+  margin-bottom: 0.5rem;
+}
+
+.paso h3 {
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  margin: 0 0 0.625rem;
+}
+
+.paso p {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+  margin: 0;
+}
+
+/* ---------- lo ganan los dos lados ---------- */
+
+.lados {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 860px) {
+  .lados {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.lado {
+  border-top: 2px solid var(--tinta);
+  padding-top: 1.25rem;
+}
+
+.lado__quien {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tinta-fantasma);
+  margin: 0 0 0.5rem;
+}
+
+.lado h3 {
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+}
+
+.lado ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.875rem;
+}
+
+.lado li {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--tinta-tenue);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.lado li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.6875rem;
+  height: 0.375rem;
+  background: var(--marcador);
+  border-bottom: 1px solid var(--marcador-borde);
+}
+
+/* ---------- rutas por audiencia ---------- */
+
+.rutas {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 860px) {
+  .rutas {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.ruta {
+  border-top: 2px solid var(--tinta);
+  padding-top: 1.125rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.ruta__quien {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tinta-fantasma);
+  margin: 0 0 0.5rem;
+}
+
+.ruta h3 {
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  margin: 0 0 0.625rem;
+}
+
+.ruta p {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+  margin: 0 0 1.25rem;
+}
+
+.ruta a {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--azul);
+  text-decoration: none;
+  border-bottom: 1px solid var(--azul);
+  padding-bottom: 0.15rem;
+  align-self: start;
+}
+
+.ruta a:hover {
+  background: var(--azul-claro);
+}
+
+/* ---------- contacto ---------- */
+
+.contacto {
+  border-top: 1px solid var(--linea);
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  font-size: 0.9375rem;
+  color: var(--tinta-tenue);
+  max-width: 60ch;
+}
+
+.contacto a {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+}
+
 /* ---------- pie ---------- */
 
 .pie {
@@ -700,6 +1087,32 @@ a:hover {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--tinta-fantasma);
+}
+
+/* El logo del custodio va en el pie, no en la portada: la portada es del
+ * estándar. */
+.pie__marca {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--linea);
+}
+
+.pie__marca img {
+  width: 132px;
+  height: auto;
+}
+
+.pie__marca span {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tinta-fantasma);
+  border-left: 1px solid var(--linea-firme);
+  padding-left: 0.875rem;
 }
 
 
@@ -740,6 +1153,60 @@ a:hover {
 
   .prosa {
     padding-block: 2rem 3.5rem;
+  }
+
+  /* Tres columnas no caben: cada fila pasa a bloque con la cabecera como rótulo.
+     La tabla y el tbody también bajan a bloque; si no, el algoritmo de tabla
+     sigue repartiendo anchos y la primera celda queda en una palabra por línea. */
+  .datos--tres,
+  .datos--tres tbody {
+    display: block;
+  }
+
+  .datos--tres thead {
+    display: none;
+  }
+
+  .datos--tres tr {
+    display: block;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  /* tbody th, no th: la media query no sube la especificidad y el 26% de
+     .datos--tres tbody th ganaría, dejando el título en una palabra por línea. */
+  .datos--tres tbody th,
+  .datos--tres tbody td {
+    display: block;
+    width: auto;
+    border-bottom: 0;
+    padding: 0;
+  }
+
+  .datos--tres tbody th {
+    margin-bottom: 0.5rem;
+  }
+
+  .datos--tres td::before {
+    content: attr(data-rotulo);
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tinta-fantasma);
+    margin-top: 0.625rem;
+  }
+
+  .pie__marca {
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .pie__marca span {
+    border-left: 0;
+    padding-left: 0;
+    flex-basis: 100%;
   }
 }
 

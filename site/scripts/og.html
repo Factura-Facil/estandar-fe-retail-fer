@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  Plantilla de la que se rinde public/og.png (1200 × 630).
+
+  Importa src/styles/fer.css en vez de repetir los colores, para que el marcador
+  y la tinta salgan de los tokens y la imagen no se desincronice del sitio.
+
+  Para regenerarla, con cualquier navegador headless. Ejemplo:
+    chromium --headless --window-size=1200,630 \
+      --screenshot=site/public/og.png site/scripts/og.html
+
+  Requiere red la primera vez: las IBM Plex vienen de Google Fonts, igual que en
+  el layout. Revisar que el texto no quedó en la tipografía de reserva antes de
+  dar la imagen por buena.
+-->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="../src/styles/fer.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .og {
+        width: 1200px;
+        height: 630px;
+        background: var(--papel);
+        border-top: 10px solid var(--tinta);
+        border-bottom: 10px solid var(--tinta);
+        padding: 70px 80px 0;
+        overflow: hidden;
+      }
+
+      .og__rotulo {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--tinta-fantasma);
+        margin: 0 0 34px;
+      }
+
+      .og__titulo {
+        font-family: var(--cond);
+        font-weight: 700;
+        font-size: 84px;
+        line-height: 0.96;
+        letter-spacing: -0.015em;
+        color: var(--tinta);
+        margin: 0;
+      }
+
+      .og__titulo span {
+        color: var(--tinta-fantasma);
+      }
+
+      .og__regla {
+        border: 0;
+        border-top: 3px solid var(--tinta);
+        margin: 38px 0 26px;
+      }
+
+      .og__campo {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.02em;
+        color: var(--tinta-fantasma);
+        margin: 0 0 14px;
+      }
+
+      .og__cadena {
+        font-family: var(--mono);
+        font-size: 19px;
+        color: var(--tinta-fantasma);
+        white-space: nowrap;
+        margin: 0;
+      }
+
+      .og__fina {
+        border: 0;
+        border-top: 1px solid var(--linea);
+        margin: 30px 0 26px;
+      }
+
+      .og__claim {
+        font-family: var(--sans);
+        font-size: 22px;
+        line-height: 1.45;
+        color: var(--tinta);
+        margin: 0;
+        max-width: 56ch;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="og">
+      <p class="og__rotulo">Convención abierta · Panamá · versión 1.1.0</p>
+      <h1 class="og__titulo">Factura Electrónica<br /><span>Retail</span></h1>
+      <hr class="og__regla" />
+      <p class="og__campo">dInfEmFE · campo B29</p>
+      <p class="og__cadena">Gracias por su compra. <span class="marca">#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</span></p>
+      <hr class="og__fina" />
+      <p class="og__claim">
+        Una sola regla de lectura para el número de orden de compra y el código de
+        barra, independiente del PAC del emisor.
+      </p>
+    </div>
+  </body>
+</html>

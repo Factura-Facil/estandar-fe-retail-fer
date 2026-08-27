@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" fill="#fbfaf7"/>
-  <rect x="4" y="12" width="24" height="9" fill="#ffef9e"/>
+  <rect x="4" y="12" width="24" height="9" fill="#b1d451"/>
   <g fill="#15171a" font-family="ui-monospace,monospace" font-size="11" font-weight="700">
     <text x="16" y="20" text-anchor="middle">FER</text>
   </g>
