@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FER 1.1.0 — ejemplo para probar el validador.
+
+  ATENCIÓN: este archivo es ficticio y está incompleto a propósito. No es una Factura
+  Electrónica válida, no está firmado y no valida contra el esquema de la DGI. Existe
+  únicamente para ejercitar la lectura de los campos dInfEmFE con una estructura
+  parecida a la real: un campo a nivel de documento y uno por ítem.
+
+  Para validar un documento real, usa los ejemplos y archivos de ayuda publicados por
+  la Dirección General de Ingresos junto a la Ficha Técnica vigente.
+
+  Todos los valores son ficticios.
+
+  Este ejemplo ilustra tres situaciones a la vez:
+    - documento: bloque al inicio, conforme a la recomendación de §4.3.5
+    - ítem 1: bloque con código de barra EAN
+    - ítem 2: bloque con código de peso variable
+    - ítem 3: perfil heredado, código en crudo sin etiqueta (§7)
+-->
+<rFE xmlns="http://dgi-fep.mef.gob.pa/wsdl/FeSimple">
+  <gDGen>
+    <iAmb>2</iAmb>
+    <iTpEmis>01</iTpEmis>
+    <iDoc>01</iDoc>
+    <dNroDF>0000000001</dNroDF>
+    <dPtoFacDF>001</dPtoFacDF>
+    <dFechaEm>2026-08-27T09:15:00-05:00</dFechaEm>
+    <iNatOp>01</iNatOp>
+    <iTipoOp>1</iTipoOp>
+    <iDest>1</iDest>
+    <iFormCAFE>1</iFormCAFE>
+    <iEntCAFE>1</iEntCAFE>
+    <dEnvFE>1</dEnvFE>
+    <iProGen>2</iProGen>
+    <dInfEmFE>#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1# Gracias por su compra.</dInfEmFE>
+    <gEmis>
+      <gRucEmi>
+        <dTipoRuc>2</dTipoRuc>
+        <dRuc>000000000-0-000000</dRuc>
+        <dDV>00</dDV>
+      </gRucEmi>
+      <dNombEm>PROVEEDOR DE EJEMPLO, S.A.</dNombEm>
+    </gEmis>
+    <gDatRec>
+      <iTipoRec>02</iTipoRec>
+      <dNombRec>CADENA DE EJEMPLO, S.A.</dNombRec>
+    </gDatRec>
+  </gDGen>
+
+  <gItem>
+    <dSecItem>1</dSecItem>
+    <dDescProd>Producto de ejemplo con EAN</dDescProd>
+    <dCodProd>50000001</dCodProd>
+    <dCantCodInt>24.00</dCantCodInt>
+    <dInfEmFE>#FER1# cbar=7600000000001 #FER1#</dInfEmFE>
+    <gPrecios>
+      <dPrUnit>1.50</dPrUnit>
+      <dValTotItem>36.00</dValTotItem>
+    </gPrecios>
+  </gItem>
+
+  <gItem>
+    <dSecItem>2</dSecItem>
+    <dDescProd>Producto de peso variable</dDescProd>
+    <dCodProd>50000002</dCodProd>
+    <dCantCodInt>3.25</dCantCodInt>
+    <dInfEmFE>Mantener refrigerado. #FER1# cbar=2000123456789 #FER1#</dInfEmFE>
+    <gPrecios>
+      <dPrUnit>4.20</dPrUnit>
+      <dValTotItem>13.65</dValTotItem>
+    </gPrecios>
+  </gItem>
+
+  <gItem>
+    <dSecItem>3</dSecItem>
+    <dDescProd>Producto que aún emite en perfil heredado</dDescProd>
+    <dCodProd>50000003</dCodProd>
+    <dCantCodInt>12.00</dCantCodInt>
+    <dInfEmFE>7600000000003</dInfEmFE>
+    <gPrecios>
+      <dPrUnit>2.00</dPrUnit>
+      <dValTotItem>24.00</dValTotItem>
+    </gPrecios>
+  </gItem>
+
+  <gTot>
+    <dTotNeto>73.65</dTotNeto>
+    <dTotITBMS>0.00</dTotITBMS>
+    <dVTot>73.65</dVTot>
+    <dNroItems>3</dNroItems>
+  </gTot>
+</rFE>

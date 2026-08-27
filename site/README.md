@@ -9,7 +9,15 @@ se edita a mano. Para cambiar el texto de la especificación se edita el archivo
 raíz del repositorio.
 
 El validador importa `referencia/javascript/fer.js` sin modificarlo, así que la
-herramienta y la implementación de referencia no pueden divergir.
+herramienta y la implementación de referencia no pueden divergir. Tiene dos modos: el
+contenido de un campo, y un archivo XML completo. El modo XML añade `src/lib/revisar-xml.js`,
+que recorre el documento por nombre local —funciona con o sin namespace— y revisa las
+recomendaciones de emisión de §4.3 y §4.4 sobre los datos en crudo, antes de que la
+resolución de §5.2 las oculte. Ese archivo sí es propio del sitio: es lógica de
+validación, no de lectura, y no forma parte de la especificación.
+
+`scripts/sync-contenido.mjs` copia además `claves/registro.json` a `public/`, de modo
+que el registro queda servido en una URL estable.
 
 ## Desarrollo
 

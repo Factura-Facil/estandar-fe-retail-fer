@@ -5,46 +5,75 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
 ---
 
 <Base
-  titulo="Validador — FER 1.0.0"
-  descripcion="Pega el contenido de un campo dInfEmFE y mira exactamente qué extrae un receptor conforme a FER 1.0.0."
+  titulo="Validador — FER 1.1.0"
+  descripcion="Revisa el contenido de un campo dInfEmFE o un XML completo, y mira exactamente qué extrae un receptor conforme a FER 1.1.0."
 >
   <div class="envoltura prosa tool">
     <p class="rotulo">Herramienta</p>
     <h1>Qué lee un receptor</h1>
-    <p>
-      Pega el contenido de un campo <code>dInfEmFE</code> y mira qué extrae la
-      implementación de referencia. Corre completo en tu navegador: nada se envía a
-      ningún servidor.
-    </p>
+    <p>Corre completo en tu navegador. Ni el campo ni el archivo salen de tu máquina.</p>
 
-    <label class="pie__mono" for="entrada">Contenido del campo</label>
-    <textarea
-      id="entrada"
-      class="tool__campo"
-      spellcheck="false"
-      autocapitalize="off"
-      autocomplete="off"
-      rows="4">Gracias por su compra. #FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</textarea
-    >
-
-    <div class="tool__fila">
-      <div class="tool__radios" role="radiogroup" aria-label="Nivel del campo">
-        <label><input type="radio" name="nivel" value="documento" checked /> documento · B29</label>
-        <label><input type="radio" name="nivel" value="item" /> ítem · C19</label>
-      </div>
+    <div class="modos" role="tablist" aria-label="Modo de revisión">
+      <button type="button" class="modo" data-modo="campo" role="tab" aria-selected="true">
+        Un campo
+      </button>
+      <button type="button" class="modo" data-modo="xml" role="tab" aria-selected="false">
+        Un XML completo
+      </button>
     </div>
 
-    <div class="tool__ejemplos" id="ejemplos"></div>
+    <section id="panel-campo">
+      <label class="pie__mono" for="entrada">Contenido del campo dInfEmFE</label>
+      <textarea
+        id="entrada"
+        class="tool__campo"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        rows="4">Gracias por su compra. #FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</textarea
+      >
 
-    <div class="tool__salida">
-      <p class="tool__perfil" id="perfil"></p>
-      <div class="campo">
-        <p class="campo__etiqueta">lectura</p>
-        <p class="campo__cadena" id="marcado"></p>
-        <dl class="campo__lectura" id="extraido"></dl>
+      <div class="tool__fila">
+        <div class="tool__radios" role="radiogroup" aria-label="Nivel del campo">
+          <label
+            ><input type="radio" name="nivel" value="documento" checked /> documento · B29</label
+          >
+          <label><input type="radio" name="nivel" value="item" /> ítem · C19</label>
+        </div>
       </div>
-      <p class="campo__nota" id="nota"></p>
-    </div>
+
+      <div class="tool__ejemplos" id="ejemplos"></div>
+
+      <div class="tool__salida">
+        <p class="tool__perfil" id="perfil"></p>
+        <div class="campo">
+          <p class="campo__etiqueta">lectura</p>
+          <p class="campo__cadena" id="marcado"></p>
+          <dl class="campo__lectura" id="extraido"></dl>
+        </div>
+        <p class="campo__nota" id="nota"></p>
+      </div>
+    </section>
+
+    <section id="panel-xml" hidden>
+      <div class="zona" id="zona">
+        <p class="zona__texto">
+          Arrastra un XML aquí, o
+          <label class="zona__boton">
+            elige un archivo
+            <input type="file" id="archivo" accept=".xml,text/xml,application/xml" />
+          </label>
+        </p>
+        <p class="pie__mono">
+          Si no tienes uno a mano, hay un
+          <a href={`${repo}/blob/main/conformidad/xml/ejemplo-completo.xml`}
+            >ejemplo en el repositorio</a
+          >.
+        </p>
+      </div>
+
+      <div id="salida-xml"></div>
+    </section>
 
     <h2>Cómo funciona</h2>
     <p>
@@ -55,27 +84,29 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
         >abre un issue</a
       >.
     </p>
+    <p>
+      Al revisar un XML se recorre el documento buscando los campos <code>dInfEmFE</code
+      > por nombre local, así que funciona con o sin declaración de namespace y sin
+      depender de la posición exacta de los nodos. Además de la lectura se revisan las
+      recomendaciones de emisión de §4.3 y §4.4, que los casos de conformidad no pueden
+      ejercitar porque dependen de cómo se escribe el campo y no de cómo se lee.
+    </p>
   </div>
 </Base>
 
 <script>
   import { leer } from "../contenido/fer.js";
+  import { revisarXml } from "../lib/revisar-xml.js";
 
-  const NORMATIVAS = {
-    documento: ["oc", "ref"],
-    item: ["cbar"],
-  };
+  const NORMATIVAS: Record<string, string[]> = { documento: ["oc", "ref"], item: ["cbar"] };
 
-  const EJEMPLOS = [
+  const EJEMPLOS: [string, string, string][] = [
     ["bloque simple", "documento", "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#"],
-    [
-      "con texto libre",
-      "documento",
-      "Aviso al cliente. #FER1# oc=4500000001 #FER1# Válido 30 días.",
-    ],
+    ["con texto libre", "documento", "Aviso al cliente. #FER1# oc=4500000001 #FER1# Válido 30 días."],
     ["ceros a la izquierda", "documento", "#FER1# oc=0004500001 #FER1#"],
     ["clave duplicada", "documento", "#FER1# oc=4500000001 | oc=4500000999 #FER1#"],
     ["sin cerrar", "documento", "#FER1# oc=4500000001"],
+    ["mayúsculas", "documento", "#FER1# OC=4500000001 #FER1#"],
     ["versión superior", "documento", "#FER2# oc=4500000001 | ccosto=1200 #FER2#"],
     ["perfil heredado", "documento", "Orden de compra: 4500000001 TIENDA RETAIL X"],
     ["código de barra", "item", "Producto refrigerado. #FER1# cbar=7600000000001 #FER1#"],
@@ -83,92 +114,96 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
     ["heredado en ítem", "item", "7600000000001"],
   ];
 
-  const entrada = document.getElementById("entrada") as HTMLTextAreaElement;
-  const perfil = document.getElementById("perfil")!;
-  const marcado = document.getElementById("marcado")!;
-  const extraido = document.getElementById("extraido")!;
-  const nota = document.getElementById("nota")!;
-  const ejemplos = document.getElementById("ejemplos")!;
+  const BLOQUE = /#FER(\d)#([\s\S]*?)#FER\1#/;
+
+  const $ = (id: string) => document.getElementById(id)!;
+  function el(tag: string, clase?: string, texto?: string) {
+    const n = document.createElement(tag);
+    if (clase) n.className = clase;
+    if (texto !== undefined) n.textContent = texto;
+    return n;
+  }
+
+  for (const b of document.querySelectorAll<HTMLButtonElement>(".modo")) {
+    b.addEventListener("click", () => {
+      for (const otro of document.querySelectorAll<HTMLButtonElement>(".modo")) {
+        otro.setAttribute("aria-selected", String(otro === b));
+      }
+      ($("panel-campo") as HTMLElement).hidden = b.dataset.modo !== "campo";
+      ($("panel-xml") as HTMLElement).hidden = b.dataset.modo !== "xml";
+    });
+  }
+
+  const entrada = $("entrada") as HTMLTextAreaElement;
 
   function nivelActual(): "documento" | "item" {
     const sel = document.querySelector<HTMLInputElement>('input[name="nivel"]:checked');
     return (sel?.value as "documento" | "item") ?? "documento";
   }
 
-  const BLOQUE = /#FER(\d)#([\s\S]*?)#FER\1#/;
-
-  function elemento(tag: string, clase?: string, texto?: string) {
-    const el = document.createElement(tag);
-    if (clase) el.className = clase;
-    if (texto !== undefined) el.textContent = texto;
-    return el;
-  }
-
-  function pintarMarcado(valor: string, esFer: boolean) {
-    marcado.replaceChildren();
+  function pintarMarcado(destino: Element, valor: string, esFer: boolean) {
+    destino.replaceChildren();
     if (!valor.trim()) {
-      marcado.append(elemento("span", "tool__vacio", "El campo está vacío."));
+      destino.append(el("span", "tool__vacio", "El campo está vacío."));
       return;
     }
     const m = esFer ? BLOQUE.exec(valor) : null;
     if (!m) {
-      marcado.append(elemento("span", "campo__libre", valor));
+      destino.append(el("span", "campo__libre", valor));
       return;
     }
     const antes = valor.slice(0, m.index);
     const despues = valor.slice(m.index + m[0].length);
-    if (antes) marcado.append(elemento("span", "campo__libre", antes));
-    marcado.append(elemento("span", "marca", m[0]));
-    if (despues) marcado.append(elemento("span", "campo__libre", despues));
+    if (antes) destino.append(el("span", "campo__libre", antes));
+    destino.append(el("span", "marca", m[0]));
+    if (despues) destino.append(el("span", "campo__libre", despues));
   }
 
-  function actualizar() {
+  function actualizarCampo() {
     const valor = entrada.value;
     const nivel = nivelActual();
     const r = leer(valor, nivel);
     const esFer = r.perfil === "fer";
 
-    perfil.replaceChildren();
-    perfil.append(document.createTextNode("perfil "));
-    const b = elemento("b", undefined, esFer ? `bloque #FER${r.versionEsquema}#` : "heredado");
-    perfil.append(b);
+    $("perfil").replaceChildren(
+      document.createTextNode("perfil "),
+      el("b", undefined, esFer ? `bloque #FER${r.versionEsquema}#` : "heredado")
+    );
 
-    pintarMarcado(valor, esFer);
+    pintarMarcado($("marcado"), valor, esFer);
 
+    const extraido = $("extraido");
     extraido.replaceChildren();
-    const normativas = NORMATIVAS[nivel];
-    const presentes = normativas.filter((k) => k in r.datos);
-    const otras = Object.keys(r.datos).filter((k) => !normativas.includes(k));
+    const conocidas = NORMATIVAS[nivel];
+    const presentes = conocidas.filter((k) => k in r.datos);
+    const otras = Object.keys(r.datos).filter((k) => !conocidas.includes(k));
 
     if (presentes.length === 0) {
-      const dt = elemento("dt", undefined, "extraído");
-      const dd = elemento("dd", "tool__vacio", "ninguna clave del registro");
-      extraido.append(dt, dd);
+      extraido.append(
+        el("dt", undefined, "extraído"),
+        el("dd", "tool__vacio", "ninguna clave del registro")
+      );
     } else {
       for (const k of presentes) {
-        extraido.append(elemento("dt", undefined, k), elemento("dd", undefined, r.datos[k]));
+        extraido.append(el("dt", undefined, k), el("dd", undefined, r.datos[k]));
       }
     }
-
-    if (otras.length > 0) {
+    if (otras.length) {
       extraido.append(
-        elemento("dt", undefined, "ignoradas"),
-        elemento("dd", "tool__vacio", otras.join(", ") + " · fuera del registro")
+        el("dt", undefined, "ignoradas"),
+        el("dd", "tool__vacio", otras.join(", ") + " · fuera del registro")
       );
     }
-
     if (r.textoLibre) {
-      extraido.append(
-        elemento("dt", undefined, "texto libre"),
-        elemento("dd", "tool__vacio", r.textoLibre)
-      );
+      extraido.append(el("dt", undefined, "texto libre"), el("dd", "tool__vacio", r.textoLibre));
     }
 
-    nota.textContent = esFer
+    $("nota").textContent = esFer
       ? "El receptor extrae solo lo marcado. Todo lo demás es uso libre del emisor."
       : "No hay bloque delimitado, así que aplica la lectura del perfil heredado.";
   }
 
+  const ejemplos = $("ejemplos");
   for (const [etiqueta, nivel, cadena] of EJEMPLOS) {
     const b = document.createElement("button");
     b.type = "button";
@@ -180,15 +215,144 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
         `input[name="nivel"][value="${nivel}"]`
       );
       if (radio) radio.checked = true;
-      actualizar();
+      actualizarCampo();
       entrada.focus();
     });
     ejemplos.append(b);
   }
 
-  entrada.addEventListener("input", actualizar);
+  entrada.addEventListener("input", actualizarCampo);
   for (const r of document.querySelectorAll('input[name="nivel"]')) {
-    r.addEventListener("change", actualizar);
+    r.addEventListener("change", actualizarCampo);
   }
-  actualizar();
+  actualizarCampo();
+
+  function listaAvisos(avisos: any[]) {
+    const ul = el("ul", "avisos");
+    for (const a of avisos) {
+      const li = el("li", `aviso--${a.grado}`);
+      li.append(el("span", "aviso__grado", a.grado));
+      li.append(el("span", "aviso__texto", a.texto));
+      li.append(el("span", "aviso__ref", a.ref));
+      ul.append(li);
+    }
+    return ul;
+  }
+
+  function pintarXml(r: any) {
+    const salida = $("salida-xml");
+    salida.replaceChildren();
+
+    if (!r.ok) {
+      salida.append(el("p", "xml__error", r.error));
+      return;
+    }
+
+    const { errores, avisos: nAvisos, notas } = r.resumen;
+    const resumen = el(
+      "p",
+      "xml__resumen",
+      errores === 0 && nAvisos === 0
+        ? "Sin errores ni avisos."
+        : `${errores} error(es) · ${nAvisos} aviso(s) · ${notas} nota(s)`
+    );
+    resumen.classList.add(
+      errores ? "xml__resumen--error" : nAvisos ? "xml__resumen--aviso" : "xml__resumen--ok"
+    );
+    salida.append(resumen);
+
+    salida.append(el("h3", undefined, "Nivel de documento"));
+    if (!r.documento) {
+      salida.append(el("p", "tool__vacio", "No hay campo dInfEmFE fuera de gItem."));
+    } else {
+      const d = r.documento;
+      const caja = el("div", "campo");
+      caja.append(el("p", "campo__etiqueta", `perfil ${d.lectura.perfil}`));
+      const cadena = el("p", "campo__cadena");
+      pintarMarcado(cadena, d.campo, d.lectura.perfil === "fer");
+      caja.append(cadena);
+      const dl = el("dl", "campo__lectura");
+      for (const k of ["oc", "ref"]) {
+        dl.append(
+          el("dt", undefined, k),
+          el("dd", d.lectura.datos[k] ? undefined : "tool__vacio", d.lectura.datos[k] ?? "ausente")
+        );
+      }
+      caja.append(dl);
+      salida.append(caja);
+    }
+
+    salida.append(
+      el("h3", undefined, `Ítems · ${r.items.length} de ${r.totalItems} con campo`)
+    );
+    if (r.items.length === 0) {
+      salida.append(el("p", "tool__vacio", "Ningún ítem trae dInfEmFE."));
+    } else {
+      const tabla = el("table", "xml__tabla");
+      const thead = el("thead");
+      const trh = el("tr");
+      for (const c of ["#", "dCodProd", "cbar", "perfil"]) trh.append(el("th", undefined, c));
+      thead.append(trh);
+      tabla.append(thead);
+      const tbody = el("tbody");
+      for (const i of r.items) {
+        const tr = el("tr");
+        tr.append(el("td", undefined, i.secItem ?? "—"));
+        tr.append(el("td", undefined, i.codProd ?? "—"));
+        const cbar = i.lectura.datos.cbar;
+        tr.append(el("td", cbar ? "xml__dato" : "tool__vacio", cbar ?? "ausente"));
+        tr.append(el("td", "xml__perfil", i.lectura.perfil));
+        tbody.append(tr);
+      }
+      tabla.append(tbody);
+      salida.append(tabla);
+    }
+
+    const todos = [
+      ...r.globales,
+      ...(r.documento ? r.documento.avisos : []),
+      ...r.items.flatMap((i: any) =>
+        i.avisos.map((a: any) => ({ ...a, texto: `Ítem ${i.secItem ?? "?"}: ${a.texto}` }))
+      ),
+    ];
+    if (todos.length) {
+      salida.append(el("h3", undefined, "Revisión"));
+      salida.append(listaAvisos(todos));
+    }
+  }
+
+  function leerArchivo(f: File) {
+    if (f.size > 8 * 1024 * 1024) {
+      pintarXml({ ok: false, error: "El archivo pesa más de 8 MB." });
+      return;
+    }
+    const fr = new FileReader();
+    fr.onload = () => pintarXml(revisarXml(String(fr.result)));
+    fr.onerror = () => pintarXml({ ok: false, error: "No se pudo leer el archivo." });
+    fr.readAsText(f, "utf-8");
+  }
+
+  const archivo = $("archivo") as HTMLInputElement;
+  archivo.addEventListener("change", () => {
+    const f = archivo.files?.[0];
+    if (f) leerArchivo(f);
+  });
+
+  const zona = $("zona");
+  for (const ev of ["dragenter", "dragover"]) {
+    zona.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zona.classList.add("zona--activa");
+    });
+  }
+  for (const ev of ["dragleave", "drop"]) {
+    zona.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zona.classList.remove("zona--activa");
+    });
+  }
+  zona.addEventListener("drop", (e) => {
+    const f = (e as DragEvent).dataTransfer?.files?.[0];
+    if (f) leerArchivo(f);
+  });
 </script>

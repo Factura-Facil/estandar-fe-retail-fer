@@ -30,7 +30,7 @@ function escapar(s) {
 }
 
 // Especificación
-const spec = readFileSync(join(raiz, "spec", "v1.0.0.md"), "utf8");
+const spec = readFileSync(join(raiz, "spec", "v1.1.0.md"), "utf8");
 writeFileSync(
   join(destino, "spec.md"),
   `---\ntitulo: "${escapar(titulo(spec))}"\n---\n\n${sinH1(spec)}`
@@ -62,4 +62,10 @@ writeFileSync(
   readFileSync(join(raiz, "referencia", "javascript", "fer.js"), "utf8")
 );
 
-console.log(`sync: spec + ${n} decisiones + casos + parser`);
+// Registro de claves en URL estable, para que una herramienta valide sin clonar.
+writeFileSync(
+  join(aqui, "..", "public", "registro.json"),
+  readFileSync(join(raiz, "claves", "registro.json"), "utf8")
+);
+
+console.log(`sync: spec + ${n} decisiones + casos + parser + registro`);

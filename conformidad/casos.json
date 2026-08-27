@@ -1,6 +1,6 @@
 {
-  "$comment": "Casos de conformidad FER 1.0.0. Una implementación es conforme si para cada caso produce 'esperado'. 'perfil' indica qué ruta de lectura debe activarse: 'fer' o 'heredado'. Los casos con 'normativo': false ejercitan las notas de implementación de §5.3, sobre las que la propuesta de estándar no se pronuncia: quedan fuera del criterio de conformidad y una implementación puede resolverlos de otro modo.",
-  "version_spec": "1.0.0",
+  "$comment": "Casos de conformidad FER 1.1.0. Una implementación es conforme si para cada caso produce 'esperado'. 'perfil' indica qué ruta de lectura debe activarse: 'fer' o 'heredado'. Los casos con 'normativo': false ejercitan las notas de implementación de §5.3, sobre las que la propuesta de estándar no se pronuncia: quedan fuera del criterio de conformidad y una implementación puede resolverlos de otro modo.",
+  "version_spec": "1.1.0",
   "casos": [
     {
       "id": "doc-01",
@@ -17,7 +17,10 @@
       "descripcion": "Solo el bloque, sin texto libre",
       "entrada": "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001", "ref": "TIENDA RETAIL X" },
+      "esperado": {
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X"
+      },
       "texto_libre": ""
     },
     {
@@ -26,7 +29,9 @@
       "descripcion": "Texto libre antes del bloque",
       "entrada": "Feliz Navidad. #FER1# oc=4500000001 #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
+      "esperado": {
+        "oc": "4500000001"
+      },
       "texto_libre": "Feliz Navidad."
     },
     {
@@ -35,7 +40,9 @@
       "descripcion": "Texto libre antes y después del bloque",
       "entrada": "Aviso al cliente. #FER1# oc=4500000001 #FER1# Válido 30 días.",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
+      "esperado": {
+        "oc": "4500000001"
+      },
       "texto_libre": "Aviso al cliente. Válido 30 días."
     },
     {
@@ -44,7 +51,10 @@
       "descripcion": "Sin espacios alrededor de separadores",
       "entrada": "#FER1#oc=4500000001|ref=TIENDA RETAIL X#FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001", "ref": "TIENDA RETAIL X" },
+      "esperado": {
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X"
+      },
       "texto_libre": ""
     },
     {
@@ -53,7 +63,9 @@
       "descripcion": "Ceros a la izquierda se preservan como texto",
       "entrada": "#FER1# oc=0004500001 #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "0004500001" },
+      "esperado": {
+        "oc": "0004500001"
+      },
       "texto_libre": ""
     },
     {
@@ -62,28 +74,32 @@
       "descripcion": "Valor que contiene '=' se divide en el primer '=' (§5.1.3)",
       "entrada": "#FER1# ref=CENTRO=07 #FER1#",
       "perfil": "fer",
-      "esperado": { "ref": "CENTRO=07" },
+      "esperado": {
+        "ref": "CENTRO=07"
+      },
       "texto_libre": ""
     },
     {
       "id": "doc-08",
       "nivel": "documento",
-      "descripcion": "Clave en mayúsculas: se normaliza a minúsculas al leer (§5.3.6)",
+      "descripcion": "§5.2.4 — clave normalizada a minúsculas al leer",
       "entrada": "#FER1# OC=4500000001 #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
-      "texto_libre": "",
-      "normativo": false
+      "esperado": {
+        "oc": "4500000001"
+      },
+      "texto_libre": ""
     },
     {
       "id": "doc-09",
       "nivel": "documento",
-      "descripcion": "Clave duplicada: prevalece la primera ocurrencia (§5.3.1)",
+      "descripcion": "§5.2.5 — clave duplicada: prevalece la primera ocurrencia",
       "entrada": "#FER1# oc=4500000001 | oc=4500000999 #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
-      "texto_libre": "",
-      "normativo": false
+      "esperado": {
+        "oc": "4500000001"
+      },
+      "texto_libre": ""
     },
     {
       "id": "doc-10",
@@ -91,7 +107,9 @@
       "descripcion": "Valor vacío: se trata como clave ausente (§5.3.2)",
       "entrada": "#FER1# oc=4500000001 | ref= #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
+      "esperado": {
+        "oc": "4500000001"
+      },
       "texto_libre": "",
       "normativo": false
     },
@@ -101,7 +119,9 @@
       "descripcion": "Segundo bloque después del cierre: se ignora como texto libre (§5.2.1)",
       "entrada": "#FER1# oc=4500000001 #FER1# nota #FER1# oc=4500000999 #FER1#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
+      "esperado": {
+        "oc": "4500000001"
+      },
       "texto_libre": "nota #FER1# oc=4500000999 #FER1#"
     },
     {
@@ -127,12 +147,13 @@
     {
       "id": "doc-14",
       "nivel": "documento",
-      "descripcion": "Versión superior a la implementada: se procesa igual (§5.3.3)",
+      "descripcion": "§5.2.6 — versión superior: se procesa y se extrae lo conocido",
       "entrada": "#FER2# oc=4500000001 | ccosto=1200 #FER2#",
       "perfil": "fer",
-      "esperado": { "oc": "4500000001" },
-      "texto_libre": "",
-      "normativo": false
+      "esperado": {
+        "oc": "4500000001"
+      },
+      "texto_libre": ""
     },
     {
       "id": "doc-15",
@@ -149,7 +170,10 @@
       "descripcion": "Perfil heredado: prefijo con variación de mayúsculas y tildes (§5.3.8)",
       "entrada": "ORDEN DE COMPRA: 4500000001 TIENDA RETAIL X",
       "perfil": "heredado",
-      "esperado": { "oc": "4500000001", "ref": "TIENDA RETAIL X" },
+      "esperado": {
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X"
+      },
       "texto_libre": "ORDEN DE COMPRA: 4500000001 TIENDA RETAIL X",
       "normativo": false
     },
@@ -168,7 +192,9 @@
       "descripcion": "Solo el bloque, sin texto libre",
       "entrada": "#FER1# cbar=7600000000001 #FER1#",
       "perfil": "fer",
-      "esperado": { "cbar": "7600000000001" },
+      "esperado": {
+        "cbar": "7600000000001"
+      },
       "texto_libre": ""
     },
     {
@@ -177,7 +203,9 @@
       "descripcion": "Texto libre más bloque",
       "entrada": "Producto refrigerado. #FER1# cbar=7600000000001 #FER1#",
       "perfil": "fer",
-      "esperado": { "cbar": "7600000000001" },
+      "esperado": {
+        "cbar": "7600000000001"
+      },
       "texto_libre": "Producto refrigerado."
     },
     {
@@ -186,7 +214,9 @@
       "descripcion": "Ítem de peso variable, no es GTIN válido",
       "entrada": "#FER1# cbar=2000123456789 #FER1#",
       "perfil": "fer",
-      "esperado": { "cbar": "2000123456789" },
+      "esperado": {
+        "cbar": "2000123456789"
+      },
       "texto_libre": ""
     },
     {
@@ -195,16 +225,20 @@
       "descripcion": "Código local sin registro GS1",
       "entrada": "#FER1# cbar=LOC-00847 #FER1#",
       "perfil": "fer",
-      "esperado": { "cbar": "LOC-00847" },
+      "esperado": {
+        "cbar": "LOC-00847"
+      },
       "texto_libre": ""
     },
     {
       "id": "item-05",
       "nivel": "item",
-      "descripcion": "Clave no normativa en 1.0.0: se ignora sin fallar (§5.2.2)",
+      "descripcion": "Clave fuera del registro: se ignora sin fallar (§5.2.2)",
       "entrada": "#FER1# cbar=7600000000001 | lote=ABC123 #FER1#",
       "perfil": "fer",
-      "esperado": { "cbar": "7600000000001" },
+      "esperado": {
+        "cbar": "7600000000001"
+      },
       "texto_libre": ""
     },
     {
@@ -213,7 +247,9 @@
       "descripcion": "Perfil heredado: código de barra en crudo (§7.1)",
       "entrada": "7600000000001",
       "perfil": "heredado",
-      "esperado": { "cbar": "7600000000001" },
+      "esperado": {
+        "cbar": "7600000000001"
+      },
       "texto_libre": "7600000000001"
     },
     {
@@ -222,7 +258,9 @@
       "descripcion": "Perfil heredado: el valor crudo es el campo completo, aunque sea una nota. Ilustra la ambigüedad que §7.2 señala y que migrar al bloque elimina (§7.1)",
       "entrada": "Producto refrigerado.",
       "perfil": "heredado",
-      "esperado": { "cbar": "Producto refrigerado." },
+      "esperado": {
+        "cbar": "Producto refrigerado."
+      },
       "texto_libre": "Producto refrigerado."
     }
   ]

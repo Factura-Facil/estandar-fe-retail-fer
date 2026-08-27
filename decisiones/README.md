@@ -14,7 +14,8 @@ como es sin tener que preguntar.
 | [0002](0002-descartar-dnroped.md) | Descartar `dNroPed` para la orden de compra | Aceptada |
 | [0003](0003-descartar-dgtincom-y-dcodprod.md) | Descartar `dGTINCom` y `dCodProd` para el código de barra | Aceptada |
 | [0004](0004-descartar-dinfemped.md) | Descartar `dInfEmPedGl` y `dInfEmPedIt` | Aceptada |
-| [0005](0005-bloque-delimitado-y-centinela.md) | Bloque delimitado con centinela versionado | Aceptada |
+| [0005](0005-bloque-delimitado-y-centinela.md) | Bloque delimitado con centinela versionado | Aceptada, parcialmente superseada por 0006 |
+| [0006](0006-reglas-de-extraccion-normativas.md) | Reglas de extracción normativas y compromisos de estabilidad del registro | Aceptada |
 
 Formato: contexto, decisión, consecuencias, alternativas consideradas. Las referencias
 a campos usan la nomenclatura de la Ficha Técnica de la Factura Electrónica de Panamá.

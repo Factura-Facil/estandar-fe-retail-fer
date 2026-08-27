@@ -1,7 +1,7 @@
 {
   "$comment": "Registro normativo de claves FER. Los cambios se incorporan por PR.",
   "version_esquema": 1,
-  "version_spec": "1.0.0",
+  "version_spec": "1.1.0",
   "centinela": "#FER1#",
   "claves": [
     {
@@ -10,7 +10,8 @@
       "tipo": "texto",
       "estado": "normativa",
       "desde": "1.0.0",
-      "descripcion": "Número de orden de compra de la cadena, limpio, para el three-way match en el ERP."
+      "descripcion": "Número de orden de compra de la cadena, limpio, para el three-way match en el ERP. Valor único: un documento corresponde a una sola orden.",
+      "valor_unico": true
     },
     {
       "clave": "ref",
@@ -28,9 +29,37 @@
       "desde": "1.0.0",
       "descripcion": "Código de barra del artículo: EAN/GTIN cuando existe; código de peso variable o local cuando no."
     },
-    { "clave": "lote",   "nivel": "item",      "tipo": "texto", "estado": "candidata", "desde": null, "descripcion": "Número de lote del artículo. No normativa en 1.0.0." },
-    { "clave": "ccosto", "nivel": "documento", "tipo": "texto", "estado": "candidata", "desde": null, "descripcion": "Centro de costo. No normativa en 1.0.0." },
-    { "clave": "centro", "nivel": "documento", "tipo": "texto", "estado": "candidata", "desde": null, "descripcion": "Centro de recepción. No normativa en 1.0.0." },
-    { "clave": "sadd",   "nivel": "documento", "tipo": "texto", "estado": "candidata", "desde": null, "descripcion": "Dato adicional del pedido. No normativa en 1.0.0." }
+    {
+      "clave": "lote",
+      "nivel": "item",
+      "tipo": "texto",
+      "estado": "candidata",
+      "desde": null,
+      "descripcion": "Número de lote del artículo. No normativa."
+    },
+    {
+      "clave": "ccosto",
+      "nivel": "documento",
+      "tipo": "texto",
+      "estado": "candidata",
+      "desde": null,
+      "descripcion": "Centro de costo. No normativa."
+    },
+    {
+      "clave": "centro",
+      "nivel": "documento",
+      "tipo": "texto",
+      "estado": "candidata",
+      "desde": null,
+      "descripcion": "Centro de recepción. No normativa."
+    },
+    {
+      "clave": "sadd",
+      "nivel": "documento",
+      "tipo": "texto",
+      "estado": "candidata",
+      "desde": null,
+      "descripcion": "Dato adicional del pedido. No normativa."
+    }
   ]
 }

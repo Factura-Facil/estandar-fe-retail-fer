@@ -1,6 +1,7 @@
 # 0005 — Bloque delimitado con centinela versionado
 
-**Estado:** aceptada
+**Estado:** aceptada, parcialmente superseada por
+[0006](0006-reglas-de-extraccion-normativas.md)
 **Fecha:** 2026-02
 **Aplica a:** FER 1.0.0
 
@@ -65,6 +66,10 @@ documento madre. Este ADR deja constancia de que la convención **no** promete q
 claves de la versión 1 sean estables en versiones posteriores; esa garantía tendría
 que darla explícitamente una versión futura del estándar, y hoy no está dada.
 
+> **Superseado.** FER 1.1.0 sí da esa garantía y hace normativa la lectura hacia
+> adelante. Ver [0006](0006-reglas-de-extraccion-normativas.md) y §6.1. El párrafo
+> anterior se conserva como registro del estado en 1.0.0.
+
 **Por qué claves con nombre y no posiciones.** Un formato posicional
 (`4500000001|TIENDA RETAIL X`) es más corto, pero cualquier cambio en el orden o
 cualquier campo opcional lo rompe, y un valor ausente exige un separador vacío que es
@@ -91,7 +96,7 @@ transición, no una. La convención asume el costo de mantener un registro de cl
 un criterio de conformidad, trabajo que un esquema XML haría gratis.
 
 **Consecuencia deliberada.** Las implementaciones de referencia no tratan un bloque
-ausente, duplicado o malformado como error (§5.3.5): sacrifican capacidad de
+ausente, duplicado o malformado como error (§5.3.4): sacrifican capacidad de
 validación a cambio de que adoptar la convención no pueda introducir un modo de falla
 nuevo en la recepción de facturas. Sin esa propiedad, el riesgo percibido de adoptar
 supera el beneficio.

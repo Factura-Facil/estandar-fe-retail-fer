@@ -1,5 +1,5 @@
-; FER 1.0.0 — gramática del bloque
-; Referencia: spec/v1.0.0.md §3
+; FER 1.1.0 — gramática del bloque
+; Referencia: spec/v1.1.0.md §3
 
 bloque      = centinela SP-opt pares SP-opt centinela
 centinela   = "#FER" DIGIT "#"

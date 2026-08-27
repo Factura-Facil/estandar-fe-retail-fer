@@ -8,6 +8,7 @@ on:
       - "spec/**"
       - "decisiones/**"
       - "conformidad/casos.json"
+      - "claves/registro.json"
       - "referencia/javascript/fer.js"
       - ".github/workflows/pages.yml"
   workflow_dispatch:

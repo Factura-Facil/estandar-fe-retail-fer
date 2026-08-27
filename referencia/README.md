@@ -1,7 +1,7 @@
 # Implementaciones de referencia
 
 Implementaciones mínimas de la lectura y la escritura definidas en
-[`spec/v1.0.0.md`](../spec/v1.0.0.md). Sin dependencias externas, pensadas para leerse
+[`spec/v1.1.0.md`](../spec/v1.1.0.md). Sin dependencias externas, pensadas para leerse
 completas en una sentada y para copiarse a un proyecto real.
 
 No son librerías con soporte: son la traducción ejecutable de la especificación. Si una
@@ -16,7 +16,7 @@ implementación es el defecto.
 Ambas pasan los 17 casos normativos de
 [`conformidad/casos.json`](../conformidad/casos.json). Los 7 casos restantes, marcados
 `"normativo": false`, ejercitan las notas de implementación de
-[§5.3](../spec/v1.0.0.md#53-notas-de-implementación--no-normativo): estas
+[§5.3](../spec/v1.1.0.md#53-notas-de-implementación--no-normativo): estas
 implementaciones también coinciden con ellos, pero no son requisito de conformidad.
 
 ## Uso

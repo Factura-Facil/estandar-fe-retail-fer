@@ -2,3 +2,6 @@ src/contenido/
 dist/
 node_modules/
 .astro/
+
+# Generado por scripts/sync-contenido.mjs desde claves/registro.json.
+public/registro.json

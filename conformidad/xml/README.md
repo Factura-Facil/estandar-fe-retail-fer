@@ -16,3 +16,4 @@ Todos los valores son ficticios.
 | `cabecera-texto-libre.xml` | Documento | B29 | Texto libre antes y después del bloque |
 | `item-bloque.xml` | Ítem | C19 | Bloque sin texto libre, SKU preservado en `dCodProd` |
 | `item-heredado.xml` | Ítem | C19 | Perfil heredado, código de barra en crudo |
+| `ejemplo-completo.xml` | Ambos | B29 y C19 | Documento con tres ítems, para probar el validador |
