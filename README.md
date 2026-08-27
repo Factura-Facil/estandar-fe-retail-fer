@@ -1,6 +1,8 @@
-# FER — Convención de etiquetado para Facturas Electrónicas de retail (Panamá)
+# FER — Factura Electrónica Retail
 
-**Versión 1.0.0** · Especificación abierta · [Texto normativo](spec/v1.0.0.md) · [Registro de claves](claves/registro.json) · [Casos de conformidad](conformidad/casos.json)
+Convención de etiquetado para Facturas Electrónicas de retail en Panamá.
+
+**Versión 1.0.0** · Especificación abierta · [Sitio](https://factura-facil.github.io/estandar-fe-retail-fer/) · [Texto normativo](spec/v1.0.0.md) · [Registro de claves](claves/registro.json) · [Casos de conformidad](conformidad/casos.json)
 
 FER define **dónde y cómo** viajan dos datos de negocio dentro del XML de la Factura
 Electrónica de Panamá, para que cualquier receptor pueda leerlos con una sola regla,
@@ -82,11 +84,15 @@ y quedan fuera del criterio de conformidad.
 Extractos XML con la ubicación exacta del campo en cada nivel:
 [`conformidad/xml/`](conformidad/xml/).
 
+Hay un [validador en línea](https://factura-facil.github.io/estandar-fe-retail-fer/validador/)
+que corre la implementación de referencia en el navegador: se pega el contenido de un
+campo y muestra qué extrae un receptor.
+
 ## Gobernanza
 
-FER es una iniciativa **abierta, gratuita y neutral respecto del PAC**. Adherirse y
-usar la convención no tiene costo ni condiciones comerciales, y no es necesario ser
-cliente de ningún proveedor de autorización en particular.
+FER es **neutral respecto del PAC**: el campo portador es oficial y lo emite cualquier
+proveedor de autorización calificado, por lo que implementar la convención no depende
+de quién procese la factura.
 
 La especificación se versiona con [SemVer](https://semver.org). Las claves nuevas se
 proponen mediante issue y se incorporan por PR al registro; ver
@@ -94,7 +100,7 @@ proponen mediante issue y se incorporan por PR al registro; ver
 se reescriben.
 
 El rol de Factura Fácil, S.A. es el de **facilitador y custodio**: mantener el
-repositorio, versionar la especificación y llevar el registro de adherentes. La
+repositorio, versionar la especificación y llevar el registro de adoptantes. La
 propiedad del beneficio es de la industria. Ver [MAINTAINERS.md](MAINTAINERS.md). Las
 empresas que adoptan la convención se listan en [ADOPTANTES.md](ADOPTANTES.md).
 

@@ -1,0 +1,88 @@
+---
+import "../styles/fer.css";
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+}
+const { titulo, descripcion } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const aqui = Astro.url.pathname.replace(/\/$/, "");
+const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+
+const nav = [
+  { href: `${base}/spec/`, texto: "Especificación" },
+  { href: `${base}/validador/`, texto: "Validador" },
+  { href: `${base}/decisiones/`, texto: "Decisiones" },
+  { href: repo, texto: "Repositorio", externo: true },
+];
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={Astro.url.href} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={`${Astro.site?.origin ?? ""}${base}/og.png`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+  </head>
+  <body>
+    <header class="barra">
+      <div class="envoltura barra__fila">
+        <a class="barra__marca" href={`${base}/`}>FER <span>1.0.0</span></a>
+        <nav class="barra__nav" aria-label="Secciones">
+          {
+            nav.map((i) => (
+              <a
+                href={i.href}
+                aria-current={!i.externo && aqui === i.href.replace(/\/$/, "") ? "page" : undefined}
+              >
+                {i.texto}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <footer class="pie">
+      <div class="envoltura">
+        <p>
+          FER es una convención de industria. No es un requisito de la Dirección General
+          de Ingresos y no representa una posición oficial de la DGI. Las consultas de
+          interpretación normativa sobre los campos de la Ficha Técnica las responde la
+          DGI.
+        </p>
+        <p>
+          Mantenido por Factura Fácil, S.A. en calidad de custodio del registro. El texto
+          de la especificación se publica bajo <a
+            href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a
+          > y las implementaciones de referencia bajo <a
+            href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a
+          >.
+        </p>
+        <p class="pie__mono">
+          Esta página se genera desde <a href={repo}>el repositorio</a>. Si hay
+          discrepancia, el repositorio manda.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

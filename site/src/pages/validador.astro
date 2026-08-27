@@ -1,0 +1,194 @@
+---
+import Base from "../layouts/Base.astro";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+---
+
+<Base
+  titulo="Validador — FER 1.0.0"
+  descripcion="Pega el contenido de un campo dInfEmFE y mira exactamente qué extrae un receptor conforme a FER 1.0.0."
+>
+  <div class="envoltura prosa tool">
+    <p class="rotulo">Herramienta</p>
+    <h1>Qué lee un receptor</h1>
+    <p>
+      Pega el contenido de un campo <code>dInfEmFE</code> y mira qué extrae la
+      implementación de referencia. Corre completo en tu navegador: nada se envía a
+      ningún servidor.
+    </p>
+
+    <label class="pie__mono" for="entrada">Contenido del campo</label>
+    <textarea
+      id="entrada"
+      class="tool__campo"
+      spellcheck="false"
+      autocapitalize="off"
+      autocomplete="off"
+      rows="4">Gracias por su compra. #FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</textarea
+    >
+
+    <div class="tool__fila">
+      <div class="tool__radios" role="radiogroup" aria-label="Nivel del campo">
+        <label><input type="radio" name="nivel" value="documento" checked /> documento · B29</label>
+        <label><input type="radio" name="nivel" value="item" /> ítem · C19</label>
+      </div>
+    </div>
+
+    <div class="tool__ejemplos" id="ejemplos"></div>
+
+    <div class="tool__salida">
+      <p class="tool__perfil" id="perfil"></p>
+      <div class="campo">
+        <p class="campo__etiqueta">lectura</p>
+        <p class="campo__cadena" id="marcado"></p>
+        <dl class="campo__lectura" id="extraido"></dl>
+      </div>
+      <p class="campo__nota" id="nota"></p>
+    </div>
+
+    <h2>Cómo funciona</h2>
+    <p>
+      Esta página importa el mismo archivo que está en el repositorio, <code
+        >referencia/javascript/fer.js</code
+      >, sin modificarlo. Si el validador y la especificación discrepan, la
+      especificación manda y es un defecto de la implementación: <a href={`${repo}/issues`}
+        >abre un issue</a
+      >.
+    </p>
+  </div>
+</Base>
+
+<script>
+  import { leer } from "../contenido/fer.js";
+
+  const NORMATIVAS = {
+    documento: ["oc", "ref"],
+    item: ["cbar"],
+  };
+
+  const EJEMPLOS = [
+    ["bloque simple", "documento", "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#"],
+    [
+      "con texto libre",
+      "documento",
+      "Aviso al cliente. #FER1# oc=4500000001 #FER1# Válido 30 días.",
+    ],
+    ["ceros a la izquierda", "documento", "#FER1# oc=0004500001 #FER1#"],
+    ["clave duplicada", "documento", "#FER1# oc=4500000001 | oc=4500000999 #FER1#"],
+    ["sin cerrar", "documento", "#FER1# oc=4500000001"],
+    ["versión superior", "documento", "#FER2# oc=4500000001 | ccosto=1200 #FER2#"],
+    ["perfil heredado", "documento", "Orden de compra: 4500000001 TIENDA RETAIL X"],
+    ["código de barra", "item", "Producto refrigerado. #FER1# cbar=7600000000001 #FER1#"],
+    ["peso variable", "item", "#FER1# cbar=2000123456789 #FER1#"],
+    ["heredado en ítem", "item", "7600000000001"],
+  ];
+
+  const entrada = document.getElementById("entrada") as HTMLTextAreaElement;
+  const perfil = document.getElementById("perfil")!;
+  const marcado = document.getElementById("marcado")!;
+  const extraido = document.getElementById("extraido")!;
+  const nota = document.getElementById("nota")!;
+  const ejemplos = document.getElementById("ejemplos")!;
+
+  function nivelActual(): "documento" | "item" {
+    const sel = document.querySelector<HTMLInputElement>('input[name="nivel"]:checked');
+    return (sel?.value as "documento" | "item") ?? "documento";
+  }
+
+  const BLOQUE = /#FER(\d)#([\s\S]*?)#FER\1#/;
+
+  function elemento(tag: string, clase?: string, texto?: string) {
+    const el = document.createElement(tag);
+    if (clase) el.className = clase;
+    if (texto !== undefined) el.textContent = texto;
+    return el;
+  }
+
+  function pintarMarcado(valor: string, esFer: boolean) {
+    marcado.replaceChildren();
+    if (!valor.trim()) {
+      marcado.append(elemento("span", "tool__vacio", "El campo está vacío."));
+      return;
+    }
+    const m = esFer ? BLOQUE.exec(valor) : null;
+    if (!m) {
+      marcado.append(elemento("span", "campo__libre", valor));
+      return;
+    }
+    const antes = valor.slice(0, m.index);
+    const despues = valor.slice(m.index + m[0].length);
+    if (antes) marcado.append(elemento("span", "campo__libre", antes));
+    marcado.append(elemento("span", "marca", m[0]));
+    if (despues) marcado.append(elemento("span", "campo__libre", despues));
+  }
+
+  function actualizar() {
+    const valor = entrada.value;
+    const nivel = nivelActual();
+    const r = leer(valor, nivel);
+    const esFer = r.perfil === "fer";
+
+    perfil.replaceChildren();
+    perfil.append(document.createTextNode("perfil "));
+    const b = elemento("b", undefined, esFer ? `bloque #FER${r.versionEsquema}#` : "heredado");
+    perfil.append(b);
+
+    pintarMarcado(valor, esFer);
+
+    extraido.replaceChildren();
+    const normativas = NORMATIVAS[nivel];
+    const presentes = normativas.filter((k) => k in r.datos);
+    const otras = Object.keys(r.datos).filter((k) => !normativas.includes(k));
+
+    if (presentes.length === 0) {
+      const dt = elemento("dt", undefined, "extraído");
+      const dd = elemento("dd", "tool__vacio", "ninguna clave del registro");
+      extraido.append(dt, dd);
+    } else {
+      for (const k of presentes) {
+        extraido.append(elemento("dt", undefined, k), elemento("dd", undefined, r.datos[k]));
+      }
+    }
+
+    if (otras.length > 0) {
+      extraido.append(
+        elemento("dt", undefined, "ignoradas"),
+        elemento("dd", "tool__vacio", otras.join(", ") + " · fuera del registro")
+      );
+    }
+
+    if (r.textoLibre) {
+      extraido.append(
+        elemento("dt", undefined, "texto libre"),
+        elemento("dd", "tool__vacio", r.textoLibre)
+      );
+    }
+
+    nota.textContent = esFer
+      ? "El receptor extrae solo lo marcado. Todo lo demás es uso libre del emisor."
+      : "No hay bloque delimitado, así que aplica la lectura del perfil heredado.";
+  }
+
+  for (const [etiqueta, nivel, cadena] of EJEMPLOS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tool__ejemplo";
+    b.textContent = etiqueta;
+    b.addEventListener("click", () => {
+      entrada.value = cadena;
+      const radio = document.querySelector<HTMLInputElement>(
+        `input[name="nivel"][value="${nivel}"]`
+      );
+      if (radio) radio.checked = true;
+      actualizar();
+      entrada.focus();
+    });
+    ejemplos.append(b);
+  }
+
+  entrada.addEventListener("input", actualizar);
+  for (const r of document.querySelectorAll('input[name="nivel"]')) {
+    r.addEventListener("change", actualizar);
+  }
+  actualizar();
+</script>

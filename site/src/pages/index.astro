@@ -1,0 +1,155 @@
+---
+import Base from "../layouts/Base.astro";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+---
+
+<Base
+  titulo="FER — Factura Electrónica Retail"
+  descripcion="Convención abierta para el número de orden de compra y el código de barra en la Factura Electrónica de Panamá. Una sola regla de lectura, independiente del PAC."
+>
+  <div class="envoltura portada">
+    <p class="rotulo">Convención abierta · Panamá · versión 1.0.0</p>
+    <h1>Factura Electrónica <em>Retail</em></h1>
+    <p class="portada__bajada">
+      Dónde y cómo viajan el número de orden de compra y el código de barra dentro del
+      XML de la Factura Electrónica de Panamá, para que cualquier cadena los lea con una
+      sola regla, sin importar qué PAC use el proveedor.
+    </p>
+
+    <div class="campo">
+      <p class="campo__etiqueta">dInfEmFE · campo B29 · nivel documento</p>
+      <p class="campo__cadena"><span class="campo__libre"
+          >Gracias por su compra.</span
+        > <span class="marca">#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</span></p>
+      <dl class="campo__lectura">
+        <dt>lo que el receptor lee</dt>
+        <dd>oc = 4500000001 · ref = TIENDA RETAIL X</dd>
+        <dt>lo que el receptor ignora</dt>
+        <dd>todo lo que está fuera del bloque</dd>
+      </dl>
+      <p class="campo__nota">
+        El bloque convive con el texto libre del emisor. El SKU permanece en <code
+          >dCodProd</code
+        >.
+      </p>
+    </div>
+
+    <p class="enlaces">
+      <a href={`${base}/spec/`}>Leer la especificación</a>
+      <a href={`${base}/validador/`}>Probar una cadena</a>
+      <a href={repo}>Ver el repositorio</a>
+    </p>
+  </div>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">El problema</h2>
+      <div class="doble">
+        <div>
+          <h3>Cada proveedor habla distinto</h3>
+          <p>
+            Una cadena de retail recibe facturas de cientos o miles de proveedores. Cada
+            proveedor emite a través del PAC que eligió, y coloca el número de pedido y el
+            código de barra donde su desarrollo decida. No hay convención común.
+          </p>
+          <p>
+            El costo se paga en los dos extremos: el proveedor mantiene un mapeo distinto
+            por cada cadena a la que factura, y la cadena mantiene reglas de ingesta
+            distintas por cada proveedor. El resultado son rechazos, reprocesos y trabajo
+            manual en cuentas por pagar.
+          </p>
+        </div>
+        <div>
+          <h3>Por qué en un campo de texto</h3>
+          <p>
+            El esquema XML de la Factura Electrónica de Panamá no tiene un nodo de
+            extensión libre, y los campos dedicados que parecerían servir imponen
+            restricciones de tipo, longitud u obligatoriedad que dejan fuera los datos
+            reales de un catálogo.
+          </p>
+          <p>
+            <code>dInfEmFE</code> es la única sede que combina capacidad suficiente, tipo
+            permisivo, cero dependencias con otros nodos y presencia en ambos niveles. El
+            razonamiento completo, con las alternativas descartadas, está en <a
+              href={`${base}/decisiones/`}>las decisiones de diseño</a
+            >.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Qué no es</h2>
+      <ul class="no-es">
+        <li>
+          <span
+            ><strong>Un requisito de la DGI.</strong> Es una convención de industria. El
+            nombre es un identificador neutral y no representa una posición oficial de la
+            Dirección General de Ingresos.</span
+          >
+        </li>
+        <li>
+          <span
+            ><strong>Un cambio al esquema XML.</strong> Se apoya enteramente en un campo
+            oficial ya existente de la Ficha Técnica vigente.</span
+          >
+        </li>
+        <li>
+          <span
+            ><strong>Un cambio de proveedor.</strong> El campo portador es oficial y lo
+            emite cualquier PAC, así que implementar la convención no depende de quién
+            procese la factura.</span
+          >
+        </li>
+        <li>
+          <span
+            ><strong>Un producto.</strong> Es un documento, un registro de claves y un
+            conjunto de casos de prueba.</span
+          >
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="envoltura">
+      <h2 class="seccion__titulo">Estado</h2>
+      <table class="datos">
+        <tbody>
+          <tr>
+            <th>Versión</th>
+            <td>1.0.0 · centinela <code>#FER1#</code></td>
+          </tr>
+          <tr>
+            <th>Claves</th>
+            <td>
+              <code>oc</code> y <code>ref</code> a nivel de documento, <code>cbar</code> a
+              nivel de ítem
+            </td>
+          </tr>
+          <tr>
+            <th>Conformidad</th>
+            <td>17 casos normativos, verificables contra las implementaciones</td>
+          </tr>
+          <tr>
+            <th>Referencia</th>
+            <td>Python y JavaScript, sin dependencias</td>
+          </tr>
+          <tr>
+            <th>Compatibilidad</th>
+            <td>Perfil heredado reconocido; la migración es incremental</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="enlaces">
+        <a href={`${base}/spec/`}>Especificación</a>
+        <a href={`${repo}/blob/main/conformidad/casos.json`}>Casos de conformidad</a>
+        <a href={`${repo}/blob/main/CONTRIBUTING.md`}>Proponer un cambio</a>
+        <a href={`${repo}/issues`}>Reportar una ambigüedad</a>
+      </p>
+    </div>
+  </section>
+</Base>

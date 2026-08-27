@@ -31,7 +31,7 @@ Los datos viajan en un **bloque acotado** que convive con el texto libre:
 - El mismo centinela abre y cierra el bloque.
 - El **dígito del centinela es la versión del esquema**: un lector que reconozca
   `#FER1#` sabe qué claves esperar, y futuras versiones (`#FER2#`) pueden coexistir
-  sin romper a los adherentes previos.
+  sin romper a los implementadores previos.
 - La regla de lectura es única: el receptor extrae solo lo delimitado; todo lo demás
   es uso libre del emisor y se ignora.
 

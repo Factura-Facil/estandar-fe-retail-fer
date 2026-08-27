@@ -1,0 +1,61 @@
+name: Publicar el sitio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "spec/**"
+      - "decisiones/**"
+      - "conformidad/casos.json"
+      - "referencia/javascript/fer.js"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: site
+        run: npm ci
+
+      - name: Verificar conformidad antes de publicar
+        run: node referencia/javascript/test-conformidad.mjs
+
+      - name: Construir
+        working-directory: site
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -70,7 +70,7 @@ responsabilidad de una lectura tolerante a fallos. Es el costo que
 **Riesgo asumido.** Si una versión futura de la Ficha Técnica incorporara un nodo de
 extensión estructurado, la convención debería migrar a él. La decisión de versionar la
 especificación con SemVer y un centinela existe precisamente para hacer viable esa
-migración sin romper a los adherentes.
+migración sin romper a los implementadores.
 
 ## Alternativas consideradas
 

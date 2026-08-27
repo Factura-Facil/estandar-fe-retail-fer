@@ -1,0 +1,22 @@
+---
+import Base from "../layouts/Base.astro";
+import { Content, frontmatter } from "../contenido/spec.md";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Base
+  titulo={`Especificación — FER 1.0.0`}
+  descripcion="Texto normativo de FER 1.0.0: gramática del bloque, reglas de emisión y recepción, registro de claves y perfil heredado."
+>
+  <div class="envoltura prosa">
+    <p class="rotulo">Texto normativo</p>
+    <h1>{frontmatter.titulo}</h1>
+    <p class="pie__mono">
+      Fuente: <code>spec/v1.0.0.md</code> · <a
+        href="https://github.com/Factura-Facil/estandar-fe-retail-fer/blob/main/spec/v1.0.0.md"
+        >ver en el repositorio</a
+      > · <a href={`${base}/validador/`}>probar una cadena</a>
+    </p>
+    <Content />
+  </div>
+</Base>
