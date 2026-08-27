@@ -1,0 +1,25 @@
+name: Ambigüedad en la especificación
+description: Una cláusula admite dos lecturas distintas
+title: "[spec] "
+labels: ["ambiguedad"]
+body:
+  - type: input
+    id: clausula
+    attributes:
+      label: Cláusula
+      placeholder: "§5.2.2"
+    validations:
+      required: true
+  - type: textarea
+    id: campo
+    attributes:
+      label: Contenido del campo dInfEmFE
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: lecturas
+    attributes:
+      label: Las dos lecturas posibles
+    validations:
+      required: true

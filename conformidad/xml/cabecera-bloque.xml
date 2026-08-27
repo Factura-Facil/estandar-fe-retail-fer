@@ -1,0 +1,15 @@
+<!--
+  FER 1.0.0 — extracto ilustrativo, no es una FE completa ni validable.
+  Nivel documento, campo B29 (dInfEmFE) dentro de gDGen, antes de gEmis.
+  Valores ficticios.
+-->
+<gDGen>
+  <iAmb>2</iAmb>
+  <iTpEmis>01</iTpEmis>
+  <iDoc>01</iDoc>
+  <iProGen>2</iProGen>
+  <dInfEmFE>#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</dInfEmFE>
+  <gEmis>
+    <!-- ... -->
+  </gEmis>
+</gDGen>

@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Interpretación normativa de la Ficha Técnica
+    url: https://dgi.mef.gob.pa/_7facturaelectronica/felectronica
+    about: >
+      Las dudas sobre la validez fiscal de un campo las responde la DGI, no los
+      mantenedores de este repositorio (dgi.fe.consultas@mef.gob.pa).

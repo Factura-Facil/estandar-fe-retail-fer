@@ -1,0 +1,15 @@
+<!--
+  FER 1.0.0 — extracto ilustrativo, no es una FE completa ni validable.
+  Nivel ítem, campo C19 (dInfEmFE) dentro de gItem. El SKU permanece en dCodProd:
+  la convención no lo reemplaza (§4.2, decisión 0003).
+  Valores ficticios.
+-->
+<gItem>
+  <dSecItem>1</dSecItem>
+  <dDescProd>Producto de ejemplo</dDescProd>
+  <dCodProd>50000001</dCodProd>
+  <dInfEmFE>#FER1# cbar=7600000000001 #FER1#</dInfEmFE>
+  <gPrecios>
+    <!-- ... -->
+  </gPrecios>
+</gItem>

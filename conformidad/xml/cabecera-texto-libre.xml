@@ -1,0 +1,13 @@
+<!--
+  FER 1.0.0 — extracto ilustrativo, no es una FE completa ni validable.
+  Nivel documento, campo B29. El receptor ignora el texto libre y extrae solo el
+  bloque delimitado (§5.1). Corresponde al caso de conformidad doc-04.
+  Valores ficticios.
+-->
+<gDGen>
+  <iProGen>2</iProGen>
+  <dInfEmFE>Aviso al cliente. #FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1# Válido 30 días.</dInfEmFE>
+  <gEmis>
+    <!-- ... -->
+  </gEmis>
+</gDGen>

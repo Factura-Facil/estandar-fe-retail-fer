@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.DS_Store
+
+# Fuentes internas: el documento madre es CONFIDENCIAL y este repositorio es publico.
+*.docx
+*.doc
+*.zip

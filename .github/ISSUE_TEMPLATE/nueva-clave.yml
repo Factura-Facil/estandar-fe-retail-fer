@@ -1,0 +1,51 @@
+name: Nueva clave
+description: Proponer una clave para el registro de FER
+title: "[clave] "
+labels: ["registro-de-claves"]
+body:
+  - type: input
+    id: clave
+    attributes:
+      label: Clave propuesta
+      description: Minúsculas ASCII, corta, sin depender del idioma. Ej. lote, centro.
+    validations:
+      required: true
+  - type: dropdown
+    id: nivel
+    attributes:
+      label: Nivel
+      options: [documento, item]
+    validations:
+      required: true
+  - type: textarea
+    id: dato
+    attributes:
+      label: Qué dato transporta
+      description: Definición del dato y de dónde sale en el ERP del emisor.
+    validations:
+      required: true
+  - type: textarea
+    id: necesidad
+    attributes:
+      label: Por qué no cabe en un campo dedicado
+      description: >
+        Indica el campo de la Ficha Técnica que parecería servir y la restricción
+        concreta que lo hace inviable (tipo, longitud, nodos obligatorios que arrastra).
+    validations:
+      required: true
+  - type: textarea
+    id: generalidad
+    attributes:
+      label: Quién más lo necesita
+      description: >
+        Las claves específicas de una sola empresa no entran al registro. Indica al
+        menos un segundo receptor con el mismo requerimiento.
+    validations:
+      required: true
+  - type: textarea
+    id: ejemplo
+    attributes:
+      label: Ejemplo del campo completo
+      placeholder: "#FER1# cbar=7600000000001 | lote=ABC123 #FER1#"
+    validations:
+      required: true

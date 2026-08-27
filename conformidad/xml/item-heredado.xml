@@ -1,0 +1,16 @@
+<!--
+  FER 1.0.0 — extracto ilustrativo, no es una FE completa ni validable.
+  Nivel ítem, perfil heredado: el código de barra viaja en crudo, sin delimitadores
+  ni etiqueta. El receptor aplica esta lectura solo cuando no encuentra un bloque
+  (§7.1). Corresponde al caso de conformidad item-06.
+  Valores ficticios.
+-->
+<gItem>
+  <dSecItem>1</dSecItem>
+  <dDescProd>Producto de ejemplo</dDescProd>
+  <dCodProd>50000001</dCodProd>
+  <dInfEmFE>7600000000001</dInfEmFE>
+  <gPrecios>
+    <!-- ... -->
+  </gPrecios>
+</gItem>

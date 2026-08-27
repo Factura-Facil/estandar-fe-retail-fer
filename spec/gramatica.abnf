@@ -1,0 +1,13 @@
+; FER 1.0.0 — gramática del bloque
+; Referencia: spec/v1.0.0.md §3
+
+bloque      = centinela SP-opt pares SP-opt centinela
+centinela   = "#FER" DIGIT "#"
+pares       = par *( SP-opt "|" SP-opt par )
+par         = clave SP-opt "=" SP-opt valor
+clave       = 1*( %x61-7A / DIGIT / "_" )
+valor       = *VCHAR-restringido
+SP-opt      = *WSP
+
+; VCHAR-restringido: cualquier carácter imprimible excepto "|"
+; y excepto la secuencia "#FER" DIGIT "#". No hay mecanismo de escape en 1.0.0.
