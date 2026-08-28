@@ -1,5 +1,5 @@
 /**
- * Revisión de un XML completo contra FER 1.1.0.
+ * Revisión de un XML completo contra FER 1.1.1.
  *
  * Recorre el documento buscando los campos portadores `dInfEmFE` por nombre local, de
  * modo que funciona con o sin declaración de namespace y sin depender de la posición
@@ -160,8 +160,8 @@ function revisarCampo(valor, nivel) {
     avisos.push({
       grado: "error",
       texto:
-        "El valor de oc parece contener más de una orden de compra. Un documento " +
-        "corresponde a una sola orden y oc no admite listas.",
+        "El valor de oc parece contener más de una Orden de Compra. Un documento " +
+        "corresponde a una sola Orden de Compra y oc no admite listas.",
       ref: "§4.3.4",
     });
   }
@@ -218,7 +218,7 @@ export function revisarXml(texto) {
   if (documento.length === 0) {
     globales.push({
       grado: "aviso",
-      texto: "No hay campo dInfEmFE a nivel de documento, así que no viaja la orden de compra.",
+      texto: "No hay campo dInfEmFE a nivel de documento, así que no viaja la Orden de Compra.",
       ref: "§4.1",
     });
   }
@@ -232,7 +232,7 @@ export function revisarXml(texto) {
   if (itemsSinCampo > 0) {
     globales.push({
       grado: "aviso",
-      texto: `${itemsSinCampo} de ${totalItems} ítems no traen dInfEmFE, así que no traen código de barra.`,
+      texto: `${itemsSinCampo} de ${totalItems} ítems no traen dInfEmFE, así que no traen Código de Barras.`,
       ref: "§4.2",
     });
   }

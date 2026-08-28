@@ -1,14 +1,14 @@
 /**
- * Implementación de referencia de FER 1.1.0.
+ * Implementación de referencia de FER 1.1.1.
  *
  * Convención de etiquetado para Facturas Electrónicas de retail (Panamá).
- * Especificación: spec/v1.1.0.md
+ * Especificación: spec/v1.1.1.md
  *
  * Copyright 2026 Factura Fácil, S.A. — Apache-2.0
  * Sin dependencias. Funciona en Node y en el navegador (ESM).
  */
 
-export const VERSION_SPEC = "1.1.0";
+export const VERSION_SPEC = "1.1.1";
 export const VERSION_ESQUEMA_SOPORTADA = 1;
 
 export const CLAVES_DOCUMENTO = ["oc", "ref"];
@@ -74,7 +74,7 @@ function leerHeredado(valor, nivel) {
 }
 
 /**
- * Lee un campo dInfEmFE conforme a FER 1.1.0.
+ * Lee un campo dInfEmFE conforme a FER 1.1.1.
  *
  * `valor` debe ser el contenido del nodo XML ya des-escapado por el parser (§5.1.1),
  * no los bytes crudos del documento.

@@ -36,19 +36,32 @@ const nav = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
     />
   </head>
   <body>
     <header class="barra">
-      <div class="envoltura barra__fila">
-        <a class="barra__marca" href={`${base}/`}>FER <span>1.1.0</span></a>
+      <div class="barra__fila">
+        <a class="barra__marca" href={`${base}/`}>
+          <img
+            src={`${base}/logo-facturafacil.png`}
+            alt="Factura Fácil, S.A."
+            width="585"
+            height="200"
+          />
+          <span class="barra__sep" aria-hidden="true"></span>
+          <span class="barra__nombre">FER</span>
+          <span class="barra__version">1.1.1</span>
+        </a>
         <nav class="barra__nav" aria-label="Secciones">
           {
             nav.map((i) => (
               <a
                 href={i.href}
-                aria-current={!i.externo && aqui === i.href.replace(/\/$/, "") ? "page" : undefined}
+                class={i.externo ? "barra__repo" : undefined}
+                aria-current={
+                  !i.externo && aqui === i.href.replace(/\/$/, "") ? "page" : undefined
+                }
               >
                 {i.texto}
               </a>
@@ -76,21 +89,23 @@ const nav = [
           </a>
           <span>Custodio del registro</span>
         </p>
-        <p>
-          FER es una convención de industria. No es un requisito de la Dirección General
-          de Ingresos y no representa una posición oficial de la DGI. Las consultas de
-          interpretación normativa sobre los campos de la Ficha Técnica las responde la
-          DGI.
-        </p>
-        <p>
-          El rol de Factura Fácil, S.A. es el de facilitador y custodio: mantener el
-          repositorio, versionar la especificación y llevar el registro. El texto de la
-          especificación se publica bajo <a
-            href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a
-          > y las implementaciones de referencia bajo <a
-            href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a
-          >.
-        </p>
+        <div class="pie__cols">
+          <p>
+            FER es una convención de industria. No es un requisito de la Dirección General
+            de Ingresos y no representa una posición oficial de la DGI. Las consultas de
+            interpretación normativa sobre los campos de la Ficha Técnica las responde la
+            DGI.
+          </p>
+          <p>
+            El rol de Factura Fácil, S.A. es el de facilitador y custodio: mantener el
+            repositorio, versionar la especificación y llevar el registro. El texto de la
+            especificación se publica bajo <a
+              href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a
+            > y las implementaciones de referencia bajo <a
+              href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a
+            >.
+          </p>
+        </div>
         <p class="pie__mono">
           Esta página se genera desde <a href={repo}>el repositorio</a>. Si hay
           discrepancia, el repositorio manda.

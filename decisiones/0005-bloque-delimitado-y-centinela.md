@@ -1,7 +1,9 @@
 # 0005 — Bloque delimitado con centinela versionado
 
-**Estado:** aceptada, parcialmente superseada por
-[0006](0006-reglas-de-extraccion-normativas.md)
+*Por qué los datos van en un bloque delimitado y no ocupan el campo entero.*
+
+**Estado:** parcialmente superseada por
+[0006](0006-reglas-de-extraccion-normativas.md) · aceptada
 **Fecha:** 2026-02
 **Aplica a:** FER 1.0.0
 
@@ -18,7 +20,7 @@ algo se adopta mal.
 
 Además hay un formato previo, de uso común en el mercado, que coloca los datos
 directamente en el campo sin delimitadores: `Orden de compra: 4500000001 TIENDA RETAIL
-X` en cabecera y el código de barra en crudo en el ítem. Ese formato existe y hay que
+X` en cabecera y el Código de Barras en crudo en el ítem. Ese formato existe y hay que
 convivir con él.
 
 ## Decisión
@@ -65,6 +67,8 @@ claves que reconocen, apoyándose en el principio de coexistencia que enuncia el
 documento madre. Este ADR deja constancia de que la convención **no** promete que las
 claves de la versión 1 sean estables en versiones posteriores; esa garantía tendría
 que darla explícitamente una versión futura del estándar, y hoy no está dada.
+**[Este pasaje describe el estado en 1.0.0 y quedó superseado: ver la nota que
+sigue.]**
 
 > **Superseado.** FER 1.1.0 sí da esa garantía y hace normativa la lectura hacia
 > adelante. Ver [0006](0006-reglas-de-extraccion-normativas.md) y §6.1. El párrafo
@@ -79,7 +83,7 @@ ignora, nunca se rechaza).
 
 **Por qué no hay escape en 1.0.0.** Un mecanismo de escape agrega complejidad al
 emisor, al receptor y a los casos de prueba, a cambio de resolver un caso que no
-aparece en los datos reales: ni las órdenes de compra ni los códigos de barra
+aparece en los datos reales: ni las Órdenes de Compra ni los Códigos de Barras
 contienen `|`. Se declaran caracteres reservados y punto. Si aparece un caso legítimo,
 se resuelve en una versión mayor.
 

@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Icono from "../components/Icono.astro";
 // Los adoptantes salen del registro del repositorio y no de una lista en esta
 // página: dar de alta a uno es un PR a adoptantes/registro.json.
 import registroAdoptantes from "../contenido/adoptantes.json";
@@ -71,11 +72,11 @@ const tabla = [
   },
   {
     aspecto: "Trabajo en cuentas por pagar",
-    hoy: "Identificar la orden dentro de texto libre heterogéneo",
-    fer: "La orden está siempre en el mismo lugar del mismo campo",
+    hoy: "Identificar la Orden de Compra dentro de texto libre heterogéneo",
+    fer: "La Orden de Compra está siempre en el mismo lugar del mismo campo",
   },
   {
-    aspecto: "Código de barra del ítem",
+    aspecto: "Código de Barras del ítem",
     hoy: "Cada emisor lo coloca distinto, o no lo incluye",
     fer: "Un formato uniforme para todo el catálogo",
   },
@@ -94,62 +95,73 @@ const tabla = [
 
 <Base
   titulo="FER — Factura Electrónica Retail"
-  descripcion="Convención abierta para el número de orden de compra y el código de barra en la Factura Electrónica de Panamá. Una sola regla de lectura, independiente del PAC."
+  descripcion="Convención abierta para la Orden de Compra y el Código de Barras en la Factura Electrónica de Panamá. Una sola regla de lectura, independiente del PAC."
 >
-  <div class="envoltura portada">
-    <p class="rotulo">FER · Factura Electrónica Retail · versión 1.1.0</p>
-    <h1>El número de orden y el código de barra, <em>siempre en el mismo lugar</em>.</h1>
-    <p class="portada__bajada">
-      Una convención abierta que define dónde y cómo viajan esos dos datos dentro del XML
-      de la Factura Electrónica de Panamá, para que cualquier cadena los lea con una sola
-      regla, sin importar qué PAC use el proveedor.
-    </p>
-
-    {/* Dos momentos numerados, no tres listas: quién escribe y quién lee. El
-        marcador verde es el vínculo —lo resaltado arriba es lo que sale abajo—,
-        y el saludo del emisor se menciona una sola vez, para que no parezca
-        que el ejemplo se repite. */}
-    <div class="campo">
-      <p class="campo__paso"><span>1</span> Lo que escribe el emisor</p>
-      <p class="campo__etiqueta">
-        en <code>dInfEmFE</code>, el campo de texto libre que la factura ya trae
+  <section class="portada">
+    <div class="envoltura">
+      <p class="rotulo">FER · Factura Electrónica Retail · versión 1.1.1</p>
+      <h1>La Orden de Compra y el Código de Barras, <em>siempre en el mismo lugar</em>.</h1>
+      <p class="portada__bajada">
+        Una convención abierta que define dónde y cómo viajan esos dos datos dentro de la
+        Factura Electrónica de Panamá, para que cualquier cadena los lea con una sola
+        regla, sin importar qué PAC use el proveedor.
       </p>
-      <p class="campo__cadena"><span class="campo__libre"
-          >Gracias por su compra.</span
-        > <span class="marca">#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</span></p>
 
-      <p class="campo__paso"><span>2</span> Lo que extrae el receptor</p>
-      <p class="campo__etiqueta">
-        del bloque marcado, con una sola regla y sin adivinar
+      <p class="enlaces">
+        <a class="boton boton--primario" href={`${base}/spec/`}
+          >Leer la especificación <span class="boton__flecha">→</span></a
+        >
+        <a class="boton boton--secundario" href={`${base}/validador/`}>Probar una cadena</a>
+        <a class="boton boton--fantasma" href={repo}>Ver el repositorio</a>
       </p>
-      {/* Misma forma que la salida del validador, porque es la misma operación. */}
-      <dl class="campo__lectura">
-        <dt>oc</dt>
-        <dd>4500000001</dd>
-        <dt>ref</dt>
-        <dd>TIENDA RETAIL X</dd>
-      </dl>
 
-      <p class="campo__nota">
-        El saludo queda intacto: fuera del bloque no se toca nada. El SKU sigue en <code
-          >dCodProd</code
-        >.
-      </p>
+      {/* Dos momentos numerados, no tres listas: quién escribe y quién lee. El
+          marcador verde es el vínculo —lo resaltado a la izquierda es lo que sale
+          a la derecha—, y el saludo del emisor se menciona una sola vez, para que
+          no parezca que el ejemplo se repite. */}
+      <div class="campo">
+        <div class="campo__rejilla">
+          <div class="campo__panel">
+            <p class="campo__paso"><span>1</span> Lo que escribe el emisor</p>
+            <p class="campo__etiqueta">
+              en el campo de notas de la factura (<code>dInfEmFE</code>), que ya viene en
+              toda factura autorizada
+            </p>
+            <p class="campo__cadena"><span class="campo__libre"
+                >Gracias por su compra.</span
+              > <span class="marca">#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#</span
+              ></p>
+          </div>
+
+          <div class="campo__panel">
+            <p class="campo__paso"><span>2</span> Lo que extrae el receptor</p>
+            <p class="campo__etiqueta">
+              del bloque marcado, con una sola regla y sin adivinar
+            </p>
+            {/* Misma forma que la salida del validador, porque es la misma operación. */}
+            <dl class="campo__lectura">
+              <dt>oc</dt>
+              <dd>4500000001</dd>
+              <dt>ref</dt>
+              <dd>TIENDA RETAIL X</dd>
+            </dl>
+          </div>
+        </div>
+
+        <p class="campo__nota">
+          El mensaje del proveedor queda intacto: solo se lee lo que está dentro de la
+          etiqueta. El código interno del producto sigue en su propio campo.
+        </p>
+      </div>
     </div>
-
-    <p class="enlaces">
-      <a href={`${base}/spec/`}>Leer la especificación</a>
-      <a href={`${base}/validador/`}>Probar una cadena</a>
-      <a href={repo}>Ver el repositorio</a>
-    </p>
-  </div>
+  </section>
 
   <section class="seccion">
     <div class="envoltura">
       <h2 class="seccion__titulo">El problema</h2>
       <p class="medida">
         Una cadena de retail recibe facturas de cientos o miles de proveedores. Cada uno
-        emite a través del PAC que eligió y coloca el número de orden donde su desarrollo
+        emite a través del PAC que eligió y coloca la Orden de Compra donde su desarrollo
         decida. El costo se paga en los dos extremos: el proveedor mantiene un mapeo
         distinto por cada cadena, y la cadena mantiene reglas de ingesta distintas por
         cada proveedor.
@@ -193,7 +205,7 @@ const tabla = [
     </div>
   </section>
 
-  <section class="seccion">
+  <section class="seccion seccion--banda">
     <div class="envoltura">
       <h2 class="seccion__titulo">Cómo funciona</h2>
       <p class="medida">
@@ -202,6 +214,10 @@ const tabla = [
       </p>
       <div class="pasos">
         <div class="paso">
+          <div class="paso__cab">
+            <span class="paso__icono"><Icono nombre="documento" /></span>
+            <span class="paso__num" aria-hidden="true">1</span>
+          </div>
           <h3>Un campo que ya está ahí</h3>
           <p>
             Toda Factura Electrónica panameña tiene <code>dInfEmFE</code>, un campo de
@@ -210,14 +226,22 @@ const tabla = [
           </p>
         </div>
         <div class="paso">
+          <div class="paso__cab">
+            <span class="paso__icono"><Icono nombre="bloque" /></span>
+            <span class="paso__num" aria-hidden="true">2</span>
+          </div>
           <h3>Un bloque que delimita el dato</h3>
           <p>
-            Dentro de ese campo, un centinela <code>#FER1#</code> abre y cierra un bloque
-            de pares <code>clave=valor</code>. Todo lo que quede fuera del bloque sigue
-            siendo uso libre del emisor.
+            Dentro de ese campo, una etiqueta <code>#FER1#</code> marca el inicio y el
+            fin del bloque, y dentro viajan los datos de negocio etiquetados. Todo lo
+            que quede fuera del bloque sigue siendo uso libre del emisor.
           </p>
         </div>
-        <div class="paso">
+        <div class="paso paso--verde">
+          <div class="paso__cab">
+            <span class="paso__icono"><Icono nombre="verificado" /></span>
+            <span class="paso__num" aria-hidden="true">3</span>
+          </div>
           <h3>Una regla que los lee todos</h3>
           <p>
             El receptor programa una sola extracción y le sirve para todos sus
@@ -246,11 +270,11 @@ const tabla = [
               cada proveedor.
             </li>
             <li>
-              El número de orden llega limpio, listo para el three-way match entre orden,
-              recepción y factura.
+              La Orden de Compra llega limpia, lista para la conciliación automática
+              entre pedido, recepción y factura.
             </li>
             <li>
-              El código de barra llega uniforme en el ítem, con la misma clave para todo
+              El Código de Barras llega uniforme en el ítem, con la misma clave para todo
               el catálogo.
             </li>
             <li>
@@ -274,10 +298,6 @@ const tabla = [
             <li>
               Menos facturas devueltas por formato, y por lo tanto cobros que no se
               detienen en la puerta.
-            </li>
-            <li>
-              Implementaciones de referencia en Python y JavaScript, sin dependencias,
-              para partir de algo que ya pasa los casos.
             </li>
           </ul>
         </div>
@@ -334,30 +354,32 @@ const tabla = [
   <section class="seccion">
     <div class="envoltura">
       <h2 class="seccion__titulo">Antes y después</h2>
-      <table class="datos datos--tres">
-        <thead>
-          <tr>
-            <th scope="col">Aspecto</th>
-            <th scope="col">Hoy</th>
-            <th scope="col">Con la convención</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            tabla.map((f) => (
-              <tr>
-                <th scope="row">{f.aspecto}</th>
-                <td data-rotulo="Hoy">{f.hoy}</td>
-                <td data-rotulo="Con la convención">{f.fer}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <div class="tabla">
+        <table class="datos datos--tres">
+          <thead>
+            <tr>
+              <th scope="col">Aspecto</th>
+              <th scope="col">Hoy</th>
+              <th scope="col">Con la convención</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              tabla.map((f) => (
+                <tr>
+                  <th scope="row">{f.aspecto}</th>
+                  <td data-rotulo="Hoy">{f.hoy}</td>
+                  <td data-rotulo="Con la convención">{f.fer}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <section class="seccion">
+  <section class="seccion seccion--banda">
     <div class="envoltura">
       <h2 class="seccion__titulo">Adoptantes</h2>
       <p class="medida">
@@ -420,28 +442,31 @@ const tabla = [
           <p class="ruta__quien">Soy una cadena de retail</p>
           <h3>Leer el bloque</h3>
           <p>
-            Implementar la extracción de §5 y publicar a sus proveedores que la cadena lo
-            lee. Desde ese momento un proveedor tiene a quién facturarle así.
+            Configurar la regla de lectura en su ERP y comunicar a sus proveedores que la
+            cadena ya lee FER. Desde ese momento un proveedor tiene a quién facturarle
+            así.
           </p>
-          <a href={`${base}/spec/`}>Algoritmo de recepción</a>
+          <a href={`${base}/spec/`}>Cómo empezar como cadena →</a>
         </div>
         <div class="ruta">
           <p class="ruta__quien">Soy un proveedor</p>
           <h3>Emitir el bloque</h3>
           <p>
-            Escribir el bloque en <code>dInfEmFE</code> según §4 y correr los casos de
-            conformidad. Un solo desarrollo, todas las cadenas que lo lean.
+            Incluir la Orden de Compra y el Código de Barras con el formato FER en sus
+            facturas, y verificar con los casos de prueba antes de emitir. Un solo
+            desarrollo, todas las cadenas que lo lean.
           </p>
-          <a href={`${base}/spec/`}>Reglas de emisión</a>
+          <a href={`${base}/spec/`}>Reglas de emisión →</a>
         </div>
         <div class="ruta">
           <p class="ruta__quien">Soy un PAC o un desarrollador</p>
           <h3>Ofrecerlo de fábrica</h3>
           <p>
             Incluirlo como opción en la plataforma. Hay implementaciones de referencia en
-            Python y JavaScript, sin dependencias, y una batería de casos.
+            Python y JavaScript, sin dependencias, para partir de algo que ya pasa los 20
+            casos de conformidad.
           </p>
-          <a href={repo}>Repositorio</a>
+          <a href={repo}>Repositorio →</a>
         </div>
       </div>
 
@@ -454,36 +479,19 @@ const tabla = [
     </div>
   </section>
 
-  <section class="seccion">
+  {/* La tabla de datos que vivía aquí —versión, claves, conformidad, referencia,
+      compatibilidad— se mudó a la página de la especificación: le habla a quien va a
+      implementar y en esta página cortaba la lectura de negocio. Queda el estado en
+      una línea y los enlaces, que sí sirven a los dos públicos. */}
+  <section class="seccion seccion--cian">
     <div class="envoltura">
       <h2 class="seccion__titulo">Estado</h2>
-      <table class="datos">
-        <tbody>
-          <tr>
-            <th>Versión</th>
-            <td>1.1.0 · centinela <code>#FER1#</code></td>
-          </tr>
-          <tr>
-            <th>Claves</th>
-            <td>
-              <code>oc</code> y <code>ref</code> a nivel de documento, <code>cbar</code> a
-              nivel de ítem
-            </td>
-          </tr>
-          <tr>
-            <th>Conformidad</th>
-            <td>20 casos normativos, verificables contra las implementaciones</td>
-          </tr>
-          <tr>
-            <th>Referencia</th>
-            <td>Python y JavaScript, sin dependencias</td>
-          </tr>
-          <tr>
-            <th>Compatibilidad</th>
-            <td>Perfil heredado reconocido; la migración es incremental</td>
-          </tr>
-        </tbody>
-      </table>
+      <p class="medida">
+        La versión 1.1.1 está publicada y es estable: las claves vigentes no cambian de
+        significado, las versiones futuras solo agregan, y la migración es incremental,
+        sin fecha de corte coordinada. El detalle técnico —claves, casos de conformidad e
+        implementaciones de referencia— está en la especificación.
+      </p>
       <p class="enlaces">
         <a href={`${base}/spec/`}>Especificación</a>
         <a href={`${repo}/blob/main/conformidad/casos.json`}>Casos de conformidad</a>

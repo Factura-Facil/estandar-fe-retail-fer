@@ -2,7 +2,7 @@
 
 Convención de etiquetado para Facturas Electrónicas de retail en Panamá.
 
-**Versión 1.1.0** · Especificación abierta · [Sitio](https://factura-facil.github.io/estandar-fe-retail-fer/) · [Texto normativo](spec/v1.1.0.md) · [Registro de claves](claves/registro.json) · [Casos de conformidad](conformidad/casos.json)
+**Versión 1.1.1** · Especificación abierta · [Sitio](https://factura-facil.github.io/estandar-fe-retail-fer/) · [Texto normativo](spec/v1.1.1.md) · [Registro de claves](claves/registro.json) · [Casos de conformidad](conformidad/casos.json)
 
 FER define **dónde y cómo** viajan dos datos de negocio dentro del XML de la Factura
 Electrónica de Panamá, para que cualquier receptor pueda leerlos con una sola regla,
@@ -63,22 +63,22 @@ El razonamiento completo, incluyendo por qué los campos dedicados (`dNroPed`,
 
 | | |
 |---|---|
-| Versión del esquema | `1.1.0` (centinela `#FER1#`) |
+| Versión del esquema | `1.1.1` (centinela `#FER1#`) |
 | Claves normativas | `oc`, `ref`, `cbar` |
-| Compatibilidad | Perfil heredado soportado, ver [§7](spec/v1.1.0.md#7-perfil-heredado) |
+| Compatibilidad | Perfil heredado soportado, ver [§7](spec/v1.1.1.md#7-perfil-heredado) |
 | Cambios | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Cómo implementar
 
 **Emisores.** Envolver los datos actuales en el bloque, separando el número de
-pedido de su referencia. Ver [§4](spec/v1.1.0.md#4-emisión).
+pedido de su referencia. Ver [§4](spec/v1.1.1.md#4-emisión).
 
-**Receptores.** Implementar la extracción según [§5](spec/v1.1.0.md#5-recepción) y
+**Receptores.** Implementar la extracción según [§5](spec/v1.1.1.md#5-recepción) y
 validar contra [`conformidad/casos.json`](conformidad/casos.json). Hay
 implementaciones de referencia en Python y JavaScript en
 [`referencia/`](referencia/README.md), sin dependencias, que pasan los 20 casos
 normativos. Los otros 4 casos del archivo, marcados `"normativo": false`, ejercitan
-las notas de implementación de [§5.3](spec/v1.1.0.md#53-notas-de-implementación--no-normativo)
+las notas de implementación de [§5.3](spec/v1.1.1.md#53-notas-de-implementación--no-normativo)
 y quedan fuera del criterio de conformidad.
 
 Extractos XML con la ubicación exacta del campo en cada nivel:

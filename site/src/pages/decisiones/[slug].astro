@@ -1,26 +1,79 @@
 ---
 import Base from "../../layouts/Base.astro";
 
+const limpiar = (t: string) => t.replace(/^\d{4}\s+—\s+/, "").replace(/[`]/g, "");
+
 export async function getStaticPaths() {
   const mods = import.meta.glob("../../contenido/decisiones/*.md", { eager: true });
-  return Object.values(mods).map((m: any) => ({
-    params: { slug: m.frontmatter.slug },
-    props: { mod: m },
+  const todas = Object.values(mods)
+    .map((m: any) => ({ slug: m.frontmatter.slug, titulo: m.frontmatter.titulo, mod: m }))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
+
+  // El vecino viaja sin su módulo: solo se necesita para rotular el enlace.
+  const vecino = (d: any) => (d ? { slug: d.slug, titulo: d.titulo } : null);
+
+  return todas.map((d, i) => ({
+    params: { slug: d.slug },
+    props: { mod: d.mod, anterior: vecino(todas[i - 1]), siguiente: vecino(todas[i + 1]) },
   }));
 }
 
-const { mod } = Astro.props;
+const { mod, anterior, siguiente } = Astro.props;
 const { Content, frontmatter } = mod;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const num = frontmatter.slug.slice(0, 4);
+
+// El H1 del .md nombra los campos entre acentos graves. Se componen como código, que
+// es como aparecen en el resto del sitio, en vez de salir como texto literal.
+const titulo = frontmatter.titulo
+  .replace(/^\d{4}\s+—\s+/, "")
+  .split("`")
+  .map((t: string, i: number) => ({ t, codigo: i % 2 === 1 }));
 ---
 
-<Base titulo={`${frontmatter.titulo} — FER`} descripcion={frontmatter.titulo}>
-  <div class="envoltura prosa">
-    <p class="rotulo">
-      <a href={`${base}/decisiones/`} style="color:inherit">Decisiones</a> / {num}
-    </p>
-    <h1>{frontmatter.titulo.replace(/^\d{4}\s+—\s+/, "")}</h1>
+<Base
+  titulo={`${limpiar(frontmatter.titulo)} — FER`}
+  descripcion={frontmatter.resumen || limpiar(frontmatter.titulo)}
+>
+  <section class="cabecera">
+    <div class="envoltura envoltura--prosa">
+      <p class="rotulo">
+        <a href={`${base}/decisiones/`}>Decisiones</a> / {num}
+      </p>
+      <h1>{titulo.map((p) => (p.codigo ? <code>{p.t}</code> : p.t))}</h1>
+      {frontmatter.resumen && <p class="cabecera__bajada">{frontmatter.resumen}</p>}
+    </div>
+  </section>
+
+  <div class="envoltura envoltura--prosa prosa">
     <Content />
+
+    {/* Las decisiones se leen a menudo en cadena —0002 remite a 0001, 0004 a 0002—
+        y hasta ahora había que volver al índice para dar un paso. */}
+    <nav class="vecinas" aria-label="Otras decisiones">
+      {
+        anterior && (
+          <a class="vecinas__enlace" href={`${base}/decisiones/${anterior.slug}/`}>
+            <span class="vecinas__dir">← Anterior</span>
+            <span class="vecinas__titulo">
+              {anterior.slug.slice(0, 4)} · {limpiar(anterior.titulo)}
+            </span>
+          </a>
+        )
+      }
+      {
+        siguiente && (
+          <a
+            class="vecinas__enlace vecinas__enlace--sig"
+            href={`${base}/decisiones/${siguiente.slug}/`}
+          >
+            <span class="vecinas__dir">Siguiente →</span>
+            <span class="vecinas__titulo">
+              {siguiente.slug.slice(0, 4)} · {limpiar(siguiente.titulo)}
+            </span>
+          </a>
+        )
+      }
+    </nav>
   </div>
 </Base>

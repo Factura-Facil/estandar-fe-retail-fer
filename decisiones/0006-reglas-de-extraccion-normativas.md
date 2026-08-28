@@ -1,5 +1,7 @@
 # 0006 — Reglas de extracción normativas y compromisos de estabilidad del registro
 
+*Por qué las reglas de extracción dejaron de ser opcionales en 1.1.0.*
+
 **Estado:** aceptada
 **Fecha:** 2026-08
 **Aplica a:** FER 1.1.0
@@ -66,9 +68,11 @@ tres.
 
 ## Consecuencias
 
-**El criterio de conformidad se endurece.** Los casos `doc-08`, `doc-09` y `doc-14`
-pasan de nota a normativos: 20 casos normativos en lugar de 17. Una implementación
-verificada contra 1.0.0 debe volver a ejecutar la batería.
+**El criterio de conformidad se endurece.** Tres casos pasan de nota a normativos:
+`doc-08` (clave escrita en mayúsculas, que se normaliza al leer), `doc-09` (clave
+duplicada) y `doc-14` (bloque de una versión superior). Son 20 casos normativos en
+lugar de 17, y una implementación verificada contra 1.0.0 debe volver a ejecutar la
+batería.
 
 **Publicar una versión mayor del registro deja de requerir coordinación.** Un emisor
 puede emitir `#FER2#` sin avisar y ningún receptor previo pierde datos que antes leía.

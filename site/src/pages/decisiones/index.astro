@@ -1,9 +1,19 @@
 ---
 import Base from "../../layouts/Base.astro";
+
+// El título viene del H1 del .md, donde los nombres de campo van entre acentos graves.
+// En el índice se componen como texto plano: la lista es para escanear, no para leer
+// código.
+const limpiar = (t: string) => t.replace(/^\d{4}\s+—\s+/, "").replace(/[`]/g, "");
+
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const mods = import.meta.glob("../../contenido/decisiones/*.md", { eager: true });
 const items = Object.values(mods)
-  .map((m: any) => ({ slug: m.frontmatter.slug, titulo: m.frontmatter.titulo }))
+  .map((m: any) => ({
+    slug: m.frontmatter.slug,
+    titulo: limpiar(m.frontmatter.titulo),
+    resumen: m.frontmatter.resumen,
+  }))
   .sort((a, b) => a.slug.localeCompare(b.slug));
 ---
 
@@ -11,13 +21,23 @@ const items = Object.values(mods)
   titulo="Decisiones de diseño — FER"
   descripcion="Registro histórico de las decisiones que dieron forma a FER, con las alternativas descartadas y por qué."
 >
-  <div class="envoltura prosa">
-    <p class="rotulo">Registro histórico</p>
-    <h1>Decisiones de diseño</h1>
+  <section class="cabecera">
+    <div class="envoltura envoltura--prosa">
+      <p class="rotulo">Registro histórico</p>
+      <h1>Decisiones de diseño</h1>
+      <p class="cabecera__bajada">
+        Por qué la especificación es como es, con las alternativas que se descartaron y la
+        razón de cada descarte. Cada entrada documenta el contexto que motivó una decisión,
+        la opción elegida, el fundamento y lo que se descartó.
+      </p>
+    </div>
+  </section>
+
+  <div class="envoltura envoltura--prosa prosa">
     <p>
-      Por qué la especificación es como es, con las alternativas que se descartaron y la
-      razón de cada descarte. Estos documentos no se reescriben: si una decisión cambia,
-      se agrega una nueva que supersede a la anterior.
+      No hace falta leerlas en orden: cada una se sostiene sola. Estos documentos no se
+      reescriben —si una decisión cambia, se agrega una nueva que supersede a la
+      anterior— así que una decisión posterior puede corregir a una previa sin borrarla.
     </p>
     <ul class="indice">
       {
@@ -25,7 +45,10 @@ const items = Object.values(mods)
           <li>
             <a href={`${base}/decisiones/${d.slug}/`}>
               <span class="indice__num">{d.slug.slice(0, 4)}</span>
-              <span class="indice__titulo">{d.titulo.replace(/^\d{4}\s+—\s+/, "")}</span>
+              <span class="indice__cuerpo">
+                <span class="indice__titulo">{d.titulo}</span>
+                {d.resumen && <span class="indice__resumen">{d.resumen}</span>}
+              </span>
             </a>
           </li>
         ))

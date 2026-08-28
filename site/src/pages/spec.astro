@@ -1,22 +1,124 @@
 ---
 import Base from "../layouts/Base.astro";
-import { Content, frontmatter } from "../contenido/spec.md";
+import { Content, frontmatter, getHeadings } from "../contenido/spec.md";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// El índice se arma desde los encabezados del propio texto normativo. Agregar o
+// renumerar una sección en spec/v1.1.1.md no obliga a tocar esta página, y los
+// anclajes son los mismos slugs que Astro le pone a los títulos del markdown.
+const indice = [];
+for (const h of getHeadings()) {
+  if (h.depth === 2) indice.push({ ...h, hijos: [] });
+  else if (h.depth === 3 && indice.length) indice[indice.length - 1].hijos.push(h);
+}
+
+// Esta tabla estaba en la portada. Le habla a quien va a implementar, así que su
+// sitio es esta página; allá cortaba la lectura del visitante de negocio.
+const estado = [
+  { que: "Versión", dato: "1.1.1 · centinela <code>#FER1#</code>" },
+  {
+    que: "Claves",
+    dato: "<code>oc</code> y <code>ref</code> a nivel de documento, <code>cbar</code> a nivel de ítem",
+  },
+  {
+    que: "Conformidad",
+    dato: "20 casos normativos, verificables contra las implementaciones",
+  },
+  { que: "Referencia", dato: "Python y JavaScript, sin dependencias" },
+  {
+    que: "Compatibilidad",
+    dato: "Perfil heredado reconocido; la migración es incremental",
+  },
+];
 ---
 
 <Base
-  titulo={`Especificación — FER 1.1.0`}
-  descripcion="Texto normativo de FER 1.0.0: gramática del bloque, reglas de emisión y recepción, registro de claves y perfil heredado."
+  titulo={`Especificación — FER 1.1.1`}
+  descripcion="Texto normativo de FER 1.1.1: gramática del bloque, reglas de emisión y recepción, registro de claves y perfil heredado."
 >
-  <div class="envoltura prosa">
-    <p class="rotulo">Texto normativo</p>
-    <h1>{frontmatter.titulo}</h1>
-    <p class="pie__mono">
-      Fuente: <code>spec/v1.1.0.md</code> · <a
-        href="https://github.com/Factura-Facil/estandar-fe-retail-fer/blob/main/spec/v1.1.0.md"
-        >ver en el repositorio</a
-      > · <a href={`${base}/validador/`}>probar una cadena</a>
+  <section class="cabecera cabecera--spec">
+    <div class="envoltura">
+      <p class="rotulo">Texto normativo</p>
+      <h1>{frontmatter.titulo}</h1>
+      <p class="cabecera__fuente">
+        Fuente: <code>spec/v1.1.1.md</code> · <a
+          href="https://github.com/Factura-Facil/estandar-fe-retail-fer/blob/main/spec/v1.1.1.md"
+          >ver en el repositorio</a
+        > · <a href={`${base}/validador/`}>probar una cadena</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="envoltura envoltura--spec prosa">
+    <h2>Estado</h2>
+    <div class="tabla">
+      <table class="datos datos--lateral">
+        <tbody>
+          {
+            estado.map((f) => (
+              <tr>
+                <th>{f.que}</th>
+                <td set:html={f.dato} />
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    {/* Antes del texto normativo, lo mínimo que hace falta para que algo funcione:
+        un emisor escribe, un receptor localiza. El resto del documento es el detalle
+        de estas tres piezas. */}
+    <h2>Implementación mínima</h2>
+    <p>
+      Tres piezas y ya hay algo funcionando. Todo lo que sigue en este documento es el
+      detalle de estas tres, y de los casos de borde que aparecen en producción.
     </p>
+
+    <p>
+      <strong>Emisión, cabecera.</strong> La Orden de Compra en el <code>dInfEmFE</code> de
+      <code>&lt;gDGen&gt;</code>, junto al texto libre que el emisor ya escribía (§4.1):
+    </p>
+    <pre><code>&lt;dInfEmFE&gt;Gracias por su compra. #FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#&lt;/dInfEmFE&gt;</code></pre>
+
+    <p>
+      <strong>Emisión, ítem.</strong> El Código de Barras en el <code>dInfEmFE</code> de cada
+      <code>&lt;gItem&gt;</code>. <code>dCodProd</code> no se toca (§4.2):
+    </p>
+    <pre><code>&lt;dInfEmFE&gt;#FER1# cbar=7600000000001 #FER1#&lt;/dInfEmFE&gt;</code></pre>
+
+    <p>
+      <strong>Recepción.</strong> Localizar el bloque con esta expresión regular, dividir el
+      grupo 2 por <code>|</code> y cada fragmento por el primer <code>=</code> (§3.3, §5.1):
+    </p>
+    <pre><code>#FER(\d)#(.*?)#FER\1#</code></pre>
+
+    <p>
+      Eso cubre el caso normal. Antes de emitir documentos reales, <a
+        href={`${base}/validador/`}>pruebe una cadena o un XML completo en el validador</a
+      >, que corre la implementación de referencia en el navegador.
+    </p>
+
+    <h2 id="contenido-spec">Contenido</h2>
+    <ol class="tdc">
+      {
+        indice.map((s) => (
+          <li>
+            <a class="tdc__sec" href={`#${s.slug}`}>
+              {s.text}
+            </a>
+            {s.hijos.length > 0 && (
+              <span class="tdc__subs">
+                {s.hijos.map((h) => (
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                ))}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+
     <Content />
   </div>
 </Base>

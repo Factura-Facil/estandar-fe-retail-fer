@@ -1,5 +1,5 @@
 <!--
-  FER 1.1.0 — extracto ilustrativo, no es una FE completa ni validable.
+  FER 1.1.1 — extracto ilustrativo, no es una FE completa ni validable.
   Nivel ítem, perfil heredado: el código de barra viaja en crudo, sin delimitadores
   ni etiqueta. El receptor aplica esta lectura solo cuando no encuentra un bloque
   (§7.1). Corresponde al caso de conformidad item-06.

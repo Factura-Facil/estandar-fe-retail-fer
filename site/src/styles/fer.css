@@ -1,57 +1,79 @@
 /* FER — sistema visual
  *
- * El artefacto del estándar es una cadena de texto dentro de un campo XML. La página
- * se construye alrededor de ese objeto: papel, tinta y un marcador sobre lo único que
- * el receptor lee.
+ * El artefacto del estándar sigue siendo una cadena de texto dentro de un campo XML, y
+ * la página sigue construida alrededor de ese objeto: lo que el receptor extrae va
+ * marcado en verde y el resto es texto libre. Lo que cambia es el soporte. En vez de
+ * papel técnico —crema, filetes duros, sin profundidad— la superficie es blanca, las
+ * piezas son tarjetas con radio y sombra corta, y el azul marino de Factura Fácil hace
+ * de tinta de titular.
  *
- * El color del marcador es el que el manual de marca de Factura Fácil reserva para
- * marcadores editoriales (ff-green-light). Es el único punto donde la marca del
- * custodio entra en el sistema visual: no hay sombras, esquinas redondeadas ni
- * degradados, y la tipografía sigue siendo IBM Plex.
+ * Tres colores cargan el significado y ninguno es decorativo:
+ *   marcador  — lo que el receptor lee dentro del bloque
+ *   rojo      — el estado que la convención elimina
+ *   cian      # reglas, bordes de foco e íconos; nunca superficie de texto largo
+ *
+ * El cian de marca (#25BAF0) no alcanza AA sobre blanco. Los enlaces usan una versión
+ * oscurecida (--cian-texto) y el cian de marca queda para filetes, bordes, íconos y
+ * texto sobre el azul marino.
  */
 
-@font-face {
-  font-family: "Plex Sans";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: local("IBM Plex Sans");
-}
-
 :root {
-  /* Papel de documento técnico, no crema editorial */
-  --papel: #fbfaf7;
-  --papel-hondo: #f2f0ea;
-  --tinta: #15171a;
-  --tinta-tenue: #5c6169;
-  --tinta-fantasma: #9aa0a8;
+  /* Azul marino de titular. Es la tinta de la marca, no un gris azulado. */
+  --navy: #0e1a47;
 
-  /* Azul de tinta de impresora de formulario continuo */
-  --azul: #1b3a8c;
-  --azul-claro: #e8ecf7;
+  --tinta: #1e2532;
+  --tinta-tenue: #5a6478;
+  --tinta-fantasma: #98a3b5;
+  /* Rótulos de micrográfica: encabezados de tabla, pastillas, perfil. */
+  --tinta-rotulo: #7d8798;
 
-  /* Azul de marca de Factura Fácil. Entra solo como acento —reglas cortas y
-     rótulos de audiencia—, nunca como superficie: la página sigue siendo papel. */
+  /* Cian de marca. Ver la nota de contraste arriba. */
   --cian: #25baf0;
+  --cian-texto: #1279b8;
+  --cian-tenue: #e8f6fd;
+  --cian-papel: #f4fbfe;
 
-  /* Marcador: lo que el receptor extrae. ff-green-light / ff-green del manual. */
-  --marcador: #b1d451;
-  --marcador-borde: #a3bf40;
-  --marcador-tenue: #eef5df;
+  /* Marcador: lo que el receptor extrae. ff-green-light del manual de marca. */
+  --marcador: #c6e17a;
+  --marcador-tenue: #edf6dc;
+  --marcador-borde: #dcebc2;
+  --marcador-firme: #a3bf40;
+  --verde-texto: #6d8a25;
+  --verde-rotulo: #5f7a1f;
+  --verde-hondo: #4f6a18;
+  --verde-icono: #7d9c2c;
 
   /* Rojo de corrección: el estado que la convención elimina, no un color de marca. */
   --rojo: #a4342a;
-  --rojo-tenue: #f9efed;
+  --rojo-tenue: #fdf7f6;
+  --rojo-borde: #f0dcd8;
+  --rojo-pastilla: #f7e6e3;
+  --rojo-linea: #ecd7d3;
 
-  --linea: #ddd8ce;
-  --linea-firme: #b9b2a4;
+  --papel: #ffffff;
+  --papel-hondo: #f7fafd;
+  --linea: #e6edf5;
+  --linea-firme: #cfdeeb;
+  --linea-tenue: #eef3f9;
+  --linea-nav: #dbe4ee;
 
-  --sans: "IBM Plex Sans", "Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif;
+  --sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --display: Poppins, "Plus Jakarta Sans", ui-sans-serif, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
+  --r-sm: 10px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-2xl: 20px;
+
+  --sombra-card: 0 10px 26px -20px rgba(14, 26, 71, 0.2);
+  --sombra-heroe: 0 18px 44px -22px rgba(14, 26, 71, 0.22);
+  --sombra-boton: 0 6px 18px rgba(14, 26, 71, 0.16);
+
   --medida: 68ch;
-  --ancho: 1120px;
+  --ancho: 1160px;
+  --ancho-prosa: 900px;
 }
 
 *,
@@ -73,6 +95,7 @@ html {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
@@ -82,546 +105,1375 @@ body {
   background: var(--papel);
   color: var(--tinta);
   font-family: var(--sans);
-  font-size: 1.0625rem;
-  line-height: 1.65;
-  font-feature-settings: "ss01";
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---------- estructura ---------- */
+/* ── Contenedores ───────────────────────────────────────────────────────── */
 
 .envoltura {
-  width: 100%;
   max-width: var(--ancho);
   margin-inline: auto;
-  padding-inline: 1.5rem;
+  padding-inline: 24px;
+}
+
+/* Las páginas de texto corrido son una columna sola: el encabezado a sangre y el
+   cuerpo comparten ancho para que el H1 y el primer párrafo alineen a la izquierda. */
+.envoltura--prosa {
+  max-width: var(--ancho-prosa);
+}
+
+.envoltura--spec {
+  max-width: 820px;
 }
 
 .medida {
   max-width: var(--medida);
 }
 
-/* ---------- barra superior ---------- */
+/* ── Barra ──────────────────────────────────────────────────────────────── */
 
 .barra {
-  border-bottom: 1px solid var(--linea);
-  background: var(--papel);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linea);
 }
 
 .barra__fila {
+  max-width: var(--ancho);
+  margin-inline: auto;
+  padding: 14px 24px;
   display: flex;
-  align-items: baseline;
-  gap: 1.5rem;
-  padding-block: 0.875rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .barra__marca {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.125rem;
-  letter-spacing: 0.01em;
-  color: var(--tinta);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   text-decoration: none;
-  margin-right: auto;
+  color: inherit;
 }
 
-.barra__marca span {
+.barra__marca img {
+  width: 118px;
+  height: auto;
+  display: block;
+}
+
+.barra__sep {
+  width: 1px;
+  height: 26px;
+  background: var(--linea-nav);
+}
+
+.barra__nombre {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.barra__version {
   font-family: var(--mono);
-  font-weight: 400;
-  font-size: 0.75rem;
-  color: var(--tinta-fantasma);
-  margin-left: 0.5rem;
-  letter-spacing: 0;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--cian);
+  background: var(--cian-tenue);
+  border-radius: 999px;
+  padding: 4px 7px;
 }
 
 .barra__nav {
   display: flex;
-  gap: 1.25rem;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
+  align-items: center;
+  gap: 2px;
   flex-wrap: wrap;
 }
 
 .barra__nav a {
+  font-size: 14px;
+  font-weight: 500;
   color: var(--tinta-tenue);
   text-decoration: none;
-  padding-bottom: 2px;
-  border-bottom: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .barra__nav a:hover,
 .barra__nav a[aria-current="page"] {
-  color: var(--tinta);
-  border-bottom-color: var(--linea-firme);
+  background: #f3f8fd;
+  color: var(--navy);
+  font-weight: 600;
 }
 
-/* ---------- portada ---------- */
+/* El repositorio sale del sitio: se compone como botón fantasma para que se lea
+   como salida y no como una sección más. */
+.barra__nav a.barra__repo {
+  margin-left: 6px;
+  font-weight: 600;
+  border-color: var(--linea-nav);
+  background: transparent;
+}
+
+.barra__nav a.barra__repo:hover {
+  border-color: var(--cian);
+  background: #f3fbfe;
+}
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  padding: 13px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease;
+}
+
+.boton__flecha {
+  font-family: var(--mono);
+}
+
+.boton--primario {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: var(--sombra-boton);
+}
+
+.boton--primario:hover {
+  background: #16256b;
+  color: #fff;
+}
+
+.boton--secundario {
+  background: var(--papel);
+  color: var(--navy);
+  border-color: var(--linea-firme);
+}
+
+.boton--secundario:hover {
+  border-color: var(--cian);
+  background: var(--cian-papel);
+  color: var(--navy);
+}
+
+.boton--fantasma {
+  color: var(--tinta-tenue);
+  padding: 13px 18px;
+}
+
+.boton--fantasma:hover {
+  background: #f3f8fd;
+  color: var(--navy);
+}
+
+/* ── Encabezados a sangre ───────────────────────────────────────────────── */
+
+/* La portada y las páginas de texto abren con la misma banda: un degradado corto de
+   cian papel a blanco, cerrado por un filete. Es lo que separa el titular del cuerpo
+   sin necesidad de una regla decorativa. */
+.portada,
+.cabecera {
+  background: linear-gradient(180deg, var(--cian-papel) 0%, var(--papel) 100%);
+  border-bottom: 1px solid var(--linea);
+}
 
 .portada {
-  padding-block: 4.5rem 3rem;
+  padding: 72px 0 64px;
 }
 
+.cabecera {
+  padding: 56px 0 44px;
+}
+
+/* Rótulo con filete: el filete cian sustituye a la numeración de sección.
+   Una línea sola no necesita el interlineado de lectura del cuerpo: con 1.6 el
+   rótulo abre una caja más alta de la cuenta y empuja el titular hacia abajo. */
 .rotulo {
+  margin: 0 0 16px;
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--tinta-fantasma);
-  margin-bottom: 1.25rem;
+  color: var(--cian-texto);
+}
+
+.rotulo::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--cian);
+  margin-bottom: 14px;
+}
+
+/* En la portada el rótulo abre el documento entero, no una sección dentro de él:
+   ahí no hay nada que numerar y el filete sobra. Sin filete el rótulo queda muy
+   pegado al titular, así que respira un poco más abajo. */
+.portada .rotulo {
+  margin-bottom: 20px;
+}
+
+.portada .rotulo::before {
+  content: none;
+}
+
+.rotulo a {
+  color: inherit;
 }
 
 .portada h1 {
-  font-family: var(--cond);
+  margin: 0 0 20px;
+  font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(2.5rem, 7vw, 4.25rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  margin: 0 0 0.5rem;
+  font-size: clamp(34px, 5.2vw, 60px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  color: var(--navy);
+  max-width: 20ch;
   text-wrap: balance;
 }
 
 .portada h1 em {
   font-style: normal;
-  color: var(--tinta-fantasma);
-  font-weight: 400;
+  color: var(--cian);
 }
 
 .portada__bajada {
-  font-size: clamp(1.0625rem, 1.1vw + 0.85rem, 1.25rem);
-  line-height: 1.5;
+  margin: 0 0 36px;
+  max-width: 56ch;
+  font-size: clamp(17px, 1.1vw + 13px, 20px);
+  line-height: 1.55;
   color: var(--tinta-tenue);
-  max-width: 52ch;
-  margin: 0 0 2.5rem;
   text-wrap: pretty;
 }
 
-/* ---------- el artefacto: campo anotado ---------- */
+.cabecera h1 {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--navy);
+  text-wrap: balance;
+}
 
-/* El campo es el objeto del estándar, así que se dibuja como un objeto y no como
-   el hueco entre dos reglas: relleno propio para que tenga cuerpo sobre el papel.
-   Lo comparte el validador, donde cumple el mismo papel de panel de resultado. */
-.campo {
-  border-top: 2px solid var(--tinta);
+/* Dónde corta el titular es decisión de cada página: acotarlo en medida de texto
+   —y no dejarlo llegar al borde de la columna— mantiene el corte donde se diseñó. */
+.cabecera--spec h1 {
+  max-width: 24ch;
+}
+
+.cabecera--tool h1 {
+  max-width: 26ch;
+}
+
+/* La herramienta arranca antes: bajo el encabezado no hay un H2 que abra sección,
+   sino los controles, y esos piden menos aire por delante. */
+.cabecera--tool {
+  padding-bottom: 40px;
+}
+
+.cabecera h1 code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  font-weight: 500;
+  color: var(--cian-texto);
+}
+
+.cabecera__bajada {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+  text-wrap: pretty;
+}
+
+.cabecera__nota {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+  text-wrap: pretty;
+}
+
+/* La línea de procedencia es una fila de piezas sueltas —la ruta del archivo y dos
+   enlaces—, no un párrafo: en flex el separador queda a la misma distancia de ambos
+   lados y la línea se parte por piezas enteras cuando no cabe. */
+.cabecera__fuente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--tinta-tenue);
+}
+
+.cabecera__fuente code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--papel);
+  border: 1px solid var(--linea-nav);
+  border-radius: 5px;
+  padding: 2px 6px;
+  color: var(--tinta-tenue);
+}
+
+/* Pastillas de estado: las tres afirmaciones que abren la especificación —estado,
+   versión y centinela— se leen de un vistazo en vez de como un párrafo. */
+.pastillas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 28px;
+}
+
+.pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: var(--papel-hondo);
-  padding: 1.5rem;
-  margin-block: 2rem 0;
-  overflow-x: auto;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+.pastilla strong {
+  font-weight: 400;
+  color: var(--tinta-rotulo);
+}
+
+.pastilla a {
+  color: inherit;
+}
+
+.pastilla--verde {
+  background: var(--marcador-tenue);
+  border-color: var(--marcador-borde);
+}
+
+.pastilla--verde strong {
+  color: var(--verde-texto);
+}
+
+.pastilla code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+
+/* ── La tarjeta del campo ───────────────────────────────────────────────── */
+
+/* Dos momentos, no tres listas: quién escribe y quién lee. Cada uno es un panel de
+   la misma tarjeta, para que se lean como las dos caras de una sola operación. */
+.campo {
+  background: var(--papel);
+  border: 1px solid #e0e9f3;
+  border-radius: var(--r-2xl);
+  box-shadow: var(--sombra-heroe);
+  overflow: hidden;
+}
+
+.campo__rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.campo__panel {
+  padding: 28px 28px 30px;
+}
+
+.campo__rejilla .campo__panel + .campo__panel {
+  background: #fbfdfe;
+  border-left: 1px solid var(--linea-tenue);
+}
+
+/* Con una sola columna el filete lateral no separa nada: pasa a ser horizontal. */
+@media (max-width: 719px) {
+  .campo__rejilla .campo__panel + .campo__panel {
+    border-left: 0;
+    border-top: 1px solid var(--linea-tenue);
+  }
+}
+
+.campo__paso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--navy);
+}
+
+.campo__paso span {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.campo__panel + .campo__panel .campo__paso span {
+  background: var(--marcador-tenue);
+  color: var(--verde-texto);
 }
 
 .campo__etiqueta {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.campo__etiqueta code {
   font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--tinta-fantasma);
-  margin-bottom: 0.875rem;
+  font-size: 13px;
+  background: #f3f8fd;
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--tinta);
 }
 
 .campo__cadena {
-  font-family: var(--mono);
-  font-size: clamp(0.8125rem, 1.6vw, 1rem);
-  line-height: 2.1;
-  white-space: pre-wrap;
-  word-break: break-word;
   margin: 0;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea-tenue);
+  border-radius: var(--r-md);
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: clamp(12px, 1.3vw, 14px);
+  line-height: 2.1;
+  color: var(--tinta);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .campo__libre {
   color: var(--tinta-fantasma);
 }
 
-/* El marcador. Trazo de izquierda a derecha, una sola vez, al cargar. */
+/* El marcador es el único punto donde el color dice algo: lo resaltado arriba es
+   exactamente lo que sale extraído abajo. */
 .marca {
-  position: relative;
-  color: var(--tinta);
-  padding: 0.2em 0.15em;
-  box-decoration-break: clone;
   background-image: linear-gradient(var(--marcador), var(--marcador));
-  background-repeat: no-repeat;
   background-size: 100% 100%;
+  background-repeat: no-repeat;
+  border-radius: 3px;
+  padding: 0.2em 0.15em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  color: var(--tinta);
 }
 
+/* Solo en la portada: el trazo se dibuja una vez, al entrar. */
 .portada .marca {
   animation: trazo 700ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
 }
 
 @keyframes trazo {
   from {
-    background-size: 0% 100%;
+    background-size: 0 100%;
   }
   to {
     background-size: 100% 100%;
   }
 }
 
-.campo__lectura {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 0.5rem 1.25rem;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  margin: 0;
-  max-width: 44rem;
+@media (prefers-reduced-motion: reduce) {
+  .portada .marca {
+    animation: none;
+  }
 }
 
-/* En el validador la lectura va pegada a la cadena y necesita el corte. En la
-   portada se interpone .campo__salida, así que la adyacencia no se da. */
-.campo__cadena + .campo__lectura {
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px dashed var(--linea-firme);
+.campo__lectura {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 20px;
+  align-items: baseline;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
 }
 
 .campo__lectura dt {
+  font-family: var(--mono);
+  font-size: 13px;
   color: var(--tinta-fantasma);
 }
 
-/* El valor extraído es el remate de todo el argumento: se lee, no se consulta. */
 .campo__lectura dd {
   margin: 0;
-  color: var(--tinta);
-  font-size: 1.0625rem;
-  font-weight: 500;
-}
-
-/* Los dos momentos del campo: quién lo escribe y quién lo lee. Van numerados
-   como los pasos de "Cómo funciona", para que se lean como una secuencia y no
-   como dos listas sueltas. */
-.campo__paso {
   font-family: var(--mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--tinta);
-  margin: 2rem 0 0.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px dashed var(--linea-firme);
-}
-
-.campo__paso:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
-
-.campo__paso span {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.125rem;
-  letter-spacing: 0;
-  margin-right: 0.375rem;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--navy);
+  overflow-wrap: anywhere;
 }
 
 .campo__nota {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--tinta-fantasma);
-  margin: 1.25rem 0 0;
-  padding-top: 1rem;
-  border-top: 1px solid var(--linea);
-}
-
-/* ---------- secciones ---------- */
-
-/* Bandas alternas. El pie ya usaba --papel-hondo, así que la página no estrena
-   color: extiende un recurso que ya estaba en el sistema.
-   nth-of-type en vez de una clase en el markup, para que agregar o quitar una
-   sección no obligue a renumerar la alternancia a mano. */
-.seccion {
-  padding-block: 4.5rem;
-}
-
-.seccion:nth-of-type(even) {
+  margin: 0;
+  padding: 16px 28px;
+  border-top: 1px solid var(--linea-tenue);
   background: var(--papel-hondo);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
 }
 
-/* Con bandas, cada frontera ya es un cambio de color y la regla de 1px sobra.
-   La primera sí la necesita: viene después de la portada, del mismo papel. */
-.seccion:first-of-type {
-  border-top: 1px solid var(--linea);
+/* ── Enlaces ────────────────────────────────────────────────────────────── */
+
+a {
+  color: var(--cian-texto);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
-/* El último tramo vuelve al papel: si quedara en --papel-hondo se fundiría con
-   el pie, que usa ese mismo fondo. */
-.seccion:last-of-type {
+a:hover {
+  color: var(--navy);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cian);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+}
+
+/* En la portada la fila de acciones separa el titular de la tarjeta del campo. */
+.portada .enlaces {
+  margin-bottom: 44px;
+}
+
+.enlaces a:not(.boton) {
+  display: inline-flex;
+  align-items: center;
+  background: var(--papel);
+  color: var(--navy);
+  border: 1px solid var(--linea-firme);
+  border-radius: var(--r-sm);
+  padding: 10px 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.enlaces a:not(.boton):hover {
+  border-color: var(--cian);
+  background: var(--cian-papel);
+}
+
+/* ── Secciones ──────────────────────────────────────────────────────────── */
+
+.seccion {
+  padding-block: 72px;
   background: var(--papel);
 }
 
-/* Una banda oscura, una sola vez, donde el contenido cambia de modo: las demás
-   secciones afirman y esta niega. El azul es el de marca del custodio; a esta
-   escala funciona como campo, así que no se repite en ningún otro lado.
-   Clase doblada a propósito: .seccion--inversa a secas es (0,1,0) y perdería
-   contra la alternancia, que es (0,2,0) por el :nth-of-type. */
-.seccion.seccion--inversa {
-  background: var(--azul);
-  color: #fff;
+.seccion--banda {
+  background: var(--papel-hondo);
+  border-block: 1px solid var(--linea);
+}
+
+.seccion--cian {
+  background: var(--cian-papel);
+  border-top: 1px solid var(--linea);
+}
+
+.seccion--inversa {
+  background: var(--navy);
+  color: rgba(255, 255, 255, 0.74);
+}
+
+@media (max-width: 700px) {
+  .seccion {
+    padding-block: 48px;
+  }
+}
+
+.seccion__titulo {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+/* Mismo filete que el rótulo: marca el arranque de sección sin numerarla. */
+.seccion__titulo::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--cian);
+  margin-bottom: 12px;
 }
 
 .seccion--inversa .seccion__titulo {
   color: #fff;
 }
 
-.seccion--inversa .seccion__titulo::before {
-  background: var(--cian);
-}
-
-.seccion__titulo {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  letter-spacing: -0.01em;
-  margin: 0 0 1.5rem;
-}
-
-/* Regla corta de acento sobre cada título. Es el único color que se repite en
-   toda la página, y por eso es el que la ata: aparece ocho veces sin pesar,
-   porque son 40px y no una superficie. */
-.seccion__titulo::before {
-  content: "";
-  display: block;
-  width: 2.5rem;
-  height: 3px;
-  background: var(--cian);
-  margin-bottom: 0.875rem;
-}
-
 .seccion p {
-  max-width: var(--medida);
-  text-wrap: pretty;
-}
-
-.doble {
-  display: grid;
-  gap: 2.5rem;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 860px) {
-  .doble {
-    grid-template-columns: 1fr 1fr;
-    gap: 3.5rem;
-  }
-}
-
-.doble h3 {
-  font-family: var(--cond);
-  font-weight: 600;
-  font-size: 1.125rem;
-  margin: 0 0 0.625rem;
-}
-
-.doble p {
-  margin: 0 0 0.75rem;
+  font-size: 17px;
+  line-height: 1.65;
   color: var(--tinta-tenue);
 }
 
-/* ---------- lista de negaciones ---------- */
+.seccion > .envoltura > p {
+  margin: 0 0 32px;
+}
+
+.seccion code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: #f3f8fd;
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--tinta);
+}
+
+.seccion__nota {
+  margin: 28px 0 0;
+  max-width: var(--medida);
+  font-size: 14.5px !important;
+  line-height: 1.6;
+  color: var(--tinta-fantasma);
+}
+
+/* ── El problema: dos paneles enfrentados ───────────────────────────────── */
+
+.comparativa {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.comparativa__lado {
+  border-radius: var(--r-xl);
+  padding: 24px;
+}
+
+.comparativa__lado--antes {
+  background: var(--rojo-tenue);
+  border: 1px solid var(--rojo-borde);
+}
+
+.comparativa__lado--despues {
+  background: #fafdf3;
+  border: 1px solid var(--marcador-borde);
+}
+
+.comparativa__titulo {
+  display: inline-flex;
+  margin: 0 0 18px !important;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.comparativa__lado--antes .comparativa__titulo {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.comparativa__lado--despues .comparativa__titulo {
+  background: var(--marcador-tenue);
+  color: var(--verde-rotulo);
+}
+
+.comparativa__caso + .comparativa__caso {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--rojo-linea);
+}
+
+.comparativa__lado--despues .comparativa__caso + .comparativa__caso {
+  border-top-color: #dfeac8;
+}
+
+.comparativa__emisor {
+  margin: 0 0 8px !important;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-fantasma);
+}
+
+.comparativa__cadena {
+  margin: 0 0 8px !important;
+  font-family: var(--mono);
+  font-size: 13px !important;
+  line-height: 1.9;
+  color: var(--tinta);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comparativa__nota {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 8px;
+  margin: 0 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55;
+}
+
+.comparativa__nota::before {
+  font-family: var(--mono);
+  line-height: 1.4;
+}
+
+.comparativa__lado--antes .comparativa__nota {
+  color: #6b5f5d;
+}
+
+.comparativa__lado--antes .comparativa__nota::before {
+  content: "×";
+  color: var(--rojo);
+}
+
+.comparativa__lado--despues .comparativa__nota {
+  color: #5e6a4f;
+}
+
+.comparativa__lado--despues .comparativa__nota::before {
+  content: "→";
+  color: var(--verde-icono);
+}
+
+.comparativa__cierre {
+  margin: 20px 0 0 !important;
+  padding-top: 18px;
+  border-top: 1px dashed var(--rojo-linea);
+  font-size: 15px !important;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--rojo);
+}
+
+.comparativa__lado--despues .comparativa__cierre {
+  border-top-color: #dfeac8;
+  color: var(--verde-hondo);
+}
+
+/* ── Cómo funciona: tres tarjetas ───────────────────────────────────────── */
+
+.pasos,
+.lados,
+.rutas {
+  display: grid;
+  gap: 20px;
+}
+
+.pasos,
+.rutas {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.lados {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.paso {
+  display: flex;
+  flex-direction: column;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 26px;
+  box-shadow: var(--sombra-card);
+}
+
+.paso__cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.paso__icono {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+}
+
+.paso--verde .paso__icono {
+  background: var(--marcador-tenue);
+  color: var(--verde-texto);
+}
+
+/* Filigrana: numera el paso sin competir con el titular. */
+.paso__num {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: #e3edf6;
+}
+
+.paso--verde .paso__num {
+  color: #e9f2d8;
+}
+
+.paso h3 {
+  margin: 0 0 10px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--navy);
+}
+
+.paso p {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+/* ── Lo ganan los dos lados ─────────────────────────────────────────────── */
+
+.lado {
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 28px;
+}
+
+.seccion--banda .lado {
+  background: var(--papel);
+}
+
+.lado__quien {
+  display: inline-flex;
+  margin: 0 0 14px !important;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lado h3 {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.lado ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.lado li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+.lado li::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%237d9c2c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 10.5l3.5 3.5L16 5.5'/%3E%3C/svg%3E")
+    center / 18px 18px no-repeat;
+}
+
+/* ── Adoptantes ─────────────────────────────────────────────────────────── */
+
+.lado .adoptantes {
+  gap: 18px;
+}
+
+.lado .adoptante {
+  display: block;
+}
+
+.lado .adoptante::before {
+  content: none;
+}
+
+.adoptante__nombre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 4px !important;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--navy);
+}
+
+.adoptante__nombre a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--linea-firme);
+}
+
+.adoptante__nombre a:hover {
+  border-bottom-color: var(--cian);
+}
+
+.adoptante__sello {
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--marcador-tenue);
+  border: 1px solid var(--marcador-borde);
+  color: var(--verde-rotulo);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adoptante__nota {
+  margin: 0 !important;
+  font-size: 14.5px !important;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+/* ── Qué no es ──────────────────────────────────────────────────────────── */
 
 .no-es {
-  list-style: none;
-  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
   margin: 0;
-  max-width: var(--medida);
+  padding: 0;
+  list-style: none;
 }
 
 .no-es li {
-  padding: 0.875rem 0;
-  border-bottom: 1px solid var(--linea);
   display: grid;
-  grid-template-columns: 1.75rem 1fr;
-  gap: 0.5rem;
-  color: var(--tinta-tenue);
+  grid-template-columns: 26px 1fr;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 22px 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.74);
 }
 
 .no-es li::before {
   content: "no";
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: rgba(37, 186, 240, 0.16);
+  color: var(--cian);
   font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--tinta-fantasma);
-  padding-top: 0.3em;
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 
 .no-es strong {
-  color: var(--tinta);
+  display: block;
+  margin-bottom: 4px;
   font-weight: 600;
-}
-
-/* Sobre la banda azul la lista se reescribe en claros. Los valores son opacidades
-   del blanco y no colores nuevos: así la jerarquía —negrita, cuerpo, el "no"—
-   se mantiene idéntica a la de la versión sobre papel. */
-.seccion--inversa .no-es li {
-  color: rgba(255, 255, 255, 0.72);
-  border-bottom-color: rgba(255, 255, 255, 0.18);
-}
-
-.seccion--inversa .no-es li::before {
-  color: var(--cian);
-}
-
-.seccion--inversa .no-es strong {
   color: #fff;
 }
 
-/* ---------- tabla de estado ---------- */
+/* ── Tablas de datos ────────────────────────────────────────────────────── */
+
+/* La envoltura recorta las esquinas: una tabla no admite border-radius propio en
+   sus celdas sin que el filete interno se salga del contorno. */
+.tabla {
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--papel);
+}
 
 .datos {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9375rem;
-  max-width: 40rem;
+  font-size: 15px;
 }
 
 .datos th,
 .datos td {
+  padding: 14px 18px;
   text-align: left;
-  padding: 0.625rem 1rem 0.625rem 0;
-  border-bottom: 1px solid var(--linea);
   vertical-align: top;
+  line-height: 1.55;
+  border-bottom: 1px solid var(--linea);
+}
+
+.datos tbody tr:last-child th,
+.datos tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .datos th {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--tinta-fantasma);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  width: 1%;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.datos td {
+  color: var(--tinta-tenue);
 }
 
 .datos code {
   font-family: var(--mono);
-  font-size: 0.875em;
-}
-
-/* Tres columnas: aspecto, hoy, con la convención. Cabecera real, no th lateral. */
-.datos--tres {
-  max-width: none;
+  font-size: 13px;
+  color: var(--tinta);
 }
 
 .datos--tres thead th {
-  width: auto;
-  white-space: normal;
-  border-bottom-color: var(--tinta);
-  padding-right: 1.5rem;
+  background: var(--papel-hondo);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tinta-fantasma);
+}
+
+.datos--tres thead th:nth-child(2) {
+  color: var(--rojo);
+}
+
+.datos--tres thead th:nth-child(3) {
+  color: var(--verde-rotulo);
 }
 
 .datos--tres tbody th {
   width: 26%;
-  white-space: normal;
-  font-family: var(--sans);
-  font-size: 0.9375rem;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--tinta);
-  padding-right: 1.5rem;
 }
 
-.datos--tres td {
-  width: 37%;
-  color: var(--tinta-tenue);
-  padding-right: 1.5rem;
-}
-
+/* La columna de la convención se destaca: es la que el lector vino a comparar. */
 .datos--tres td:last-child {
-  color: var(--tinta);
-  padding-right: 0;
+  background: #fafdf3;
+  color: #5e6a4f;
 }
 
-/* ---------- enlaces ---------- */
-
-a {
-  color: var(--azul);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
+/* Tabla lateral: el encabezado va en la primera columna. */
+.datos--lateral th {
+  width: 30%;
+  background: var(--papel-hondo);
+  font-family: var(--sans);
+  font-size: 14.5px;
 }
 
-a:hover {
-  text-decoration-thickness: 2px;
-}
+/* ── Por dónde se empieza ───────────────────────────────────────────────── */
 
-:focus-visible {
-  outline: 2px solid var(--azul);
-  outline-offset: 3px;
-}
-
-.enlaces {
+.ruta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.75rem;
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  margin-top: 2rem;
+  flex-direction: column;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 26px;
+  box-shadow: var(--sombra-card);
 }
 
-/* ---------- prosa de documento ---------- */
+.ruta__quien {
+  display: inline-flex;
+  align-self: flex-start;
+  margin: 0 0 14px !important;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ruta h3 {
+  margin: 0 0 10px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.ruta p {
+  margin: 0 0 20px !important;
+  font-size: 15px !important;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+.ruta a {
+  margin-top: auto;
+  align-self: flex-start;
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--cian);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.ruta a:hover {
+  color: var(--cian-texto);
+}
+
+.contacto {
+  margin: 32px 0 0 !important;
+  max-width: var(--medida);
+  font-size: 14.5px !important;
+  line-height: 1.65;
+  color: var(--tinta-fantasma);
+}
+
+.contacto a {
+  color: var(--cian-texto);
+}
+
+/* ── Pie ────────────────────────────────────────────────────────────────── */
+
+.pie {
+  background: var(--navy);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 48px 0 56px;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.pie a {
+  color: var(--cian);
+}
+
+.pie a:hover {
+  color: #fff;
+}
+
+/* La marca y su rol se separan del texto legal con la misma línea que cierra el pie:
+   arriba quién publica, abajo bajo qué condiciones. */
+.pie__marca {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* El logo es a color y necesita fondo claro: va sobre una placa, no suelto. */
+.pie__marca a {
+  display: inline-flex;
+  background: var(--papel);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+}
+
+.pie__marca img {
+  width: 132px;
+  height: auto;
+  display: block;
+}
+
+.pie__marca span {
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cian);
+}
+
+.pie__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px 40px;
+}
+
+.pie__cols p {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.pie__mono {
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Texto corrido ──────────────────────────────────────────────────────── */
 
 .prosa {
-  max-width: var(--medida);
-  padding-block: 3rem 5rem;
+  padding-block: 40px 80px;
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: #3c4556;
 }
 
-.prosa h1 {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: clamp(1.875rem, 4vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem;
-  text-wrap: balance;
+.prosa > :first-child {
+  margin-top: 0;
+}
+
+/* El filete de sección sobra si el H2 abre la columna: la banda del encabezado ya
+   trae el suyo y quedarían dos líneas juntas. */
+.prosa > h2:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
 .prosa h2 {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: -0.01em;
-  margin: 3rem 0 1rem;
-  padding-top: 1.25rem;
+  margin: 56px 0 16px;
+  padding-top: 24px;
   border-top: 1px solid var(--linea);
+  scroll-margin-top: 90px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--navy);
 }
 
 .prosa h3 {
-  font-family: var(--cond);
+  margin: 34px 0 12px;
+  scroll-margin-top: 90px;
+  font-family: var(--display);
   font-weight: 600;
-  font-size: 1.1875rem;
-  margin: 2rem 0 0.75rem;
+  font-size: 19px;
+  line-height: 1.3;
+  color: var(--navy);
 }
 
 .prosa h2 + h3 {
-  margin-top: 1.25rem;
+  margin-top: 20px;
 }
 
 .prosa p,
 .prosa li {
+  max-width: var(--medida);
   text-wrap: pretty;
 }
 
 .prosa ol,
 .prosa ul {
-  padding-left: 1.5rem;
+  padding-left: 22px;
 }
 
 .prosa li {
-  margin-block: 0.5rem;
+  margin-bottom: 8px;
 }
 
-/* DEBE / NO DEBE en versalitas monoespaciadas: la palabra normativa se ve */
 .prosa strong {
   font-weight: 600;
+  color: var(--tinta);
 }
 
 .prosa blockquote {
-  margin: 1.5rem 0;
-  padding: 1rem 1.25rem;
-  border-left: 2px solid var(--linea-firme);
-  background: var(--papel-hondo);
-  color: var(--tinta-tenue);
-  font-size: 0.9375rem;
+  margin: 24px 0;
+  background: var(--cian-papel);
+  border: 1px solid #d8ecf8;
+  border-left: 3px solid var(--cian);
+  border-radius: var(--r-md);
+  padding: 16px 20px;
+  font-size: 15px;
+  color: #4b5566;
 }
 
 .prosa blockquote p:first-child {
@@ -632,789 +1484,676 @@ a:hover {
   margin-bottom: 0;
 }
 
+/* El aparte de superseción no es una cita: dice que el párrafo de arriba ya no
+   describe el estándar vigente. */
+.prosa blockquote.aparte--superseado {
+  background: var(--rojo-tenue);
+  border-color: var(--rojo-borde);
+  border-left-color: var(--rojo);
+  color: #6b5f5d;
+}
+
+.prosa blockquote.aparte--superseado strong:first-child {
+  color: var(--rojo);
+}
+
 .prosa code {
   font-family: var(--mono);
   font-size: 0.875em;
-  background: var(--papel-hondo);
-  padding: 0.1em 0.3em;
+  background: #f3f8fd;
   border: 1px solid var(--linea);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--tinta);
 }
 
+/* Los bloques de código son la voz del documento normativo: fondo azul marino para
+   que se lean como material citado y no como una nota de la página.
+   Shiki escribe el color y el fondo en el atributo style, de ahí el !important. */
 .prosa pre {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  padding: 1rem 1.125rem;
-  border: 1px solid var(--linea);
-  border-left: 2px solid var(--linea-firme);
-  background: #fff !important;
+  margin: 22px 0;
+  background: var(--navy) !important;
+  color: #dce9f5 !important;
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
   overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .prosa pre code {
-  background: none;
-  border: none;
-  padding: 0;
+  font-family: var(--mono);
   font-size: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
 }
 
 .prosa table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9375rem;
-  margin-block: 1.5rem;
-  display: block;
-  overflow-x: auto;
+  margin: 24px 0;
+  font-size: 15px;
 }
 
 .prosa th,
 .prosa td {
+  padding: 12px 14px;
   text-align: left;
-  padding: 0.5rem 0.875rem 0.5rem 0;
-  border-bottom: 1px solid var(--linea);
   vertical-align: top;
+  line-height: 1.55;
+  border-bottom: 1px solid var(--linea);
 }
 
 .prosa th {
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 400;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--tinta-fantasma);
-  border-bottom-color: var(--linea-firme);
+  color: var(--tinta-rotulo);
+  border-bottom: 1px solid var(--linea-nav);
 }
 
 .prosa hr {
-  border: none;
+  margin: 48px 0;
+  border: 0;
   border-top: 1px solid var(--linea);
-  margin-block: 2.5rem;
 }
 
-/* ---------- índice de decisiones ---------- */
+/* ── Tabla de contenidos de la especificación ───────────────────────────── */
+
+.prosa .tdc {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prosa .tdc li {
+  max-width: none;
+  margin: 0;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.prosa .tdc li:hover {
+  border-color: var(--cian);
+  background: var(--cian-papel);
+}
+
+.tdc__sec {
+  display: block;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.tdc__subs {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--tinta-fantasma);
+}
+
+.tdc__subs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tdc__subs a:hover {
+  color: var(--cian-texto);
+}
+
+.tdc__subs a + a::before {
+  content: " · ";
+  color: var(--linea-firme);
+}
+
+/* ── Detalle colapsable ─────────────────────────────────────────────────── */
+
+.prosa .detalle,
+.detalle {
+  margin: 24px 0;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+}
+
+.detalle summary {
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.detalle summary:hover {
+  color: var(--cian-texto);
+}
+
+.detalle p {
+  margin: 12px 0 0 !important;
+  font-size: 14.5px !important;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+/* ── Índice de decisiones ───────────────────────────────────────────────── */
 
 .indice {
-  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 32px 0 0;
   padding: 0;
-  margin: 0;
-  max-width: var(--medida);
+  list-style: none;
 }
 
 .indice li {
-  border-bottom: 1px solid var(--linea);
+  max-width: none;
+  margin: 0;
 }
 
 .indice a {
   display: grid;
-  grid-template-columns: 3.5rem 1fr;
-  gap: 1rem;
-  padding: 1rem 0;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
   text-decoration: none;
-  color: var(--tinta);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
-.indice a:hover .indice__titulo {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
+.indice a:hover {
+  border-color: var(--cian);
+  background: var(--cian-papel);
 }
 
 .indice__num {
   font-family: var(--mono);
-  font-size: 0.8125rem;
-  color: var(--tinta-fantasma);
-  padding-top: 0.15em;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cian-texto);
+}
+
+.indice__cuerpo {
+  display: block;
 }
 
 .indice__titulo {
-  font-weight: 500;
+  display: block;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--navy);
 }
 
-/* ---------- validador ---------- */
+.indice__resumen {
+  display: block;
+  margin-top: 4px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--tinta-tenue);
+}
 
+.indice a::after {
+  content: "→";
+  font-family: var(--mono);
+  color: var(--tinta-fantasma);
+}
+
+.indice a:hover::after {
+  color: var(--cian-texto);
+}
+
+/* ── Navegación entre decisiones ────────────────────────────────────────── */
+
+.vecinas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--linea);
+}
+
+.vecinas__enlace {
+  display: block;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.vecinas__enlace:hover {
+  border-color: var(--cian);
+  background: var(--cian-papel);
+}
+
+.vecinas__enlace--sig {
+  text-align: right;
+  grid-column: -2;
+}
+
+.vecinas__dir {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-fantasma);
+}
+
+.vecinas__titulo {
+  display: block;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.35;
+  color: var(--navy);
+}
+
+/* ── Validador ──────────────────────────────────────────────────────────── */
+
+/* Solo el margen inferior: el atajo `margin` pisaría el `margin-inline: auto` de
+   .envoltura y la columna dejaría de estar centrada. Los controles arrancan un poco
+   antes que un texto corrido: son la razón de estar de la página. */
 .tool {
-  padding-block: 2.5rem 5rem;
+  padding-top: 36px;
+  margin-bottom: 40px;
+}
+
+/* La medida de lectura es de la prosa. Los paneles de la herramienta son piezas de
+   interfaz: su ancho lo fija la tarjeta que los aloja, no el largo de la línea.
+   Van con `.prosa` delante para ganarle en especificidad a `.prosa p`. */
+.prosa .tool__perfil,
+.prosa .tool__privado,
+.prosa .tool__sigue,
+.prosa .campo__etiqueta,
+.prosa .campo__cadena,
+.prosa .campo__paso,
+.prosa .campo__nota,
+.prosa .zona__texto,
+.prosa .zona__nota,
+.prosa .xml__resumen,
+.prosa .xml__error,
+#salida-xml > p {
+  max-width: none;
+}
+
+/* Control segmentado: los dos modos son la misma operación sobre entradas
+   distintas, no dos herramientas. */
+.modos {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 20px;
+  background: #f3f8fd;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-md);
+  padding: 4px;
+}
+
+.modo {
+  appearance: none;
+  border: 0;
+  background: none;
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.modo:hover {
+  color: var(--navy);
+}
+
+.modo[aria-selected="true"] {
+  background: var(--papel);
+  color: var(--navy);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(14, 26, 71, 0.1);
 }
 
 .tool__campo {
   width: 100%;
-  font-family: var(--mono);
-  font-size: 0.9375rem;
-  line-height: 1.7;
-  padding: 1rem 1.125rem;
+  min-height: 130px;
+  background: var(--papel);
   border: 1px solid var(--linea-firme);
-  background: #fff;
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  font-family: var(--mono);
+  font-size: 14.5px;
+  line-height: 1.7;
   color: var(--tinta);
   resize: vertical;
-  min-height: 7rem;
 }
 
 .tool__campo:focus {
-  outline: 2px solid var(--azul);
+  outline: 2px solid var(--cian);
   outline-offset: -1px;
+  border-color: var(--cian);
+}
+
+.tool__rotulo {
+  display: block;
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-tenue);
+}
+
+/* La garantía de privacidad se repite junto al campo: es donde se decide si pegar
+   los datos de una factura real. */
+.tool__privado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  background: var(--marcador-tenue);
+  border: 1px solid var(--marcador-borde);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--verde-rotulo);
+}
+
+.tool__privado svg {
+  flex: none;
 }
 
 .tool__fila {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
-  margin-top: 1rem;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
+  margin: 14px 0 0;
 }
 
 .tool__radios {
   display: flex;
-  gap: 1rem;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .tool__radios label {
   display: inline-flex;
-  gap: 0.375rem;
   align-items: center;
+  gap: 8px;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 14px;
+  color: var(--navy);
   cursor: pointer;
-  color: var(--tinta-tenue);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.tool__radios label:hover {
+  border-color: var(--linea-firme);
+}
+
+.tool__radios label:has(input:checked) {
+  background: var(--cian-papel);
+  border-color: var(--cian);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.tool__radios input {
+  accent-color: var(--cian);
+  margin: 0;
 }
 
 .tool__ejemplos {
   display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
+  margin: 20px 0 0;
+}
+
+.tool__ejemplos-rotulo {
+  margin-right: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-rotulo);
 }
 
 .tool__ejemplo {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.3rem 0.625rem;
-  border: 1px solid var(--linea-firme);
+  appearance: none;
   background: var(--papel);
+  border: 1px solid var(--linea-nav);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
   color: var(--tinta-tenue);
   cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .tool__ejemplo:hover {
-  background: var(--marcador);
-  border-color: var(--marcador-borde);
-  color: var(--tinta);
+  border-color: var(--cian);
+  background: var(--cian-papel);
+  color: var(--navy);
 }
 
+/* La salida repite la forma de la tarjeta de la portada, porque es la misma
+   operación: se ve la cadena marcada y debajo lo que el receptor extrajo. */
 .tool__salida {
-  margin-top: 2.5rem;
-  border-top: 2px solid var(--tinta);
-  padding-top: 1.75rem;
-}
-
-.tool__salida .campo {
-  border-top: none;
-  margin-top: 0;
-  padding-top: 0;
+  margin-top: 28px;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  overflow: hidden;
 }
 
 .tool__perfil {
+  padding: 14px 22px;
+  background: var(--papel);
+  border-bottom: 1px solid var(--linea);
   font-family: var(--mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.1em;
-  color: var(--tinta-fantasma);
-  margin-bottom: 1rem;
+  text-transform: uppercase;
+  color: var(--tinta-rotulo);
 }
 
 .tool__perfil b {
-  color: var(--tinta);
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* La tarjeta de la portada se arma en dos paneles y por eso no lleva relleno propio.
+   Aquí —y en la revisión de XML, donde la construye el script— el contenido va
+   apilado, así que el relleno vuelve al contenedor. */
+.tool__salida .campo,
+#salida-xml .campo {
+  display: block;
+  padding: 22px;
+}
+
+.tool__salida .campo {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.tool__salida .campo__cadena,
+.tool__salida .campo__lectura,
+#salida-xml .campo__cadena,
+#salida-xml .campo__lectura {
+  background: var(--papel);
+  border-color: var(--linea);
+}
+
+/* En la portada la etiqueta explica el panel a quien llega de nuevas; aquí solo
+   nombra la pieza que sigue, así que baja a rótulo de micrográfica. */
+.tool__salida .campo__etiqueta,
+#salida-xml .campo__etiqueta {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-fantasma);
+}
+
+/* Y el paso deja de ser un titular numerado: aquí separa la cadena de su lectura. */
+.tool__salida .campo__paso {
+  display: block;
+  margin: 24px 0 12px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--linea-nav);
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.tool__salida .campo__lectura dd,
+#salida-xml .campo__lectura dd {
+  font-size: 16px;
+}
+
+/* En la revisión de XML no hay paso intermedio: la lectura va justo debajo. */
+#salida-xml .campo__cadena {
+  margin-bottom: 16px;
+}
+
+.tool__salida .campo__nota {
+  padding: 16px 22px;
+  background: var(--papel);
+  border-top: 1px solid var(--linea);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* Ausencia de dato, en cualquiera de sus formas: una celda, un dd, un párrafo o un
+   trozo de la cadena. Solo baja el tono; el sitio del texto lo pone quien lo aloja. */
+.tool__vacio {
+  color: var(--tinta-fantasma);
+}
+
+#salida-xml > p.tool__vacio {
+  margin: 12px 0 24px;
+  font-size: 14.5px;
+}
+
+/* Qué hacer con el resultado: el validador dice cuál es el paso siguiente según
+   lo que haya extraído. */
+.tool__sigue {
+  margin: 0;
+  padding: 14px 22px;
+  border-top: 1px solid var(--linea);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+.tool__sigue a {
   font-weight: 600;
 }
 
-.tool__vacio {
-  color: var(--tinta-fantasma);
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-}
-
-/* ---------- comparativa: el mismo dato, antes y después ---------- */
-
-.comparativa {
-  display: grid;
-  gap: 2.5rem;
-  margin-top: 2rem;
-}
-
-@media (min-width: 900px) {
-  .comparativa {
-    grid-template-columns: 1fr 1fr;
-    gap: 0 1.5rem;
-  }
-}
-
-/* Cada lado es ahora un panel con fondo propio. El tinte hace el trabajo que
-   antes hacía sola la regla superior de 2px: la diferencia entre los dos estados
-   se ve antes de leer una palabra. Con fondo, la separación entre columnas se
-   acorta —el color ya separa— y hace falta relleno lateral. */
-.comparativa__lado {
-  border-top: 2px solid var(--tinta);
-  padding: 1.25rem 1.5rem 1.5rem;
-}
-
-.comparativa__lado--antes {
-  border-top-color: var(--rojo);
-  background: var(--rojo-tenue);
-}
-
-.comparativa__lado--despues {
-  border-top-color: var(--marcador-borde);
-  background: var(--marcador-tenue);
-}
-
-.comparativa__titulo {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin: 0 0 1.5rem;
-}
-
-.comparativa__lado--antes .comparativa__titulo {
-  color: var(--rojo);
-}
-
-.comparativa__caso {
-  padding-bottom: 1.125rem;
-  margin-bottom: 1.125rem;
-  border-bottom: 1px dashed var(--linea);
-}
-
-.comparativa__emisor {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tinta-fantasma);
-  margin: 0 0 0.5rem;
-}
-
-.comparativa__cadena {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  line-height: 1.9;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0 0 0.5rem;
-}
-
-.comparativa__nota {
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--tinta-tenue);
-  margin: 0;
-  padding-left: 1.125rem;
-  position: relative;
-}
-
-.comparativa__nota::before {
-  position: absolute;
-  left: 0;
-  font-family: var(--mono);
-}
-
-.comparativa__lado--antes .comparativa__nota::before {
-  content: "×";
-  color: var(--rojo);
-}
-
-.comparativa__lado--despues .comparativa__nota::before {
-  content: "→";
-  color: var(--marcador-borde);
-}
-
-.comparativa__cierre {
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  margin: 0;
-  padding-top: 0.25rem;
-}
-
-.comparativa__lado--antes .comparativa__cierre {
-  color: var(--rojo);
-}
-
-/* ---------- pasos numerados ---------- */
-
-.pasos {
-  display: grid;
-  gap: 2rem;
-  margin-top: 2rem;
-  counter-reset: paso;
-}
-
-@media (min-width: 860px) {
-  .pasos {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2.5rem;
-  }
-}
-
-.paso {
-  border-top: 2px solid var(--tinta);
-  padding-top: 1rem;
-  counter-increment: paso;
-}
-
-/* El numeral es el ancla de la secuencia, no una etiqueta: condensada grande, del
-   mismo tamaño que un título de sección. En azul, porque a ese cuerpo la tinta
-   competía con el h3 que tiene debajo. */
-.paso::before {
-  content: counter(paso, decimal-leading-zero);
-  display: block;
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 2.5rem;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--azul);
-  margin-bottom: 0.5rem;
-}
-
-.paso h3 {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.125rem;
-  line-height: 1.2;
-  margin: 0 0 0.625rem;
-}
-
-.paso p {
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--tinta-tenue);
-  margin: 0;
-}
-
-/* ---------- lo ganan los dos lados ---------- */
-
-.lados {
-  display: grid;
-  gap: 2.5rem;
-  margin-top: 2rem;
-}
-
-@media (min-width: 860px) {
-  .lados {
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-  }
-}
-
-.lado {
-  border-top: 2px solid var(--tinta);
-  padding-top: 1.25rem;
-}
-
-/* Rótulo de audiencia: dice a quién le habla el bloque. Va en azul y no en gris
-   porque no es una etiqueta de dato —.comparativa__emisor sí lo es— sino una
-   señal de "esto es para usted", y conviene que se encuentre de un vistazo. */
-.lado__quien {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--azul);
-  margin: 0 0 0.5rem;
-}
-
-.lado h3 {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.25rem;
-  line-height: 1.15;
-  margin: 0 0 1.25rem;
-}
-
-.lado ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.875rem;
-}
-
-.lado li {
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--tinta-tenue);
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-.lado li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 0.6875rem;
-  height: 0.375rem;
-  background: var(--marcador);
-  border-bottom: 1px solid var(--marcador-borde);
-}
-
-/* ---------- adoptantes ---------- */
-
-/* Reusa .lados/.lado: los adoptantes son los mismos dos lados de la convención,
-   ahora con nombre propio. Hereda el marcador de .lado li, que aquí cae junto al
-   nombre —es el mismo gesto: lo resaltado es lo que importa—.
-   Los selectores llevan el prefijo .lado a propósito: .adoptante a secas es
-   (0,1,0) y perdería contra .lado li, que es (0,1,1). */
-.lado .adoptantes {
-  gap: 1.75rem;
-}
-
-.lado .adoptante__nombre {
-  margin: 0;
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.1875rem;
-  line-height: 1.2;
-  color: var(--tinta);
-}
-
-.lado .adoptante__nombre a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid var(--linea-firme);
-}
-
-.lado .adoptante__nombre a:hover {
-  border-bottom-color: var(--azul);
-  color: var(--azul);
-}
-
-/* El custodio se marca porque es información, no jerarquía: quien mantiene la
-   convención también la usa, y conviene que no parezca un tercero avalándola. */
-.lado .adoptante__sello {
-  display: inline-block;
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tinta-tenue);
-  background: var(--marcador-tenue);
-  border: 1px solid var(--marcador-borde);
-  padding: 0.0625rem 0.375rem;
-  margin-left: 0.5rem;
-  vertical-align: 0.15em;
-  white-space: nowrap;
-}
-
-.lado .adoptante__nota {
-  margin: 0.5rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--tinta-tenue);
-}
-
-/* Nota al pie de sección: mismo registro que .campo__nota, pero suelta en la
-   página y no dentro de un panel, así que necesita medida propia. Selector
-   doblado: .seccion p ya fija max-width y es (0,1,1). */
-.seccion .seccion__nota {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.7;
-  color: var(--tinta-fantasma);
-  max-width: 62ch;
-  margin: 2.5rem 0 0;
-  padding-top: 1rem;
-  border-top: 1px solid var(--linea);
-}
-
-/* ---------- rutas por audiencia ---------- */
-
-.rutas {
-  display: grid;
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-@media (min-width: 860px) {
-  .rutas {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2.5rem;
-  }
-}
-
-.ruta {
-  border-top: 2px solid var(--tinta);
-  padding-top: 1.125rem;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Mismo criterio que .lado__quien: rótulo de audiencia, no de dato. */
-.ruta__quien {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--azul);
-  margin: 0 0 0.5rem;
-}
-
-.ruta h3 {
-  font-family: var(--cond);
-  font-weight: 700;
-  font-size: 1.125rem;
-  line-height: 1.2;
-  margin: 0 0 0.625rem;
-}
-
-.ruta p {
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--tinta-tenue);
-  margin: 0 0 1.25rem;
-}
-
-.ruta a {
-  margin-top: auto;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  color: var(--azul);
-  text-decoration: none;
-  border-bottom: 1px solid var(--azul);
-  padding-bottom: 0.15rem;
-  align-self: start;
-}
-
-.ruta a:hover {
-  background: var(--azul-claro);
-}
-
-/* ---------- contacto ---------- */
-
-.contacto {
-  border-top: 1px solid var(--linea);
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  font-size: 0.9375rem;
-  color: var(--tinta-tenue);
-  max-width: 60ch;
-}
-
-.contacto a {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-}
-
-/* ---------- pie ---------- */
-
-.pie {
-  border-top: 1px solid var(--linea);
-  padding-block: 2.5rem 3.5rem;
-  font-size: 0.875rem;
-  color: var(--tinta-tenue);
-  background: var(--papel-hondo);
-  margin-top: 4rem;
-}
-
-.pie p {
-  max-width: 60ch;
-  margin: 0 0 0.875rem;
-}
-
-.pie a {
-  color: var(--azul);
-}
-
-.pie__mono {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--tinta-fantasma);
-}
-
-/* El logo del custodio va en el pie, no en la portada: la portada es del
- * estándar. */
-.pie__marca {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  margin: 0 0 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--linea);
-}
-
-.pie__marca img {
-  width: 132px;
-  height: auto;
-}
-
-.pie__marca span {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tinta-fantasma);
-  border-left: 1px solid var(--linea-firme);
-  padding-left: 0.875rem;
-}
-
-
-/* ---------- móvil ---------- */
-
-@media (max-width: 700px) {
-  /* La barra fija se come la pantalla cuando la navegación envuelve. */
-  .barra {
-    position: static;
-  }
-
-  .barra__fila {
-    gap: 0.75rem 1rem;
-    padding-block: 0.75rem;
-  }
-
-  .barra__nav {
-    gap: 0.875rem;
-    font-size: 0.75rem;
-  }
-
-  .portada {
-    padding-block: 2.5rem 2rem;
-  }
-
-  .campo__lectura {
-    grid-template-columns: 1fr;
-    gap: 0.125rem;
-  }
-
-  .campo__lectura dt {
-    margin-top: 0.625rem;
-  }
-
-  .seccion {
-    padding-block: 2.5rem;
-  }
-
-  .prosa {
-    padding-block: 2rem 3.5rem;
-  }
-
-  /* Tres columnas no caben: cada fila pasa a bloque con la cabecera como rótulo.
-     La tabla y el tbody también bajan a bloque; si no, el algoritmo de tabla
-     sigue repartiendo anchos y la primera celda queda en una palabra por línea. */
-  .datos--tres,
-  .datos--tres tbody {
-    display: block;
-  }
-
-  .datos--tres thead {
-    display: none;
-  }
-
-  .datos--tres tr {
-    display: block;
-    padding-block: 1rem;
-    border-bottom: 1px solid var(--linea);
-  }
-
-  /* tbody th, no th: la media query no sube la especificidad y el 26% de
-     .datos--tres tbody th ganaría, dejando el título en una palabra por línea. */
-  .datos--tres tbody th,
-  .datos--tres tbody td {
-    display: block;
-    width: auto;
-    border-bottom: 0;
-    padding: 0;
-  }
-
-  .datos--tres tbody th {
-    margin-bottom: 0.5rem;
-  }
-
-  .datos--tres td::before {
-    content: attr(data-rotulo);
-    display: block;
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--tinta-fantasma);
-    margin-top: 0.625rem;
-  }
-
-  .pie__marca {
-    flex-wrap: wrap;
-    gap: 0.625rem;
-  }
-
-  .pie__marca span {
-    border-left: 0;
-    padding-left: 0;
-    flex-basis: 100%;
-  }
-}
-
-/* ---------- conmutador de modo ---------- */
-
-.modos {
-  display: flex;
-  gap: 0;
-  margin: 1.75rem 0 1.5rem;
-  border-bottom: 1px solid var(--linea);
-}
-
-.modo {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  padding: 0.55rem 1rem;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--tinta-fantasma);
-  cursor: pointer;
-  margin-bottom: -1px;
-}
-
-.modo:hover {
-  color: var(--tinta);
-}
-
-.modo[aria-selected="true"] {
-  color: var(--tinta);
-  border-bottom-color: var(--tinta);
-}
-
-/* ---------- zona de carga ---------- */
+/* ── Zona de archivo ────────────────────────────────────────────────────── */
 
 .zona {
-  border: 1px dashed var(--linea-firme);
-  background: #fff;
-  padding: 2.25rem 1.5rem;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  border: 1.5px dashed var(--linea-firme);
+  border-radius: var(--r-xl);
+  padding: 44px 24px;
   text-align: center;
+  background: var(--papel-hondo);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .zona--activa {
-  border-color: var(--marcador-borde);
-  background: var(--marcador);
+  border-color: var(--marcador-firme);
+  background: #fafdf3;
+}
+
+.zona svg {
+  color: var(--cian-texto);
 }
 
 .zona__texto {
-  margin: 0 0 0.75rem;
-  font-size: 0.9375rem;
-  max-width: none;
+  margin: 0;
+  font-size: 15.5px;
+  color: var(--tinta);
+}
+
+.zona__nota {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-rotulo);
 }
 
 .zona__boton {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  border: 1px solid var(--linea-firme);
-  padding: 0.3rem 0.7rem;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
   background: var(--papel);
+  border: 1px solid var(--linea-firme);
+  border-radius: var(--r-sm);
+  padding: 7px 13px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta);
   white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .zona__boton:hover {
-  background: var(--marcador);
-  border-color: var(--marcador-borde);
+  border-color: var(--cian);
+  background: var(--cian-papel);
 }
 
 .zona__boton input {
@@ -1426,136 +2165,326 @@ a:hover {
 }
 
 .zona__boton:focus-within {
-  outline: 2px solid var(--azul);
-  outline-offset: 2px;
+  outline: 2px solid var(--cian);
+  outline-offset: 3px;
 }
 
-/* ---------- informe del XML ---------- */
+/* ── Revisión de XML ────────────────────────────────────────────────────── */
 
 .xml__resumen {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  margin: 2rem 0 0;
-  padding: 0.7rem 0.9rem;
-  border-left: 3px solid var(--linea-firme);
+  margin: 28px 0 20px;
   background: var(--papel-hondo);
-  max-width: none;
+  border-left: 3px solid var(--linea-firme);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--tinta-tenue);
 }
 
 .xml__resumen--ok {
-  border-left-color: #2f7a3e;
+  border-left-color: var(--marcador-firme);
 }
 
 .xml__resumen--aviso {
-  border-left-color: var(--marcador-borde);
+  border-left-color: var(--marcador-firme);
 }
 
 .xml__resumen--error {
-  border-left-color: #a8321f;
+  border-left-color: var(--rojo);
 }
 
 .xml__error {
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  margin: 2rem 0 0;
-  padding: 0.7rem 0.9rem;
-  border-left: 3px solid #a8321f;
-  background: var(--papel-hondo);
-  max-width: none;
+  margin: 20px 0;
+  background: var(--rojo-tenue);
+  border: 1px solid var(--rojo-borde);
+  border-left: 3px solid var(--rojo);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 14px 18px;
+  font-size: 14.5px;
+  color: var(--rojo);
 }
 
+#salida-xml .campo {
+  margin: 0 0 8px;
+}
+
+/* El script crea la tabla suelta, sin envoltura donde recortar las esquinas: el
+   recorte lo hace la propia tabla, que para eso separa los bordes. */
 .xml__tabla {
   width: 100%;
-  border-collapse: collapse;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  margin-block: 1rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  font-size: 14px;
 }
 
 .xml__tabla th,
 .xml__tabla td {
+  padding: 12px 16px;
   text-align: left;
-  padding: 0.45rem 0.9rem 0.45rem 0;
-  border-bottom: 1px solid var(--linea);
   vertical-align: top;
+  border-bottom: 1px solid var(--linea);
+}
+
+.xml__tabla tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .xml__tabla th {
+  background: var(--papel-hondo);
+  font-family: var(--mono);
+  font-size: 11px;
   font-weight: 400;
-  font-size: 0.75rem;
-  text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--tinta-fantasma);
-  border-bottom-color: var(--linea-firme);
+  text-transform: uppercase;
+  color: var(--tinta-rotulo);
 }
 
+/* La clase la pone el script solo cuando el ítem trae cbar, que es el caso que la
+   convención vino a resolver: va marcado, como en la portada. */
 .xml__dato {
-  background: var(--marcador);
+  background: var(--marcador-tenue);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
 }
 
 .xml__perfil {
-  color: var(--tinta-tenue);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-fantasma);
 }
 
+/* ── Avisos ─────────────────────────────────────────────────────────────── */
+
 .avisos {
-  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
   padding: 0;
-  margin: 1rem 0 0;
+  list-style: none;
 }
 
 .avisos li {
+  max-width: none;
+  margin: 0;
   display: grid;
-  grid-template-columns: 5.5rem 1fr auto;
-  gap: 0.5rem 1rem;
-  align-items: baseline;
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--linea);
-  font-size: 0.9375rem;
+  grid-template-columns: 90px 1fr auto;
+  align-items: start;
+  gap: 14px;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
 }
 
 .aviso__grado {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.15rem 0.4rem;
   justify-self: start;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .aviso--error .aviso__grado {
-  background: #f4d9d3;
-  color: #7d2517;
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
 }
 
 .aviso--aviso .aviso__grado {
-  background: var(--marcador);
-  color: #6b5510;
+  background: var(--marcador-tenue);
+  color: var(--verde-rotulo);
 }
 
 .aviso--nota .aviso__grado {
-  background: var(--papel-hondo);
+  background: var(--linea-tenue);
   color: var(--tinta-tenue);
 }
 
 .aviso__texto {
-  color: var(--tinta);
-  text-wrap: pretty;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
 }
 
 .aviso__ref {
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--tinta-fantasma);
   white-space: nowrap;
 }
 
+/* Los tres grados, enunciados una vez al pie de la revisión. */
+.grados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grados li {
+  max-width: none;
+  margin: 0;
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.grados li::marker {
+  content: none;
+}
+
+.grados__pastilla {
+  display: inline-flex;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.grados--error {
+  background: var(--rojo-tenue);
+  border: 1px solid var(--rojo-borde);
+}
+
+.grados--error .grados__pastilla {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.grados--aviso {
+  background: #fafdf3;
+  border: 1px solid var(--marcador-borde);
+}
+
+.grados--aviso .grados__pastilla {
+  background: var(--marcador-tenue);
+  color: var(--verde-rotulo);
+}
+
+.grados--nota {
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+}
+
+.grados--nota .grados__pastilla {
+  background: var(--linea-tenue);
+  color: var(--tinta-tenue);
+}
+
+/* ── Móvil ──────────────────────────────────────────────────────────────── */
+
 @media (max-width: 700px) {
+  .barra__fila {
+    padding: 12px 20px;
+  }
+
+  .barra__nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .envoltura {
+    padding-inline: 20px;
+  }
+
+  .portada {
+    padding: 48px 0 44px;
+  }
+
+  .cabecera {
+    padding: 40px 0 32px;
+  }
+
+  .campo__panel {
+    padding: 22px 20px 24px;
+  }
+
+  .campo__nota {
+    padding: 16px 20px;
+  }
+
+  .prosa {
+    padding-block: 36px 56px;
+  }
+
+  .prosa h2 {
+    margin-top: 44px;
+    font-size: 23px;
+  }
+
+  /* La tabla de tres columnas se apila: cada celda lleva su rótulo delante. */
+  .datos--tres thead {
+    display: none;
+  }
+
+  .datos--tres tr {
+    display: block;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .datos--tres tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .datos--tres th,
+  .datos--tres td {
+    display: block;
+    width: auto;
+    border-bottom: 0;
+    padding: 8px 16px;
+  }
+
+  .datos--tres tbody th {
+    padding-top: 16px;
+  }
+
+  .datos--tres td:last-child {
+    padding-bottom: 16px;
+  }
+
+  .datos--tres td::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-fantasma);
+  }
+
   .avisos li {
     grid-template-columns: 1fr;
-    gap: 0.35rem;
+    gap: 8px;
   }
 
   .aviso__ref {
-    justify-self: start;
+    white-space: normal;
+  }
+
+  .vecinas__enlace--sig {
+    text-align: left;
+    grid-column: auto;
+  }
+
+  .zona {
+    padding: 32px 20px;
   }
 }

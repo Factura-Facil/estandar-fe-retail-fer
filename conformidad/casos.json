@@ -1,6 +1,6 @@
 {
-  "$comment": "Casos de conformidad FER 1.1.0. Una implementación es conforme si para cada caso produce 'esperado'. 'perfil' indica qué ruta de lectura debe activarse: 'fer' o 'heredado'. Los casos con 'normativo': false ejercitan las notas de implementación de §5.3, sobre las que la propuesta de estándar no se pronuncia: quedan fuera del criterio de conformidad y una implementación puede resolverlos de otro modo.",
-  "version_spec": "1.1.0",
+  "$comment": "Casos de conformidad FER 1.1.1. Una implementación es conforme si para cada caso produce 'esperado'. 'perfil' indica qué ruta de lectura debe activarse: 'fer' o 'heredado'. Los casos con 'normativo': false ejercitan las notas de implementación de §5.3, sobre las que la propuesta de estándar no se pronuncia: quedan fuera del criterio de conformidad y una implementación puede resolverlos de otro modo.",
+  "version_spec": "1.1.1",
   "casos": [
     {
       "id": "doc-01",

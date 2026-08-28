@@ -1,4 +1,6 @@
-# 0002 — Descartar `dNroPed` para la orden de compra
+# 0002 — Descartar `dNroPed` para la Orden de Compra
+
+*Por qué el campo oficial de número de pedido no admite la Orden de Compra real.*
 
 **Estado:** aceptada
 **Fecha:** 2026-02
@@ -10,13 +12,13 @@ La Ficha Técnica define campos dedicados para el número de pedido. Son la opci
 cualquiera consideraría primero, y hay que documentar por qué no sirven antes de
 proponer un campo de texto libre.
 
-Un número de orden de compra de SAP tiene típicamente 10 dígitos, por ejemplo
+Una Orden de Compra de SAP tiene típicamente 10 dígitos, por ejemplo
 `4500000001`, y en la práctica del retail panameño viaja acompañado de una referencia
 de negocio legible que identifica a la cadena o el centro de recepción.
 
 ## Decisión
 
-No se usan `dNroPed` ni sus nodos asociados. La orden de compra se transporta en
+No se usan `dNroPed` ni sus nodos asociados. La Orden de Compra se transporta en
 `dInfEmFE` (B29) mediante las claves `oc` y `ref`.
 
 ## Fundamento
@@ -33,16 +35,17 @@ Tres problemas distintos, y basta uno para descartar la vía:
 2. **Nodos condicionalmente obligatorios.** Abrir el grupo contenedor obliga a poblar
    campos adicionales. Cada nodo obligatorio extra es un punto de falla más en el
    mapeo desde el formato de salida del ERP y más superficie de prueba.
-3. **Modelado incorrecto.** La orden de compra es un atributo de cabecera.
+3. **Modelado incorrecto.** La Orden de Compra es un atributo de cabecera.
    Replicarla en cada línea es redundante, infla el documento y, dado que el campo
    por ítem no admite el número real, es inviable además de conceptualmente errado.
 
 ## Consecuencias
 
-La orden de compra queda en un campo de texto, con las implicaciones de
-[0001](0001-sede-del-dato-dinfemfe.md). En cambio, se separa el número limpio (`oc`,
-consumible directamente por el three-way match) de la referencia legible (`ref`), algo
-que el campo dedicado no permitía ni siquiera cuando el dato cabía.
+La Orden de Compra queda en un campo de texto, con las implicaciones de
+[0001](0001-sede-del-dato-dinfemfe.md). En cambio, se separa el número limpio (`oc`),
+consumible directamente por el three-way match —la conciliación entre pedido, recepción
+y factura—, de la referencia legible (`ref`), algo que el campo dedicado no permitía ni
+siquiera cuando el dato cabía.
 
 ## Alternativas consideradas
 

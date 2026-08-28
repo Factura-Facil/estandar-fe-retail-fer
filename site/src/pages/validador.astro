@@ -1,18 +1,28 @@
 ---
 import Base from "../layouts/Base.astro";
-const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+import Icono from "../components/Icono.astro";
 const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
 ---
 
 <Base
-  titulo="Validador — FER 1.1.0"
-  descripcion="Revisa el contenido de un campo dInfEmFE o un XML completo, y mira exactamente qué extrae un receptor conforme a FER 1.1.0."
+  titulo="Validador — FER 1.1.1"
+  descripcion="Comprueba cómo un receptor extrae la Orden de Compra y el Código de Barras de cualquier factura electrónica conforme a FER 1.1.1. Funciona en el navegador, sin subir archivos."
 >
-  <div class="envoltura prosa tool">
-    <p class="rotulo">Herramienta</p>
-    <h1>Qué lee un receptor</h1>
-    <p>Corre completo en tu navegador. Ni el campo ni el archivo salen de tu máquina.</p>
+  <section class="cabecera cabecera--tool">
+    <div class="envoltura envoltura--prosa">
+      <p class="rotulo">Herramienta</p>
+      <h1>Comprueba qué extrae un receptor FER</h1>
+      <p class="cabecera__bajada">
+        Pega el contenido del campo de notas de tu factura o sube el XML completo. La
+        herramienta muestra exactamente lo que extraería un receptor conforme a FER.
+      </p>
+      <p class="cabecera__nota">
+        Corre completo en tu navegador. Ni el campo ni el archivo salen de tu máquina.
+      </p>
+    </div>
+  </section>
 
+  <div class="envoltura envoltura--prosa prosa tool">
     <div class="modos" role="tablist" aria-label="Modo de revisión">
       <button type="button" class="modo" data-modo="campo" role="tab" aria-selected="true">
         Un campo
@@ -22,8 +32,16 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
       </button>
     </div>
 
+    {/* La garantía de privacidad se repite aquí, al lado del input, y no solo arriba:
+        es donde el usuario decide si pega datos de una factura real. */}
+    <p class="tool__privado">
+      <Icono nombre="escudo" tamano={13} /> Los datos no salen de tu navegador
+    </p>
+
     <section id="panel-campo">
-      <label class="pie__mono" for="entrada">Contenido del campo dInfEmFE</label>
+      <label class="tool__rotulo" for="entrada"
+        >Campo de notas de la factura (<code>dInfEmFE</code>)</label
+      >
       <textarea
         id="entrada"
         class="tool__campo"
@@ -36,27 +54,36 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
       <div class="tool__fila">
         <div class="tool__radios" role="radiogroup" aria-label="Nivel del campo">
           <label
-            ><input type="radio" name="nivel" value="documento" checked /> documento · B29</label
+            ><input type="radio" name="nivel" value="documento" checked /> Cabecera del
+            documento (B29)</label
           >
-          <label><input type="radio" name="nivel" value="item" /> ítem · C19</label>
+          <label
+            ><input type="radio" name="nivel" value="item" /> Línea de producto / ítem
+            (C19)</label
+          >
         </div>
       </div>
 
+      {/* El rótulo de esta fila lo pone el script junto a los botones: si el JS no
+          corre no quedan ni los ejemplos ni un título huérfano anunciándolos. */}
       <div class="tool__ejemplos" id="ejemplos"></div>
 
       <div class="tool__salida">
         <p class="tool__perfil" id="perfil"></p>
         <div class="campo">
-          <p class="campo__etiqueta">lectura</p>
+          <p class="campo__etiqueta">el campo tal como llega</p>
           <p class="campo__cadena" id="marcado"></p>
+          <p class="campo__paso">Lo que extrae el receptor</p>
           <dl class="campo__lectura" id="extraido"></dl>
         </div>
         <p class="campo__nota" id="nota"></p>
+        <p class="tool__sigue" id="sigue"></p>
       </div>
     </section>
 
     <section id="panel-xml" hidden>
       <div class="zona" id="zona">
+        <Icono nombre="subida" tamano={30} />
         <p class="zona__texto">
           Arrastra un XML aquí, o
           <label class="zona__boton">
@@ -64,7 +91,7 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
             <input type="file" id="archivo" accept=".xml,text/xml,application/xml" />
           </label>
         </p>
-        <p class="pie__mono">
+        <p class="zona__nota">
           Si no tienes uno a mano, hay un
           <a href={`${repo}/blob/main/conformidad/xml/ejemplo-completo.xml`}
             >ejemplo en el repositorio</a
@@ -77,20 +104,46 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
 
     <h2>Cómo funciona</h2>
     <p>
-      Esta página importa el mismo archivo que está en el repositorio, <code
-        >referencia/javascript/fer.js</code
-      >, sin modificarlo. Si el validador y la especificación discrepan, la
-      especificación manda y es un defecto de la implementación: <a href={`${repo}/issues`}
-        >abre un issue</a
-      >.
+      Usa la misma implementación de referencia publicada en el repositorio, sin
+      modificaciones. Lo que ves aquí es lo que haría un receptor que la copie tal cual.
     </p>
+    <details class="detalle">
+      <summary>Detalle técnico</summary>
+      <p>
+        La página importa <code>referencia/javascript/fer.js</code> del repositorio, sin
+        tocarlo. Si el validador y la especificación discrepan, la especificación manda y
+        es un defecto de la implementación: <a href={`${repo}/issues`}>abre un issue</a>.
+      </p>
+      <p>
+        Al revisar un XML se recorre el documento buscando los campos <code>dInfEmFE</code
+        > por nombre local, así que funciona con o sin declaración de namespace y sin
+        depender de la posición exacta de los nodos.
+      </p>
+    </details>
     <p>
-      Al revisar un XML se recorre el documento buscando los campos <code>dInfEmFE</code
-      > por nombre local, así que funciona con o sin declaración de namespace y sin
-      depender de la posición exacta de los nodos. Además de la lectura se revisan las
-      recomendaciones de emisión de §4.3 y §4.4, que los casos de conformidad no pueden
-      ejercitar porque dependen de cómo se escribe el campo y no de cómo se lee.
+      Al subir un XML completo, además de la lectura se revisa <em>cómo está escrito</em> el
+      campo: lo que los casos de conformidad no pueden ejercitar, porque depende de la
+      emisión y no de la lectura. El informe clasifica cada hallazgo en tres grados:
     </p>
+    <ul class="grados">
+      <li class="grados--error">
+        <span class="grados__pastilla">error</span>
+        un defecto de emisión que hace que el dato no llegue o llegue ambiguo: un bloque que
+        abre y no cierra, una clave duplicada, un <code>oc</code> con más de una Orden de Compra,
+        o un campo que pasa los 5.000 caracteres de la Ficha Técnica.
+      </li>
+      <li class="grados--aviso">
+        <span class="grados__pastilla">aviso</span>
+        una recomendación de §4.3 o §4.4 sin cumplir: el bloque no está al inicio del campo,
+        o pasa de 512 caracteres. El documento se lee igual, pero queda expuesto al recorte
+        silencioso que describe §4.4.
+      </li>
+      <li class="grados--nota">
+        <span class="grados__pastilla">nota</span>
+        información, no defecto: claves fuera del registro, que un receptor conforme ignora,
+        o campos que se leen con el perfil heredado.
+      </li>
+    </ul>
   </div>
 </Base>
 
@@ -109,12 +162,15 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
     ["mayúsculas", "documento", "#FER1# OC=4500000001 #FER1#"],
     ["versión superior", "documento", "#FER2# oc=4500000001 | ccosto=1200 #FER2#"],
     ["perfil heredado", "documento", "Orden de compra: 4500000001 TIENDA RETAIL X"],
-    ["código de barra", "item", "Producto refrigerado. #FER1# cbar=7600000000001 #FER1#"],
+    ["código de barras", "item", "Producto refrigerado. #FER1# cbar=7600000000001 #FER1#"],
     ["peso variable", "item", "#FER1# cbar=2000123456789 #FER1#"],
     ["heredado en ítem", "item", "7600000000001"],
   ];
 
   const BLOQUE = /#FER(\d)#([\s\S]*?)#FER\1#/;
+
+  const REPO = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
+  const SPEC = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
 
   const $ = (id: string) => document.getElementById(id)!;
   function el(tag: string, clase?: string, texto?: string) {
@@ -122,6 +178,12 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
     if (clase) n.className = clase;
     if (texto !== undefined) n.textContent = texto;
     return n;
+  }
+  function enlace(href: string, texto: string) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = texto;
+    return a;
   }
 
   for (const b of document.querySelectorAll<HTMLButtonElement>(".modo")) {
@@ -159,8 +221,66 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
     if (despues) destino.append(el("span", "campo__libre", despues));
   }
 
+  /**
+   * Un campo sin bloque no es un error del usuario: es el perfil heredado de §7, que la
+   * convención reconoce. El mensaje lo dice con esas palabras para que nadie lea una
+   * pantalla en blanco y crea que pegó mal el contenido.
+   */
+  function pintarNota(esFer: boolean, vacio: boolean) {
+    const nota = $("nota");
+    nota.replaceChildren();
+    if (vacio) {
+      nota.append("Pega el contenido de un campo, o carga uno de los ejemplos de arriba.");
+      return;
+    }
+    if (esFer) {
+      nota.append(
+        "El receptor extrae solo lo marcado. Todo lo demás es uso libre del emisor."
+      );
+      return;
+    }
+    nota.append(
+      "No se encontró un bloque FER en este campo. No es un error: se aplicó la lectura del perfil heredado, la ruta que la convención reconoce para emisores que todavía no escriben el bloque — ",
+      enlace(`${SPEC}#7-perfil-heredado`, "ver §7"),
+      "."
+    );
+  }
+
+  /**
+   * Qué hacer con el resultado. El validador lee un campo, no audita una implementación:
+   * que una cadena se lea bien no dice nada sobre la conformidad de quien la emitió, y
+   * por eso el enlace a los casos se ofrece como el paso siguiente y no como un veredicto.
+   */
+  function pintarSigue(esFer: boolean, extrajo: boolean, vacio: boolean) {
+    const sigue = $("sigue");
+    sigue.replaceChildren();
+    if (vacio) return;
+    if (esFer && extrajo) {
+      sigue.append(
+        "Este campo se lee como define la convención. Para verificar una implementación entera, y no un campo suelto, están los ",
+        enlace(`${REPO}/blob/main/conformidad/casos.json`, "20 casos de conformidad →")
+      );
+    } else if (esFer) {
+      sigue.append(
+        "Hay bloque, pero no trae ninguna clave del registro para este nivel. ",
+        enlace(`${SPEC}#4-emisión`, "Reglas de emisión →")
+      );
+    } else if (extrajo) {
+      sigue.append(
+        "El dato llegó, pero depende de la forma del texto que lo rodea. Etiquetarlo dentro del bloque quita esa dependencia. ",
+        enlace(`${SPEC}#4-emisión`, "Reglas de emisión →")
+      );
+    } else {
+      sigue.append(
+        "No se extrajo ninguna clave del registro. Si esperabas un dato aquí, revisa cómo se escribe el bloque. ",
+        enlace(`${SPEC}#4-emisión`, "Reglas de emisión →")
+      );
+    }
+  }
+
   function actualizarCampo() {
     const valor = entrada.value;
+    const vacio = !valor.trim();
     const nivel = nivelActual();
     const r = leer(valor, nivel);
     const esFer = r.perfil === "fer";
@@ -198,12 +318,12 @@ const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
       extraido.append(el("dt", undefined, "texto libre"), el("dd", "tool__vacio", r.textoLibre));
     }
 
-    $("nota").textContent = esFer
-      ? "El receptor extrae solo lo marcado. Todo lo demás es uso libre del emisor."
-      : "No hay bloque delimitado, así que aplica la lectura del perfil heredado.";
+    pintarNota(esFer, vacio);
+    pintarSigue(esFer, presentes.length > 0, vacio);
   }
 
   const ejemplos = $("ejemplos");
+  ejemplos.append(el("span", "tool__ejemplos-rotulo", "O prueba un caso:"));
   for (const [etiqueta, nivel, cadena] of EJEMPLOS) {
     const b = document.createElement("button");
     b.type = "button";

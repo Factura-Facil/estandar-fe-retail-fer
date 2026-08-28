@@ -1,5 +1,8 @@
 # 0004 — Descartar `dInfEmPedGl` y `dInfEmPedIt`
 
+*Por qué un campo de texto con capacidad de sobra igual no sirve, si vive dentro del
+grupo equivocado.*
+
 **Estado:** aceptada
 **Fecha:** 2026-02
 **Aplica a:** FER 1.0.0

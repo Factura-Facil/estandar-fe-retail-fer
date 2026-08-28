@@ -1,5 +1,7 @@
 # 0001 — `dInfEmFE` como sede de los datos de retail
 
+*Por qué el campo de notas libre es la única sede viable para los dos datos de negocio.*
+
 **Estado:** aceptada
 **Fecha:** 2026-02
 **Aplica a:** FER 1.0.0
@@ -10,9 +12,9 @@ Las cadenas de retail de Panamá reciben Facturas Electrónicas de cientos o mil
 proveedores y necesitan dos datos de negocio para poder ingerirlas en su ERP sin
 intervención manual:
 
-- el **número de orden de compra** de la cadena, que habilita el three-way match
-  entre pedido, recepción y factura;
-- el **código de barra** de cada producto, que identifica físicamente el artículo en
+- la **Orden de Compra** de la cadena, que habilita el three-way match (la conciliación
+  entre pedido, recepción y factura);
+- el **Código de Barras** de cada producto, que identifica físicamente el artículo en
   punto de venta, bodega y logística.
 
 Ninguno de los dos tiene hoy una ubicación acordada en el XML. Cada emisor los coloca
@@ -28,8 +30,8 @@ de extensión libre equivalente al `Addenda` del CFDI mexicano.
 Los dos datos se registran en el campo `dInfEmFE` ("Información de interés del
 emisor"), usando sus dos ocurrencias:
 
-- **B29**, a nivel de documento, para la orden de compra;
-- **C19**, a nivel de ítem, para el código de barra.
+- **B29**, a nivel de documento, para la Orden de Compra;
+- **C19**, a nivel de ítem, para el Código de Barras.
 
 Ambos son alfanuméricos de hasta 5.000 caracteres con ocurrencia 0–1. El SKU
 permanece en `dCodProd`.
@@ -39,13 +41,13 @@ permanece en `dCodProd`.
 `dInfEmFE` es el único campo del esquema que reúne las cuatro propiedades necesarias
 simultáneamente:
 
-1. **Capacidad suficiente.** 5.000 caracteres admiten el número de pedido, su
-   referencia legible y espacio para claves futuras.
+1. **Capacidad suficiente.** 5.000 caracteres admiten el número de la Orden de Compra,
+   su referencia legible y espacio para claves futuras.
 2. **Tipo permisivo.** Alfanumérico, por lo que acepta códigos que no son
    estrictamente numéricos ni de longitud fija.
 3. **Cero dependencias.** Es un nodo autónomo. No pertenece a ningún grupo que, al
    abrirse, vuelva obligatorios otros campos.
-4. **Presencia en ambos niveles.** Existe tanto a nivel de documento como de ítem,
+4. **Disponibilidad en ambos niveles.** Existe tanto a nivel de documento como de ítem,
    con la misma semántica, lo que permite una sola regla de lectura para los dos
    datos.
 
@@ -80,4 +82,4 @@ migración sin romper a los implementadores.
 | Campos de interés del emisor del pedido (`dInfEmPedGl`, `dInfEmPedIt`) | Arrastran los nodos obligatorios de su grupo contenedor. Ver 0004 |
 | Gestionar ante la DGI un nodo de extensión nuevo | Fuera del alcance y del control de los participantes; plazo indeterminado |
 | Canal paralelo al XML (EDI, API, portal de proveedores) | Duplica la integración, no viaja con el documento fiscal y depende de infraestructura por cadena |
-| Reutilizar `dCodProd` para el código de barra | Destruye el SKU. Ver 0003 |
+| Reutilizar `dCodProd` para el Código de Barras | Destruye el SKU. Ver 0003 |

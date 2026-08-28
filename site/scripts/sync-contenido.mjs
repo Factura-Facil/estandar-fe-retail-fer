@@ -25,12 +25,28 @@ function sinH1(md) {
   return md.replace(/^#\s+.+$/m, "").replace(/^\s+/, "");
 }
 
+/**
+ * Cada decisión abre con una línea en cursiva que dice qué problema resuelve. En
+ * GitHub es la entradilla del documento; aquí sube al frontmatter para que el índice
+ * la use como descripción y la página la componga aparte del cuerpo.
+ */
+const ENTRADILLA = /^\*([^*][\s\S]*?)\*(?:\n|$)/;
+
+function entradilla(cuerpo) {
+  const m = cuerpo.match(ENTRADILLA);
+  return m ? m[1].replace(/\s+/g, " ").trim() : "";
+}
+
+function sinEntradilla(cuerpo) {
+  return cuerpo.replace(ENTRADILLA, "").replace(/^\s+/, "");
+}
+
 function escapar(s) {
   return s.replace(/"/g, '\\"');
 }
 
 // Especificación
-const spec = readFileSync(join(raiz, "spec", "v1.1.0.md"), "utf8");
+const spec = readFileSync(join(raiz, "spec", "v1.1.1.md"), "utf8");
 writeFileSync(
   join(destino, "spec.md"),
   `---\ntitulo: "${escapar(titulo(spec))}"\n---\n\n${sinH1(spec)}`
@@ -43,9 +59,11 @@ for (const archivo of readdirSync(dir).sort()) {
   if (!archivo.endsWith(".md") || archivo === "README.md") continue;
   const md = readFileSync(join(dir, archivo), "utf8");
   const slug = basename(archivo, ".md");
+  const cuerpo = sinH1(md);
   writeFileSync(
     join(destino, "decisiones", `${slug}.md`),
-    `---\ntitulo: "${escapar(titulo(md))}"\nslug: "${slug}"\n---\n\n${sinH1(md)}`
+    `---\ntitulo: "${escapar(titulo(md))}"\nslug: "${slug}"\n` +
+      `resumen: "${escapar(entradilla(cuerpo))}"\n---\n\n${sinEntradilla(cuerpo)}`
   );
   n++;
 }

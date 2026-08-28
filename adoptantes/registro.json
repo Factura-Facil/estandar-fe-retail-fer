@@ -8,7 +8,7 @@
       "custodio": true,
       "desde": "1.0.0",
       "roles": {
-        "receptor": "Extrae oc y ref de las facturas que procesa para sus clientes, con la implementación de referencia.",
+        "receptor": "Extrae oc y ref de las facturas que procesa para sus clientes, con la convención FER activa en su plataforma.",
         "emisor": "Escribe el bloque en dInfEmFE desde su plataforma de emisión, sin configuración por cadena."
       }
     }

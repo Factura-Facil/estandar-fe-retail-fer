@@ -1,7 +1,7 @@
 {
   "$comment": "Registro normativo de claves FER. Los cambios se incorporan por PR.",
   "version_esquema": 1,
-  "version_spec": "1.1.0",
+  "version_spec": "1.1.1",
   "centinela": "#FER1#",
   "claves": [
     {

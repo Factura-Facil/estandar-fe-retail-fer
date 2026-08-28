@@ -1,8 +1,8 @@
 """
-Implementación de referencia de FER 1.1.0.
+Implementación de referencia de FER 1.1.1.
 
 Convención de etiquetado para Facturas Electrónicas de retail (Panamá).
-Especificación: spec/v1.1.0.md
+Especificación: spec/v1.1.1.md
 
 Copyright 2026 Factura Fácil, S.A. — Apache-2.0
 Sin dependencias externas. Compatible con Python 3.8+.
@@ -15,7 +15,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 
-VERSION_SPEC = "1.1.0"
+VERSION_SPEC = "1.1.1"
 VERSION_ESQUEMA_SOPORTADA = 1
 
 CLAVES_DOCUMENTO = ("oc", "ref")
@@ -95,7 +95,7 @@ def _leer_heredado(valor: str, nivel: str) -> Lectura:
 
 def leer(valor: Optional[str], nivel: str = "documento") -> Lectura:
     """
-    Lee un campo dInfEmFE conforme a FER 1.1.0.
+    Lee un campo dInfEmFE conforme a FER 1.1.1.
 
     `valor` debe ser el contenido del nodo XML **ya des-escapado** por el parser
     (§5.1.1), no los bytes crudos del documento.
