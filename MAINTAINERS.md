@@ -13,5 +13,10 @@ Las propuestas de cambio y las dudas de implementación se tramitan como issues
 públicos en este repositorio, no por correo, para que las respuestas queden
 disponibles para el resto de los implementadores.
 
+Para quien no trabaja con GitHub —un área comercial, un contador, una cadena que está
+evaluando adoptar la convención— el canal es `soporte_fer@facturafacil.com.pa`. Si de
+ahí sale una propuesta de cambio o una ambigüedad del texto, vuelve al repositorio
+como issue por la misma razón: la respuesta le sirve a todos, no solo a quien preguntó.
+
 Consultas de interpretación normativa sobre el uso de los campos de la Ficha Técnica:
 Dirección General de Ingresos, `dgi.fe.consultas@mef.gob.pa`.

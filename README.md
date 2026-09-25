@@ -102,7 +102,8 @@ de quién procese la factura.
 La especificación se versiona con [SemVer](https://semver.org). Las claves nuevas se
 proponen mediante issue y se incorporan por PR al registro; ver
 [CONTRIBUTING.md](CONTRIBUTING.md). Las decisiones de diseño quedan registradas y no
-se reescriben.
+se reescriben. Quien no trabaja con GitHub puede escribir a
+`soporte_fer@facturafacil.com.pa`.
 
 El rol de Factura Fácil, S.A. es el de **facilitador y custodio**: mantener el
 repositorio, versionar la especificación y llevar el registro de adoptantes. La

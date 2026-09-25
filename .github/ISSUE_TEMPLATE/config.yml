@@ -5,3 +5,9 @@ contact_links:
     about: >
       Las dudas sobre la validez fiscal de un campo las responde la DGI, no los
       mantenedores de este repositorio (dgi.fe.consultas@mef.gob.pa).
+  - name: Soporte de adopción
+    url: https://factura-facil.github.io/estandar-fe-retail-fer/
+    about: >
+      Para quien no trabaja con GitHub: soporte_fer@facturafacil.com.pa. Las propuestas
+      de cambio y las dudas de implementación conviene abrirlas como issue, porque así
+      la respuesta queda pública.
