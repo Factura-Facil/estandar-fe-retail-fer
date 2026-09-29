@@ -8,3 +8,9 @@ dist/
 *.docx
 *.doc
 *.zip
+
+# Facturas reales que se dejan caer en la raiz para probarlas contra el validador.
+# Llevan RUC y razon social de clientes y este repositorio es publico; un `git add -A`
+# distraido las publicaria. Los ejemplos de la convencion viven en conformidad/xml/ y
+# no los toca esta regla.
+/*.xml

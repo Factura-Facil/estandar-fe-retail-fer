@@ -16,4 +16,8 @@ Todos los valores son ficticios.
 | `cabecera-texto-libre.xml` | Documento | B29 | Texto libre antes y después del bloque |
 | `item-bloque.xml` | Ítem | C19 | Bloque sin texto libre, SKU preservado en `dCodProd` |
 | `item-heredado.xml` | Ítem | C19 | Perfil heredado, código de barra en crudo |
-| `ejemplo-completo.xml` | Ambos | B29 y C19 | Documento con tres ítems, para probar el validador |
+| `ejemplo-completo.xml` | Ambos | B29 y C19 | Documento con tres ítems que aplica la convención de punta a punta |
+| `ejemplo-heredado.xml` | Ambos | B29 y C19 | El mismo documento antes de adoptarla: Orden de Compra en prosa y códigos sin etiquetar |
+
+Los dos últimos son el mismo documento antes y después, y están pensados para
+cargarlos en el validador uno detrás del otro.

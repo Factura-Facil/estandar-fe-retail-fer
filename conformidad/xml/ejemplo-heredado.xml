@@ -1,33 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  FER 1.1.1 — ejemplo para probar el validador.
+  FER 1.1.1 — el mismo documento de `ejemplo-completo.xml`, antes de adoptar la
+  convención.
 
   ATENCIÓN: este archivo es ficticio y está incompleto a propósito. No es una Factura
-  Electrónica válida, no está firmado y no valida contra el esquema de la DGI. Existe
-  únicamente para ejercitar la lectura de los campos dInfEmFE con una estructura
-  parecida a la real: un campo a nivel de documento y uno por ítem.
+  Electrónica válida, no está firmado y no valida contra el esquema de la DGI.
 
   Para validar un documento real, usa los ejemplos y archivos de ayuda publicados por
   la Dirección General de Ingresos junto a la Ficha Técnica vigente.
 
   Todos los valores son ficticios.
 
-  Este ejemplo muestra un documento que aplica la convención de punta a punta: todos
-  los ítems llevan su Código de Barras en bloque, que es lo que permite a un receptor
-  extraerlos sin adivinar.
-    - documento: bloque al inicio, conforme a la recomendación de §4.3.5
-    - ítem 1: bloque con código de barra EAN
-    - ítem 2: bloque con código de peso variable, precedido de texto libre
-    - ítem 3: bloque seguido de texto libre
+  Este es el patrón que aparece en la práctica, y por eso está aquí: el emisor sí
+  escribió la Orden de Compra y sí escribió los códigos de barra. Los escribió para
+  que los lea una persona.
 
-  En el validador este archivo da «Sirve» con una observación: el ítem 2 lleva texto
-  antes del bloque y §4.3.5 recomienda ponerlo al inicio. El aviso es esperado y el
-  ítem está así a propósito. Que convivan es justamente lo que el ejemplo muestra:
-  §4.3.5 es una recomendación, no un requisito, y un documento puede aplicar la
-  convención y tener todavía algo que mejorar en la emisión.
+    - documento: la Orden de Compra va en prosa, entre otros datos y separadores
+      <br/>. Un receptor no tiene forma de saber cuál de esos números es.
+    - ítems: el código va precedido de la frase «Código de barra». En el perfil
+      heredado de §7.1 el campo entero es el valor, así que lo que un receptor
+      extrae es la frase completa, no el número.
 
-  Para ver el mismo documento antes de adoptar la convención —con la Orden de Compra
-  escrita en prosa y los códigos sin etiquetar— ver `ejemplo-heredado.xml`.
+  Cargado en el validador, este documento no sirve: no viaja la Orden de Compra y
+  ninguno de los tres códigos es extraíble. `ejemplo-completo.xml` es este mismo
+  documento con los dos problemas resueltos.
 -->
 <rFE xmlns="http://dgi-fep.mef.gob.pa/wsdl/FeSimple">
   <gDGen>
@@ -44,7 +40,7 @@
     <iEntCAFE>1</iEntCAFE>
     <dEnvFE>1</dEnvFE>
     <iProGen>2</iProGen>
-    <dInfEmFE>#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1# Gracias por su compra.</dInfEmFE>
+    <dInfEmFE>Id cliente: X80116&lt;br/&gt;4500000001&lt;br/&gt;Representante de ventas: NOMBRE DE EJEMPLO&lt;br/&gt;&lt;br/&gt;Terminos: 30 dias&lt;br/&gt;</dInfEmFE>
     <gEmis>
       <gRucEmi>
         <dTipoRuc>2</dTipoRuc>
@@ -64,7 +60,7 @@
     <dDescProd>Producto de ejemplo con EAN</dDescProd>
     <dCodProd>50000001</dCodProd>
     <dCantCodInt>24.00</dCantCodInt>
-    <dInfEmFE>#FER1# cbar=7600000000001 #FER1#</dInfEmFE>
+    <dInfEmFE>Código de barra 7600000000001</dInfEmFE>
     <gPrecios>
       <dPrUnit>1.50</dPrUnit>
       <dValTotItem>36.00</dValTotItem>
@@ -76,7 +72,7 @@
     <dDescProd>Producto de peso variable</dDescProd>
     <dCodProd>50000002</dCodProd>
     <dCantCodInt>3.25</dCantCodInt>
-    <dInfEmFE>Mantener refrigerado. #FER1# cbar=2000123456789 #FER1#</dInfEmFE>
+    <dInfEmFE>Código de barra 2000123456789</dInfEmFE>
     <gPrecios>
       <dPrUnit>4.20</dPrUnit>
       <dValTotItem>13.65</dValTotItem>
@@ -85,10 +81,10 @@
 
   <gItem>
     <dSecItem>3</dSecItem>
-    <dDescProd>Producto con nota después del bloque</dDescProd>
+    <dDescProd>Producto con nota después del código</dDescProd>
     <dCodProd>50000003</dCodProd>
     <dCantCodInt>12.00</dCantCodInt>
-    <dInfEmFE>#FER1# cbar=7600000000003 #FER1# Producto controlado.</dInfEmFE>
+    <dInfEmFE>Código de barra 7600000000003. Producto controlado.</dInfEmFE>
     <gPrecios>
       <dPrUnit>2.00</dPrUnit>
       <dValTotItem>24.00</dValTotItem>

@@ -3,6 +3,115 @@
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el versionado sigue [SemVer](https://semver.org/lang/es/).
 
+## [No publicado]
+
+Cambios en el sitio y en los ejemplos. **Ninguna regla cambia:** el texto de la
+especificación, el registro de claves y los 20 casos normativos siguen iguales.
+
+### Agregado
+- La revisión de XML abre con un veredicto binario —«sirve» o «hay que corregirlo»— y
+  la razón concreta debajo. El resumen anterior encabezaba con el conteo por grado, y
+  un documento con avisos pero sin errores se leía como un sí.
+- **Cómo se corrige.** Cuando un documento no sirve, el informe muestra qué hay que
+  escribir para que sirva: el campo tal como llega, el bloque que debería llevar y
+  dónde va, con botón para copiarlo. Los ítems se agrupan por forma, así que un
+  catálogo con el mismo defecto en treinta líneas produce un paso y no treinta.
+  También nombra lo que ya está bien —`dCodProd` conserva el código del emisor, §4.2—
+  porque es justo lo que se tiende a romper al arreglar lo otro.
+
+  El bloque sugerido lleva los valores en blanco: `oc=NÚMERO`, `cbar=CÓDIGO`. Casi
+  siempre hay en el texto libre un número que encaja por su forma, y el validador lo
+  señala aparte, como candidato sin confirmar, pero nunca lo pone dentro de lo que se
+  copia. Un número que parece una Orden de Compra no es una Orden de Compra: nada en
+  el documento lo identifica como tal, y uno inventado se concilia contra el pedido de
+  otro con el aval de la herramienta. Con el Código de Barras la razón es más dura
+  —§7.1 dice que en el perfil heredado no se puede distinguir un código de una nota,
+  así que extraerlo con una expresión regular sería hacer lo que la propia convención
+  declara imposible. La suite comprueba en todos sus casos que el candidato no aparece
+  dentro del bloque y que el bloque siempre deja el hueco.
+- El informe identifica el documento revisado (número, fecha, emisor con RUC y
+  receptor) y destaca las tres cifras que deciden si un receptor puede procesarlo:
+  Orden de Compra, cobertura de Código de Barras y referencia.
+- Botón para copiar el informe en texto plano, encabezado por el veredicto, pensado
+  para enviárselo a quien emitió el documento.
+- Los ítems que no traen `dInfEmFE` aparecen en la tabla por su nombre. Antes solo se
+  contaban, y saber que faltan siete no dice cuáles revisar.
+- `conformidad/xml/ejemplo-heredado.xml`: el mismo documento de `ejemplo-completo.xml`
+  antes de adoptar la convención, con la Orden de Compra escrita en prosa y los
+  códigos precedidos de la frase «Código de barra». Es el patrón que aparece en la
+  práctica, y cargado detrás del otro muestra la diferencia sin explicarla.
+- Seis comprobaciones que faltaban en la revisión de XML, todas sobre reglas que ya
+  estaban en la especificación y que el validador no miraba:
+  - §4.2 — `dCodProd` y `cbar` con el mismo valor. El emisor reemplazó su código por
+    el de barras y el receptor se queda sin la referencia con la que devolverle una
+    incidencia sobre esa línea.
+  - §3.4 — fragmento sin `=` dentro del bloque. Es el rastro que deja un valor que
+    contiene el separador `|`: parte el valor en dos y la segunda mitad se descarta.
+  - §4.3.1 — más de un bloque en el mismo campo. El segundo cae en el texto libre de
+    §5.2.1 y su contenido no llega, aunque esté bien formado.
+  - §4.3.3 — claves fuera de minúsculas. El dato llega, porque §5.2.4 obliga al
+    receptor a normalizar, pero hay algo que corregir en origen.
+  - §6 — clave del registro puesta en el nivel que no le toca. Un receptor conforme la
+    ignora ahí, así que el emisor cree haber enviado el dato y no llegó. Antes se
+    reportaba como «clave desconocida», que no es lo que pasa.
+  - §5.2.6 — bloque que declara una versión superior del registro. Se procesa y se
+    extraen las claves conocidas; se reporta como nota y no como defecto, porque es el
+    mecanismo por el que el registro crece sin romper a los lectores anteriores.
+- `site/test/` — casos y ejecutor de la revisión de XML, 26 casos que corren con
+  `npm test` y bloquean la publicación igual que los de conformidad. No sustituyen a
+  `conformidad/casos.json`, que ejercita la implementación de referencia sobre campos
+  sueltos: estos cubren la capa que el sitio construye encima, la que recorre un
+  documento completo y decide qué se le dice a quien lo subió. Esa capa no tenía dónde
+  escribirle un caso, y por eso el defecto de la Orden de Compra que se corrige más
+  abajo sobrevivió a dos revisiones a ojo hasta que lo encontró un adoptante con una
+  factura real.
+
+### Corregido
+- Un documento cuyo campo de cabecera está en perfil heredado no producía ningún
+  hallazgo sobre la Orden de Compra: el aviso de §4.1 solo miraba si el campo existe y
+  el de §6 solo se aplicaba dentro de un bloque FER. El informe decía «sin errores ni
+  avisos» sobre documentos en los que la Orden de Compra no llega a ninguna parte.
+- La cobertura de Código de Barras contaba los ítems en perfil heredado como
+  resueltos. En ese perfil `cbar` es el campo entero, así que un ítem que dice «Código
+  de barra 7460577050229» daba un código extraído que en realidad es esa frase
+  completa. Ahora se cuentan aparte y el veredicto los trata como pendientes.
+- Los plurales del informe: «1 de 3 ítems no traen» y «1 campos se leen».
+- Contraste de los textos de apoyo. Cuatro colores de la paleta no llegaban al mínimo
+  de WCAG AA (4.5:1) y cargaban texto real: el gris más claro estaba en 2.55:1 —por
+  debajo incluso del umbral de texto grande— y pintaba los pies de las cifras y la
+  línea que identifica el documento, que es donde alguien comprueba que el informe es
+  de su propia factura. La pastilla de versión de la barra usaba el cian de marca
+  como color de texto, a 11px sobre fondo cian: 2.03:1 en todas las páginas. Los
+  valores nuevos conservan tono y saturación y se midieron sobre los fondos teñidos
+  donde se usan, no solo sobre blanco. En `/spec/`, `/validador/` y `/decisiones/`
+  pasan ahora todos los nodos de texto.
+- La cifra vacía —«no viaja»— era lo más pálido de su tarjeta justo cuando es lo que
+  hay que leer. Sigue teniendo menos peso que un valor presente, pero ya no menos
+  contraste que su propia explicación.
+
+### Cambiado
+- `conformidad/xml/ejemplo-completo.xml` aplica la convención en sus tres ítems. El
+  tercero emitía en perfil heredado para ilustrar §7; ese escenario ya está en
+  `item-heredado.xml` y ahora también, completo, en `ejemplo-heredado.xml`.
+- Al cargar un archivo, la zona de subida se sustituye por la tarjeta del archivo
+  revisado y la página se desplaza al resultado. Antes el informe nacía fuera de la
+  pantalla y la zona seguía diciendo «Arrastra un XML aquí».
+- El detalle técnico —observaciones, campo de cabecera y tabla de ítems— va plegado
+  bajo el veredicto, y las observaciones se ordenan por grado.
+- El veredicto negativo dice «hay que corregirlo» y no «no sirve», y lo acompaña una
+  flecha hacia abajo en lugar de una equis. El estado es el mismo, binario y sin
+  grados: lo que cambia es que nombra el trabajo pendiente en vez de calificar a quien
+  está al otro lado, que casi nunca llega sabiendo que su emisión tiene un defecto —
+  llega a averiguarlo. Es además el verbo del bloque que va justo debajo, y la flecha
+  apunta a él.
+
+  No dice «tiene errores», que sería lo más directo, porque «error» es en esta
+  herramienta uno de los tres grados —el defecto que hace que el dato no llegue— y el
+  documento que más veces llega al validador no tiene ninguno: le falta la Orden de
+  Compra y trae los códigos en perfil heredado, un aviso y una nota. El titular diría
+  «errores» encabezando un informe cuya lista no contiene ninguno, y ese informe se
+  reenvía al proveedor.
+
 ## [1.1.1] — 2026-08-28
 
 Revisión editorial y de navegación. **Ninguna regla cambia:** no se agregan ni se

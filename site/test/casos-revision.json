@@ -1,0 +1,331 @@
+{
+  "descripcion": "Casos de la revisión de XML del validador. No son casos de conformidad de la convención —esos están en conformidad/casos.json y ejercitan la implementación de referencia sobre un campo suelto—, sino de la capa que el sitio construye encima: qué le dice el validador a quien sube un documento completo.",
+  "comoLeerlos": "`hallazgos` es la lista COMPLETA de lo que el informe debe producir, escrita como \"grado §sección\". Completa y no parcial a propósito: una lista de mínimos deja pasar una regla que se dispara de más, y una regla que grita sobre un documento sano cuesta tanta confianza como una que calla sobre uno roto. El orden no importa; ordenarlos es asunto de la pantalla, no del dato.",
+  "plantilla": "Cada caso se monta sobre un rFE mínimo con namespace, para comprobar de paso que la búsqueda por nombre local no depende de la declaración de namespace.",
+  "receta": "`receta` es lo que el validador le dice a quien sube el documento que tiene que escribir, un paso por línea: \"clave | bloque | ×cuántos | candidato=...\". El bloque es contrato: es la cadena que alguien copia y pega en su emisión. El candidato es el número que está en el campo y encaja por su forma, y se declara aquí precisamente para dejar comprobado que NUNCA aparece dentro del bloque — esa comprobación corre además sobre todos los casos, declaren receta o no.",
+  "casos": [
+    {
+      "id": "limpio-sin-hallazgos",
+      "porque": "Un documento que aplica la convención de punta a punta no debe producir ningún hallazgo. Este caso es el que falla cuando alguna regla nueva se dispara de más.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1# Gracias por su compra.",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": [],
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X",
+        "cobertura": { "total": 1, "fer": 1, "heredado": 0, "sinCampo": 0 },
+        "receta": []
+      }
+    },
+
+    {
+      "id": "cabecera-heredada-sin-prefijo",
+      "porque": "El caso que motivó esta suite. Hay campo de cabecera y el número de la Orden de Compra está escrito ahí, pero como prosa: sin bloque y sin el prefijo de §7.1, así que no viaja. Durante dos revisiones no produjo ningún hallazgo, porque el aviso de §4.1 solo miraba si el campo existe y el de §6 solo corría dentro de un bloque. El informe decía «sin errores ni avisos» sobre un documento en el que la Orden de Compra no llegaba a ninguna parte.",
+      "documento": {
+        "cabecera": "Id cliente: X80116<br/>4500000001<br/>Terminos: 30 dias",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["aviso §4.1", "nota §7"],
+        "oc": null,
+        "receta": ["oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4500000001"]
+      }
+    },
+
+    {
+      "id": "cabecera-heredada-con-prefijo",
+      "porque": "El perfil heredado sí extrae la Orden de Compra cuando lleva el prefijo de §7.1, y lo que sigue queda como ref. No debe producir el aviso de §4.1: el dato llega. Solo queda la nota de que el perfil es transitorio.",
+      "documento": {
+        "cabecera": "Orden de compra: 4500000001 TIENDA RETAIL X",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X"
+      }
+    },
+
+    {
+      "id": "bloque-sin-oc",
+      "porque": "Hay bloque en la cabecera pero sin la clave oc. La falta para el receptor es la misma que en el caso heredado —no llega la Orden de Compra— pero la causa es otra y el aviso debe distinguirlas, porque lo que hay que corregir en el emisor es distinto.",
+      "documento": {
+        "cabecera": "#FER1# ref=TIENDA RETAIL X #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["aviso §6"],
+        "oc": null,
+        "ref": "TIENDA RETAIL X",
+        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=—"]
+      }
+    },
+
+    {
+      "id": "sin-cabecera",
+      "porque": "Sin campo de cabecera tampoco viaja la Orden de Compra. El aviso sale del nivel global, no del campo, porque no hay campo del que salga.",
+      "documento": {
+        "cabecera": null,
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["aviso §4.1"], "oc": null }
+    },
+
+    {
+      "id": "sku-reemplazado-por-cbar",
+      "porque": "§4.2: el emisor NO DEBE reemplazar dCodProd por el Código de Barras. dCodProd lleva el código del emisor y cbar la llave con la que el receptor identifica el artículo; si coinciden, el receptor se queda sin la referencia con la que devolverle una incidencia sobre esa línea al proveedor.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [{ "cod": "7600000000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §4.2"] }
+    },
+
+    {
+      "id": "valor-con-separador",
+      "porque": "§3.4 prohíbe el separador dentro de un valor. La razón se ve aquí: parte el valor en dos y la segunda mitad, sin «=», deja de ser un par y se descarta sin que nada lo diga. El emisor cree haber enviado una referencia.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | TIENDA RETAIL X #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §3.4"], "oc": "4500000001", "ref": null }
+    },
+
+    {
+      "id": "dos-bloques-en-un-campo",
+      "porque": "§4.3.1 admite un bloque por campo. El segundo cae en el texto libre de §5.2.1, así que su contenido no llega aunque esté perfectamente formado.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1# y además #FER1# ref=TIENDA RETAIL X #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §4.3.1"], "oc": "4500000001", "ref": null }
+    },
+
+    {
+      "id": "clave-en-mayusculas",
+      "porque": "Las dos reglas a la vez: §5.2.4 obliga al receptor a normalizar, así que el dato llega y no se pierde nada; §4.3.3 obliga al emisor a escribirlas en minúsculas, así que hay algo que corregir en origen. Aviso, no error.",
+      "documento": {
+        "cabecera": "#FER1# OC=4500000001 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["aviso §4.3.3"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "clave-en-nivel-equivocado",
+      "porque": "cbar es del nivel de ítem. En la cabecera un receptor conforme la ignora, así que el emisor cree haber enviado el código y no llegó. Merece decirse con su nombre y no como «clave desconocida», que es lo que parece desde el registro.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | cbar=7600000000001 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["aviso §6"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "clave-duplicada",
+      "porque": "§5.2.5 define qué valor se extrae —el primero—, así que la lectura no es ambigua y dos receptores conformes leen lo mismo. Pero el emisor está enviando dos Órdenes de Compra distintas creyendo que envía una, y la que se pierde es la segunda: §5.3.1 recomienda por eso tratar el documento como excepción.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | oc=4500000002 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §5.2.5"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "oc-con-lista",
+      "porque": "§4.3.4: un documento corresponde a una sola Orden de Compra y oc no admite listas. El receptor no tiene forma de repartir las líneas entre las dos.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001,4500000002 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §4.3.4"], "oc": "4500000001,4500000002" }
+    },
+
+    {
+      "id": "bloque-sin-cierre",
+      "porque": "§5.3.3: el centinela de cierre falta, el bloque se descarta y se cae al perfil heredado. El dato desaparece sin que el receptor produzca ningún error —§5.3.5 le prohíbe rechazar por esto—, que es exactamente el modo de falla silenciosa que motiva el límite de §4.4. Aquí deben salir las dos cosas: la causa y la consecuencia.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §5.3.3", "aviso §4.1", "nota §7"], "oc": null }
+    },
+
+    {
+      "id": "valor-vacio",
+      "porque": "§5.3.2: una clave con valor vacío se lee como ausente. Si era la única, el bloque no produce ningún par y §5.3.4 lo descarta entero: el campo termina leyéndose en perfil heredado. Un detalle tipográfico degrada el documento completo.",
+      "documento": {
+        "cabecera": "#FER1# oc= #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["aviso §5.3.2", "aviso §4.1", "nota §7"], "oc": null }
+    },
+
+    {
+      "id": "bloque-despues-del-texto",
+      "porque": "§4.3.5 recomienda el bloque al inicio. Donde está es legal y el dato llega, así que es aviso y no error: si algo recorta el campo por el límite, lo que se pierde es el centinela de cierre y el documento cae al caso anterior.",
+      "documento": {
+        "cabecera": "Gracias por su compra. #FER1# oc=4500000001 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["aviso §4.3.5"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "version-superior-del-registro",
+      "porque": "§5.2.6 y §6.1: un receptor de la versión 1 procesa un bloque #FER2#, extrae las claves que conoce e ignora las que no. No es un error ni impide la lectura —es el mecanismo por el que el registro puede crecer sin romper a nadie— y el informe no debe presentarlo como un defecto.",
+      "documento": {
+        "cabecera": "#FER2# oc=4500000001 | zz=clave futura #FER2#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["nota §5.2.6", "nota §5.2.2"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "item-sin-campo",
+      "porque": "Un ítem sin dInfEmFE no trae Código de Barras. Debe contarse aparte de los que sí traen campo: un «1 de 2» sin decir cuál no le sirve a quien tiene que ir a arreglarlo.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [
+          { "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" },
+          { "cod": "50000002", "campo": null }
+        ]
+      },
+      "espera": {
+        "hallazgos": ["aviso §4.2"],
+        "cobertura": { "total": 2, "fer": 1, "heredado": 0, "sinCampo": 1 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=—"]
+      }
+    },
+
+    {
+      "id": "item-en-perfil-heredado",
+      "porque": "En el perfil heredado cbar es el campo entero, porque §7.1 no define cómo distinguir un código de una nota. Contarlo como Código de Barras resuelto sería prometer una cobertura que el formato heredado no puede sostener: va en su propia cuenta.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "Código de barra 7600000000001" }]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "sinCampo": 0 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7600000000001"]
+      }
+    },
+
+    {
+      "id": "campo-sobre-el-limite",
+      "porque": "El campo admite 5.000 caracteres según la Ficha Técnica, y ese límite lo comparten el bloque y el texto libre. Pasarse no es un problema de la convención sino del documento: no lo va a admitir la DGI.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1# ",
+        "rellenoCabecera": 5000,
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["error §4.4"], "oc": "4500000001" }
+    },
+
+    {
+      "id": "receta-conserva-la-version-del-bloque",
+      "porque": "Quien ya emite #FER2# está por delante, no por detrás. Sugerirle #FER1# sería pedirle que retroceda de versión para arreglar una clave que falta, y además el centinela de cierre tiene que coincidir con el de apertura: una sugerencia con las versiones cruzadas produce un bloque que no cierra, que es el defecto de §5.3.3.",
+      "documento": {
+        "cabecera": "#FER2# ref=TIENDA RETAIL X #FER2#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["nota §5.2.6", "aviso §6"],
+        "oc": null,
+        "receta": ["oc | #FER2# oc=NÚMERO | ref=TIENDA RETAIL X #FER2# | ×1 | candidato=—"]
+      }
+    },
+
+    {
+      "id": "receta-no-arrastra-la-clave-duplicada",
+      "porque": "El bloque sugerido se rehace desde los pares que un receptor lee de verdad, no copiando la cadena original. Si arrastrara la segunda ocurrencia, la corrección devolvería al emisor el mismo defecto que se le acaba de señalar, escrito por la propia herramienta.",
+      "documento": {
+        "cabecera": "#FER1# ref=TIENDA RETAIL X | ref=OTRA CADENA #FER1#",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["error §5.2.5", "aviso §6"],
+        "ref": "TIENDA RETAIL X",
+        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=—"]
+      }
+    },
+
+    {
+      "id": "receta-agrupa-los-items-con-la-misma-forma",
+      "porque": "Un catálogo emitido por el mismo sistema repite el mismo defecto en todas sus líneas. Sin agrupar, un documento de treinta ítems produce treinta diferencias idénticas y la que hay que leer se pierde entre las otras veintinueve. El candidato sale del primero del grupo, que es el que se muestra.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#",
+        "items": [
+          { "cod": "50000001", "campo": "Código de barra 7600000000001" },
+          { "cod": "50000002", "campo": "Código de barra 7600000000002" },
+          { "cod": "50000003", "campo": "Código de barra 7600000000003" }
+        ]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "cobertura": { "total": 3, "fer": 0, "heredado": 3, "sinCampo": 0 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×3 | candidato=7600000000001"]
+      }
+    },
+
+    {
+      "id": "receta-separa-las-formas-distintas",
+      "porque": "Agrupar por forma no es agrupar todo lo roto en un solo paso: un ítem sin campo y un ítem con el código en prosa se arreglan de manera distinta —uno hay que crearlo, al otro anteponerle el bloque— y decirlo junto dejaría a la mitad sin instrucción. Los grupos salen del más numeroso al menos, para que el paso que arregla más líneas vaya primero.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 | ref=TIENDA RETAIL X #FER1#",
+        "items": [
+          { "cod": "50000001", "campo": "Código de barra 7600000000001" },
+          { "cod": "50000002", "campo": null },
+          { "cod": "50000003", "campo": "Código de barra 7600000000003" }
+        ]
+      },
+      "espera": {
+        "hallazgos": ["nota §7", "aviso §4.2"],
+        "cobertura": { "total": 3, "fer": 0, "heredado": 2, "sinCampo": 1 },
+        "receta": [
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×2 | candidato=7600000000001",
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=—"
+        ]
+      }
+    },
+
+    {
+      "id": "receta-no-inventa-el-numero-que-tiene-delante",
+      "porque": "El caso que da sentido a todo lo demás. El campo trae un número con forma de Orden de Compra pegado al identificador del cliente, y la tentación de ponerlo en el bloque es máxima porque casi siempre acierta. Casi. Nada en el documento dice que ese número sea la Orden de Compra: parecerlo es una inferencia de quien lee, y un oc inventado que llega a producción concilia contra el pedido de otro con el aval de esta herramienta. Se ofrece como candidato, señalado, y el bloque conserva el hueco.",
+      "documento": {
+        "cabecera": "Id cliente Sage 50: X80116<br/>4506706146<br/>Representante: J. Pérez",
+        "items": [{ "cod": "CAR-07-001-08", "campo": "Código de barra 7460577050229" }]
+      },
+      "espera": {
+        "hallazgos": ["aviso §4.1", "nota §7"],
+        "oc": null,
+        "ref": null,
+        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "sinCampo": 0 },
+        "receta": [
+          "oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4506706146",
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7460577050229"
+        ]
+      }
+    },
+
+    {
+      "id": "sin-ningun-campo-portador",
+      "porque": "Un documento sin ningún dInfEmFE no es un documento con faltas: es un documento al que no hay nada que revisarle. El informe debe decir eso y no listar avisos, que sugerirían que el emisor está a medio camino.",
+      "documento": {
+        "cabecera": null,
+        "items": [{ "cod": "50000001", "campo": null }]
+      },
+      "espera": { "ok": false }
+    },
+
+    {
+      "id": "xml-malformado",
+      "porque": "Lo que sube un usuario no siempre es XML. Debe fallar como archivo ilegible, no arrastrar una excepción hasta la pantalla.",
+      "xml": "<rFE><gDGen><dInfEmFE>#FER1# oc=4500000001 #FER1#</gDGen></rFE>",
+      "espera": { "ok": false }
+    }
+  ]
+}

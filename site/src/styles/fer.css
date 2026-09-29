@@ -21,15 +21,22 @@
   /* Azul marino de titular. Es la tinta de la marca, no un gris azulado. */
   --navy: #0e1a47;
 
-  --tinta: #1e2532;
-  --tinta-tenue: #5a6478;
-  --tinta-fantasma: #98a3b5;
+  /* Los cuatro grises de texto pasan AA (4.5:1) sobre --papel. Los dos más claros no
+     lo hacían: --tinta-fantasma estaba en 2.55:1, por debajo incluso del umbral de
+     texto grande, y cargaba los pies de las cifras y la línea de identificación del
+     documento, que es donde alguien comprueba que el informe es de su propia factura.
+     --tinta-rotulo estaba en 3.63:1 a 11px en versales, que es el tamaño que más
+     contraste necesita, no menos. Al corregirlos los cuatro tramos quedan juntos: la
+     jerarquía la llevan el tamaño, el peso y la familia, no la palidez. */
+  --tinta: #1e2532; /* 15.37:1 */
+  --tinta-tenue: #5a6478; /* 5.95:1 */
+  --tinta-fantasma: #65738c; /* 4.56:1 incluso sobre --papel-hondo; antes #98a3b5, 2.55:1 */
   /* Rótulos de micrográfica: encabezados de tabla, pastillas, perfil. */
-  --tinta-rotulo: #7d8798;
+  --tinta-rotulo: #616b7b; /* 5.41:1 — antes #7d8798, 3.63:1 */
 
   /* Cian de marca. Ver la nota de contraste arriba. */
   --cian: #25baf0;
-  --cian-texto: #1279b8;
+  --cian-texto: #1174b0; /* 4.62:1 sobre --cian-tenue; antes #1279b8, 4.27:1 */
   --cian-tenue: #e8f6fd;
   --cian-papel: #f4fbfe;
 
@@ -38,8 +45,8 @@
   --marcador-tenue: #edf6dc;
   --marcador-borde: #dcebc2;
   --marcador-firme: #a3bf40;
-  --verde-texto: #6d8a25;
-  --verde-rotulo: #5f7a1f;
+  --verde-texto: #5e7720; /* 4.56:1 sobre --marcador-tenue; antes #6d8a25, 3.95:1 */
+  --verde-rotulo: #5d771e; /* 4.56:1 sobre --marcador-tenue; antes #5f7a1f, 4.39:1 */
   --verde-hondo: #4f6a18;
   --verde-icono: #7d9c2c;
 
@@ -188,7 +195,9 @@ body {
   font-family: var(--mono);
   font-size: 11px;
   line-height: 1;
-  color: var(--cian);
+  /* --cian es el cian de marca y no se sostiene como texto: a 11px sobre
+     --cian-tenue daba 2.03:1. Para eso existe --cian-texto. */
+  color: var(--cian-texto);
   background: var(--cian-tenue);
   border-radius: 999px;
   padding: 4px 7px;
@@ -1798,8 +1807,11 @@ a:hover {
 .prosa .campo__nota,
 .prosa .zona__texto,
 .prosa .zona__nota,
-.prosa .xml__resumen,
 .prosa .xml__error,
+.prosa .xml__leyendo,
+.prosa .xml__discrepa,
+.prosa .cargado__nombre,
+.prosa .cargado__meta,
 #salida-xml > p {
   max-width: none;
 }
@@ -2171,28 +2183,437 @@ a:hover {
 
 /* ── Revisión de XML ────────────────────────────────────────────────────── */
 
-.xml__resumen {
-  margin: 28px 0 20px;
+/* El resultado empieza aquí: al soltar un archivo la página desplaza hasta este
+   punto, y el margen evita que la barra fija se coma la tarjeta. */
+#cargado {
+  scroll-margin-top: 92px;
+}
+
+.cargado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 0;
   background: var(--papel-hondo);
-  border-left: 3px solid var(--linea-firme);
-  border-radius: 0 var(--r-md) var(--r-md) 0;
-  padding: 14px 18px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 16px 20px;
+}
+
+.cargado__nombre {
+  margin: 0;
   font-family: var(--mono);
+  font-size: 14px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.cargado__meta {
+  margin: 3px 0 0;
   font-size: 13px;
-  line-height: 1.7;
+  color: var(--tinta-fantasma);
+}
+
+.cargado__otro {
+  flex: none;
+  background: var(--papel);
+  border: 1px solid var(--linea-firme);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.cargado__otro:hover {
+  border-color: var(--cian);
+  color: var(--cian-texto);
+}
+
+.xml__leyendo {
+  margin: 24px 0;
+  font-size: 14.5px;
+  color: var(--tinta-fantasma);
+}
+
+/* ── Veredicto ──────────────────────────────────────────────────────────── */
+
+/* Dos estados y nada más. Un veredicto graduado se lee como un sí a la primera
+   pasada, que es justo lo que no puede pasar cuando de aquí sale la respuesta a
+   un proveedor. Deliberadamente no dice «documento conforme»: esto lee un
+   archivo, no audita al emisor, y por eso el titular habla del dato («sirve»),
+   no del estándar. */
+.veredicto {
+  margin: 28px 0 0;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-2xl);
+  padding: 26px 28px;
+}
+
+.veredicto--si {
+  background: var(--marcador-tenue);
+  border-color: var(--marcador-borde);
+}
+
+.veredicto--no {
+  background: var(--rojo-tenue);
+  border-color: var(--rojo-borde);
+}
+
+.veredicto__titular {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: none;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.veredicto--si .veredicto__titular {
+  color: var(--verde-hondo);
+}
+
+.veredicto--no .veredicto__titular {
+  color: var(--rojo);
+}
+
+.veredicto__marca {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  padding: 5px;
+}
+
+.veredicto--si .veredicto__marca {
+  background: var(--marcador);
+  color: var(--verde-hondo);
+}
+
+.veredicto--no .veredicto__marca {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.veredicto__porque {
+  max-width: 62ch;
+  margin: 14px 0 0;
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--tinta);
+}
+
+.veredicto__alcance {
+  max-width: 62ch;
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--tinta-fantasma);
+}
+
+/* ── Ficha y cifras del documento ───────────────────────────────────────── */
+
+/* Para reconocer la propia factura de un vistazo. Son campos de la Ficha
+   Técnica, no de la convención: por eso van en gris de apoyo, en una línea, y su
+   ausencia no marca nada. */
+.ficha {
+  max-width: none;
+  margin: 12px 0 0;
+  padding: 0 4px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--tinta-fantasma);
+}
+
+/* Dos líneas: arriba qué documento es, abajo entre quiénes va. Bloque en el span y
+   no un <br>, para que cada una tenga su propia caja y el nombre largo de un
+   receptor envuelva dentro de la suya sin empujar a la de arriba. */
+.ficha__linea {
+  display: block;
+}
+
+/* Las tres cifras que decide leer una cadena antes de abrir el detalle. */
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin: 20px 0 4px;
+}
+
+.cifra {
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 18px 20px;
+}
+
+.cifra__rotulo {
+  margin: 0;
+  font-family: var(--mono);
+  /* 10.5px en versales con letter-spacing es el texto más difícil de leer de la
+     página; el medio punto que se gana aquí cuesta menos que el rótulo ilegible. */
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-rotulo);
+}
+
+.cifra__dato {
+  max-width: none;
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+/* «no viaja» es la respuesta de la tarjeta, no una ausencia de respuesta: era lo más
+   pálido que había en ella justo cuando es lo que hay que leer. Va más pequeño que un
+   valor presente —el dato tiene más peso que su falta— pero no más tenue. */
+.cifra__dato--vacio {
+  font-size: 17px;
   color: var(--tinta-tenue);
 }
 
-.xml__resumen--ok {
-  border-left-color: var(--marcador-firme);
+.cifra__pie {
+  max-width: none;
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--tinta-fantasma);
 }
 
-.xml__resumen--aviso {
-  border-left-color: var(--marcador-firme);
+/* ── Cómo se corrige ────────────────────────────────────────────────────── */
+
+/* Aparece solo cuando el veredicto es «hay que corregirlo»: es la respuesta a la
+   pregunta que trae a alguien al validador —qué escribo para que esto funcione— y
+   por eso va abierta y no plegada, al revés que el detalle. Papel blanco y filete
+   cian: el rojo de arriba dice el problema, esto dice la salida, y repetir el rojo
+   la haría leerse como más de lo mismo. */
+.receta {
+  margin: 22px 0 0;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--cian);
+  border-radius: 0 var(--r-xl) var(--r-xl) 0;
+  padding: 22px 24px;
 }
 
-.xml__resumen--error {
-  border-left-color: var(--rojo);
+.receta__titulo {
+  max-width: none;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.receta__intro {
+  max-width: 62ch;
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.receta__paso {
+  margin: 18px 0 0;
+  border-top: 1px solid var(--linea-tenue);
+  padding-top: 18px;
+}
+
+.receta__paso-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  max-width: none;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.receta__cuantos {
+  border-radius: 999px;
+  background: var(--linea-tenue);
+  padding: 3px 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--tinta-rotulo);
+}
+
+.receta__ref {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tinta-fantasma);
+}
+
+/* Las dos filas comparten el ancho del rótulo a propósito: la diferencia entre lo
+   que hay y lo que debería haber solo se ve con una línea encima de la otra. */
+.receta__diff {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: 14px 0 0;
+}
+
+.receta__diff dt {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-rotulo);
+}
+
+.receta__diff dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.receta__ahora {
+  color: var(--tinta-tenue);
+}
+
+.receta__ahora--nada {
+  font-family: var(--sans);
+  font-style: italic;
+}
+
+/* Lo que el receptor leería: mismo verde con que se marca lo extraído en el resto
+   del sitio, porque es exactamente eso. */
+.receta__deberia {
+  background: var(--marcador-tenue);
+  border: 1px solid var(--marcador-borde);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  color: var(--tinta);
+}
+
+/* El hueco que rellena quien emite. Va en rojo dentro del verde porque es lo único
+   de esta caja que no se puede pegar tal cual: si alguien copia sin leer, lo que
+   quede en su factura tiene que cantar a la vista. */
+.receta__hueco {
+  background: var(--rojo-pastilla);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 600;
+  color: var(--rojo);
+}
+
+.receta__donde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: none;
+  /* 62 + 14: alineado con la columna del bloque, no con el rótulo. */
+  margin: 10px 0 0 76px;
+  font-size: 13px;
+  color: var(--tinta-fantasma);
+}
+
+.receta__copiar {
+  background: var(--papel);
+  border: 1px solid var(--linea-firme);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--tinta);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.receta__copiar:hover {
+  border-color: var(--cian);
+  color: var(--cian-texto);
+}
+
+/* El número que está en el campo y encaja por su forma. Fuera del bloque y en gris
+   de apoyo: dentro parecería un dato del documento, que es justo lo que no es. */
+.receta__candidato,
+.receta__nota {
+  max-width: 62ch;
+  margin: 10px 0 0 76px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.receta__candidato b {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.receta__resto {
+  max-width: none;
+  margin: 18px 0 0;
+  border-top: 1px solid var(--linea-tenue);
+  padding-top: 16px;
+  font-size: 14px;
+  color: var(--tinta-tenue);
+}
+
+.receta__aparte {
+  max-width: none;
+  margin: 22px 0 0;
+  border-top: 1px solid var(--linea-tenue);
+  padding-top: 18px;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.receta .avisos {
+  margin: 12px 0 0;
+}
+
+/* En pantalla estrecha el rótulo pasa a ir encima: con 62px fijos el bloque queda
+   en una columna donde no cabe ni «#FER1# oc=NÚMERO #FER1#» sin romperse. */
+@media (max-width: 620px) {
+  .receta {
+    padding: 18px 16px;
+  }
+
+  .receta__diff {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .receta__diff dt {
+    margin-top: 6px;
+  }
+
+  .receta__donde,
+  .receta__candidato,
+  .receta__nota {
+    margin-left: 0;
+  }
+
+  .receta__ref {
+    margin-left: 0;
+  }
 }
 
 .xml__error {
@@ -2257,6 +2678,107 @@ a:hover {
 .xml__perfil {
   font-family: var(--mono);
   font-size: 12px;
+  color: var(--tinta-fantasma);
+}
+
+.xml__desc {
+  color: var(--tinta);
+}
+
+/* Los ítems sin dInfEmFE se listan igual que los demás: un «faltan siete» no dice
+   cuáles revisar. Van atenuados porque no hay nada que leer en ellos. */
+.xml__fila--sin td {
+  background: var(--papel-hondo);
+  color: var(--tinta-fantasma);
+}
+
+.xml__discrepa {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--rojo);
+}
+
+/* ── Detalle plegado ────────────────────────────────────────────────────── */
+
+/* El sustento del veredicto: sirve para discutir con quien emitió el documento,
+   no para decidir. Abierto de entrada competiría con la única línea que hay que
+   leer primero. */
+.informe__detalle {
+  margin: 28px 0 0;
+  border-top: 1px solid var(--linea);
+  padding-top: 4px;
+}
+
+.informe__abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  padding: 14px 2px;
+  font-size: 14.5px;
+  color: var(--cian-texto);
+  cursor: pointer;
+  list-style: none;
+}
+
+.informe__abrir::-webkit-details-marker {
+  display: none;
+}
+
+.informe__abrir::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s;
+}
+
+.informe__detalle[open] > .informe__abrir::before {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.informe__abrir:hover {
+  color: var(--navy);
+}
+
+.informe__detalle > h3:first-of-type {
+  margin-top: 8px;
+}
+
+/* ── Llevarse el informe ────────────────────────────────────────────────── */
+
+.informe__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 28px 0 0;
+  border-top: 1px solid var(--linea);
+  padding-top: 20px;
+}
+
+.informe__copiar {
+  background: var(--papel);
+  border: 1px solid var(--linea-firme);
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--tinta);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.informe__copiar:hover {
+  border-color: var(--cian);
+  color: var(--cian-texto);
+}
+
+.informe__pie-nota {
+  font-size: 13px;
   color: var(--tinta-fantasma);
 }
 

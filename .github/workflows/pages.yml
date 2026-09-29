@@ -42,6 +42,13 @@ jobs:
       - name: Verificar conformidad antes de publicar
         run: node referencia/javascript/test-conformidad.mjs
 
+      # El validador es lo que un adoptante usa para decidir si su emisión sirve, así
+      # que un hueco suyo se propaga a documentos reales. Se verifica antes de publicar
+      # por la misma razón que la conformidad.
+      - name: Verificar la revisión del validador antes de publicar
+        working-directory: site
+        run: npm test
+
       - name: Construir
         working-directory: site
         run: npm run build

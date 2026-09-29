@@ -6,9 +6,13 @@
     "sync": "node scripts/sync-contenido.mjs",
     "dev": "npm run sync && astro dev",
     "build": "npm run sync && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "npm run sync && node test/test-revision.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2"
+  },
+  "devDependencies": {
+    "@xmldom/xmldom": "^0.9.12"
   }
 }
