@@ -26,6 +26,30 @@ const REGISTRO = {
 const NIVEL_DE = { oc: "documento", ref: "documento", cbar: "item" };
 
 /**
+ * Cuándo un ítem en perfil heredado cuenta como Código de Barras: el campo entero son
+ * dígitos, ocho o más. Es un criterio de esta herramienta y no de la convención —§7.1
+ * no define ninguno, y dice por qué: el formato heredado no permite distinguir un
+ * código de una nota—, así que se elige por el lado de no dar un falso sí.
+ *
+ * Ocho dígitos es el GTIN más corto (EAN-8), y los códigos de peso variable también
+ * son solo dígitos. Quedan fuera los falsos positivos que la propia §7.1 pone de
+ * ejemplo —ROJO, FRAGIL, LOTE2, 2024— y también, es el precio, un código local con
+ * letras aunque sea correcto: para ese está el bloque.
+ *
+ * Sin esto, un proveedor que ya emite el formato heredado limpio —el código solo en el
+ * campo, como en el ejemplo de §7— recibía «hay que corregirlo» sobre un documento que
+ * la convención obliga al receptor a leer. §7.1 dice que emisores migrados y no
+ * migrados conviven sin cambios en la ingesta; la herramienta no puede ser más
+ * estricta que eso.
+ */
+export function esCodigoHeredado(valor) {
+  return /^\d{8,}$/.test(valor ?? "");
+}
+
+/** Para citar un valor largo dentro de un aviso sin arrastrar el campo entero. */
+const citar = (s, n = 60) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
+
+/**
  * Todos los descendientes cuyo nombre local coincida, ignorando el namespace y
  * **en orden de documento**, que es el orden en que el emisor escribió los ítems.
  *
@@ -266,8 +290,9 @@ function revisarCampo(valor, nivel) {
       texto:
         lectura.perfil === "fer"
           ? "Hay un bloque a nivel de documento pero no trae la clave oc, así que no viaja la Orden de Compra."
-          : "El campo de cabecera no trae bloque FER, así que no viaja la Orden de Compra. " +
-            "Si el número está escrito en el texto libre, un receptor no puede extraerlo.",
+          : "El campo de cabecera no trae bloque FER ni el prefijo «Orden de compra:» del " +
+            "formato heredado, así que no viaja la Orden de Compra. Si el número está " +
+            "escrito en el texto libre, un receptor no puede extraerlo.",
       ref: lectura.perfil === "fer" ? "§6" : "§4.1",
     });
   }
@@ -280,6 +305,44 @@ function revisarCampo(valor, nivel) {
         "corresponde a una sola Orden de Compra y oc no admite listas.",
       ref: "§4.3.4",
     });
+  }
+
+  /**
+   * El formato heredado no convive con texto libre (§7.2): la Orden de Compra es lo que
+   * sigue al prefijo hasta el primer espacio, y la ref es todo lo demás. Un campo que
+   * además lleva el texto que imprime el ERP —con su HTML de impresión, `<br/>`— lo
+   * rompe de dos maneras, y las dos pasan en la práctica: pegado al número, el `<br/>`
+   * no es un espacio y la Orden de Compra se lee como «4506706146<br/>Id»; con un
+   * espacio delante, la ref se lleva el resto del campo. El dato llega, pero llega
+   * mal, que es peor que no llegar: se concilia.
+   *
+   * Solo se mira el marcado porque es lo único que delata el problema sin adivinar.
+   * Una ref que es prosa sin etiquetas no se distingue de una ref legítima.
+   */
+  if (nivel === "documento" && lectura.perfil === "heredado") {
+    const arreglo =
+      " Pon «Orden de compra: NÚMERO» al final del campo, sin nada detrás, o usa el " +
+      "bloque FER, que convive con el resto del texto.";
+    if (/[<>]/.test(lectura.datos.oc ?? "")) {
+      avisos.push({
+        grado: "error",
+        texto:
+          `La Orden de Compra se lee como "${citar(lectura.datos.oc)}": el formato heredado ` +
+          "la corta en el primer espacio, y la etiqueta HTML pegada al número no lo es." +
+          arreglo,
+        ref: "§7.1",
+      });
+    }
+    if (/[<>]/.test(lectura.datos.ref ?? "")) {
+      avisos.push({
+        grado: "error",
+        texto:
+          `La referencia se lee como "${citar(lectura.datos.ref)}": el formato heredado ` +
+          "toma como ref todo lo que sigue a la Orden de Compra, incluido el resto del campo." +
+          arreglo,
+        ref: "§7.1",
+      });
+    }
   }
 
   // `crudo` sale junto al resto para que `receta()` pueda reconstruir el bloque con una
@@ -345,14 +408,27 @@ export function revisarXml(texto, parsear) {
     const avisos = [...(revision?.avisos ?? [])];
 
     /**
+     * El Código de Barras que esta revisión da por bueno: el `cbar` del bloque, o el
+     * campo heredado entero cuando pasa `esCodigoHeredado()`. Un heredado que no lo
+     * pasa trae `cbar` en la lectura —la referencia no distingue— pero aquí no cuenta.
+     */
+    const lectura = revision?.lectura;
+    const cbar =
+      lectura?.perfil === "fer"
+        ? (lectura.datos.cbar ?? null)
+        : esCodigoHeredado(lectura?.datos.cbar)
+          ? lectura.datos.cbar
+          : null;
+
+    /**
      * §4.2 dice que el emisor NO DEBE reemplazar `dCodProd` por el Código de Barras:
      * `dCodProd` lleva el código del emisor —su SKU— y `cbar` la llave por la que el
      * receptor identifica el artículo. Cuando coinciden, el receptor se queda sin la
      * referencia del proveedor, que es la que necesita para devolverle una incidencia
-     * sobre esa línea. Solo se comprueba en el perfil FER: en heredado `cbar` es el
-     * campo entero y la coincidencia no significaría lo mismo.
+     * sobre esa línea. En heredado solo se comprueba cuando el campo es un código
+     * limpio: si trae texto alrededor, `cbar` es el campo entero y la coincidencia no
+     * significaría lo mismo.
      */
-    const cbar = revision?.lectura.perfil === "fer" ? revision.lectura.datos.cbar : null;
     if (cbar && codProd && cbar === codProd) {
       avisos.push({
         grado: "error",
@@ -369,6 +445,7 @@ export function revisarXml(texto, parsear) {
       codProd,
       descProd: primerTexto(nodo, "dDescProd"),
       conCampo: revision !== null,
+      codigo: cbar,
       campo: revision?.campo ?? null,
       lectura: revision?.lectura ?? null,
       crudo: revision?.crudo ?? null,
@@ -381,16 +458,20 @@ export function revisarXml(texto, parsear) {
   const itemsSinCampo = totalItems - conCampo.length;
 
   /**
-   * Cobertura de Código de Barras. Se separa por perfil a propósito: en el perfil
-   * heredado `cbar` es el contenido completo del campo, porque §7.1 no permite
-   * distinguir un código de una nota. Contarlos juntos prometería una cobertura que
-   * el formato heredado no puede sostener.
+   * Cobertura de Código de Barras, separada por perfil. En el perfil heredado `cbar` es
+   * el contenido completo del campo, porque §7.1 no permite distinguir un código de una
+   * nota: `heredado` son los que pasan `esCodigoHeredado()` y cuentan como resueltos;
+   * `heredadoConTexto`, los que traen otra cosa —el código con una frase delante, o una
+   * nota sin código— y no cuentan. Juntarlos prometería una cobertura que el formato
+   * heredado no puede sostener; no contar ninguno le diría «hay que corregirlo» a quien
+   * emite el heredado tal como lo describe §7.
    */
+  const heredadosItem = items.filter((i) => i.lectura?.perfil === "heredado" && i.lectura.datos.cbar);
   const cobertura = {
     total: totalItems,
-    fer: items.filter((i) => i.lectura?.perfil === "fer" && i.lectura.datos.cbar).length,
-    heredado: items.filter((i) => i.lectura?.perfil === "heredado" && i.lectura.datos.cbar)
-      .length,
+    fer: items.filter((i) => i.lectura?.perfil === "fer" && i.codigo).length,
+    heredado: heredadosItem.filter((i) => i.codigo).length,
+    heredadoConTexto: heredadosItem.filter((i) => !i.codigo).length,
     sinCampo: itemsSinCampo,
   };
 
@@ -515,9 +596,17 @@ function pista(revision) {
  * como lo que son —un número que está ahí, sin confirmar— y nunca dentro de `bloque`,
  * que es lo que alguien va a copiar y pegar.
  *
+ * Cuando el campo no trae bloque, el paso ofrece además la forma del perfil heredado
+ * en `alternativa`, con el mismo hueco. Hay emisores que ya escriben ese formato para
+ * otra cadena, y decirles solo «usa el bloque» les pide cambiar algo que un receptor
+ * conforme ya lee (§7.1). Va detrás y no al lado: §7.1 lo llama transitorio y «no una
+ * alternativa equivalente», y en una cabecera con más texto es además la forma más
+ * difícil de escribir bien. Cuando ya hay bloque no se ofrece: sería pedirle a quien
+ * migró que vuelva atrás.
+ *
  * @returns {Array<{clave: string, ref: string, titulo: string, ahora: string|null,
- *   bloque: string, donde: string, candidato: string|null, cuantos: number,
- *   ejemplos: string[], nota: string|null}>}
+ *   bloque: string, donde: string, alternativa: {bloque: string, donde: string}|null,
+ *   candidato: string|null, cuantos: number, ejemplos: string[], nota: string|null}>}
  */
 export function receta(r) {
   if (!r.ok) return [];
@@ -553,6 +642,17 @@ export function receta(r) {
         : doc.crudo
           ? "en lugar del bloque que ya está"
           : "al inicio del campo, antes del texto que ya lleva",
+      // §7.2: el heredado no convive con texto libre. Todo lo que sigue al número se lee
+      // como ref, así que tiene que ir al final; y si va pegado a un <br/>, el número
+      // mismo se corrompe. Ver la comprobación de §7.1 en `revisarCampo()`.
+      alternativa: doc?.crudo
+        ? null
+        : {
+            bloque: "Orden de compra: NÚMERO",
+            donde: !doc
+              ? "en un campo dInfEmFE nuevo dentro de gDGen"
+              : "al final del campo y sin nada detrás: todo lo que sigue al número se lee como ref",
+          },
       candidato: pista(doc),
       cuantos: 1,
       ejemplos: [],
@@ -561,14 +661,12 @@ export function receta(r) {
   }
 
   /**
-   * Un ítem cuenta como pendiente salvo que traiga `cbar` en bloque. El perfil heredado
-   * no basta por la misma razón que no cuenta en el veredicto: ahí `cbar` es el campo
-   * entero, así que un ítem que dice «Código de barra 7460577050229» se lee como si el
-   * código fuera esa frase completa.
+   * Un ítem cuenta como pendiente salvo que traiga un código que la revisión dé por
+   * bueno: `cbar` en bloque, o el campo heredado con solo el código. Un heredado con
+   * texto alrededor no basta: ahí `cbar` es el campo entero, así que un ítem que dice
+   * «Código de barra 7460577050229» se lee como si el código fuera esa frase completa.
    */
-  const pendientes = r.items.filter(
-    (i) => !(i.lectura?.perfil === "fer" && i.lectura.datos.cbar)
-  );
+  const pendientes = r.items.filter((i) => !i.codigo);
 
   /**
    * Agrupados por forma y no uno por uno. Un catálogo emitido por el mismo sistema
@@ -618,6 +716,17 @@ export function receta(r) {
       ahora: primero.campo,
       bloque: bloqueCon(primero.crudo, "cbar"),
       donde: DONDE[estado],
+      alternativa:
+        estado === "sin-clave"
+          ? null
+          : {
+              bloque: HUECO.cbar,
+              donde:
+                (estado === "sin-campo"
+                  ? "en un campo dInfEmFE nuevo dentro de cada gItem, con solo el código"
+                  : "en lugar de lo que lleva el campo: solo el código, sin ningún otro texto") +
+                ". Si el código lleva letras, usa el bloque: sin él no se distingue de una nota",
+            },
       candidato,
       cuantos: items.length,
       ejemplos: items.map((i) => i.secItem).filter(Boolean),

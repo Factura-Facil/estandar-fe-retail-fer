@@ -141,6 +141,19 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         heredado no se puede distinguir un código de una nota, así que extraerlo con una
         expresión regular sería hacer lo que la propia convención declara imposible.
       </p>
+      <p>
+        Lo que sí hace el validador es aceptar el <a href={`${spec}#7-perfil-heredado`}
+          >perfil heredado</a
+        > cuando se puede leer sin adivinar: la cabecera con «Orden de compra:» y un ítem
+        cuyo campo trae solo el código. Un receptor conforme lee ese formato, así que un
+        documento escrito así sirve. Para el ítem, la herramienta da por bueno un campo de
+        solo dígitos, ocho o más. Ese criterio es suyo, no de la convención, que no
+        define ninguno. Deja fuera los falsos positivos que la propia §7.1 pone de
+        ejemplo —ROJO, FRAGIL, LOTE2, 2024— y, a cambio, marca por corregir un código
+        local con letras aunque sea correcto: para ese está el bloque. Cuando el documento
+        no está en ningún formato, la corrección propone primero el bloque y después la
+        forma heredada.
+      </p>
     </details>
     <p>
       Al subir un XML completo, además de la lectura se revisa <em>cómo está escrito</em> el
@@ -171,7 +184,7 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
 
 <script>
   import { leer } from "../contenido/fer.js";
-  import { revisarXml, receta } from "../lib/revisar-xml.js";
+  import { revisarXml, receta, esCodigoHeredado } from "../lib/revisar-xml.js";
 
   const NORMATIVAS: Record<string, string[]> = { documento: ["oc", "ref"], item: ["cbar"] };
 
@@ -273,10 +286,19 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
    * que una cadena se lea bien no dice nada sobre la conformidad de quien la emitió, y
    * por eso el enlace a los casos se ofrece como el paso siguiente y no como un veredicto.
    */
-  function pintarSigue(esFer: boolean, extrajo: boolean, vacio: boolean) {
+  function pintarSigue(esFer: boolean, extrajo: boolean, vacio: boolean, codigoDudoso: boolean) {
     const sigue = $("sigue");
     sigue.replaceChildren();
     if (vacio) return;
+    // El receptor toma el campo entero como código aunque sea una frase: decir «el dato
+    // llegó» aquí sería el falso sí. Mismo criterio que la revisión de XML.
+    if (codigoDudoso) {
+      sigue.append(
+        "El receptor toma el campo entero como código. En el perfil heredado el campo tiene que traer solo el código —esta herramienta da por bueno uno de solo dígitos, ocho o más—; si lleva algo más, va dentro del bloque. ",
+        enlace(`${SPEC}#7-perfil-heredado`, "Ver §7 →")
+      );
+      return;
+    }
     if (esFer && extrajo) {
       sigue.append(
         "Este campo se lee como define la convención. Para verificar una implementación entera, y no un campo suelto, están los ",
@@ -341,7 +363,8 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     }
 
     pintarNota(esFer, vacio);
-    pintarSigue(esFer, presentes.length > 0, vacio);
+    const codigoDudoso = nivel === "item" && !esFer && "cbar" in r.datos && !esCodigoHeredado(r.datos.cbar);
+    pintarSigue(esFer, presentes.length > 0, vacio, codigoDudoso);
   }
 
   const ejemplos = $("ejemplos");
@@ -434,7 +457,7 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
   function faltas(r: any) {
     const datos = r.documento?.lectura?.datos ?? {};
     const c = r.cobertura;
-    const sinCodigo = c.total - c.fer - c.heredado;
+    const sinCodigo = c.total - c.fer - c.heredado - c.heredadoConTexto;
     const lista: string[] = [];
     if (!datos.oc) lista.push("no viaja la Orden de Compra");
     if (sinCodigo > 0) {
@@ -445,15 +468,20 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
       );
     }
     /**
-     * El perfil heredado cuenta como falta, no como logrado. En el nivel de ítem
-     * `cbar` es el contenido entero del campo, porque §7.1 no permite distinguir un
-     * código de una nota: un campo que dice «Código de barra 7460577050229» se lee
-     * como si el código fuera esa frase completa. Contarlo a favor produciría
-     * exactamente el falso sí que este veredicto existe para evitar.
+     * El perfil heredado cuenta a favor solo cuando el campo es el código y nada más
+     * (`esCodigoHeredado()` en revisar-xml.js). Es el formato de §7 tal como está
+     * escrito, un receptor conforme lo lee, y decirle «hay que corregirlo» a quien ya
+     * lo emite así sería más estricto que la convención.
+     *
+     * Con texto alrededor, no. En el nivel de ítem `cbar` es el contenido entero del
+     * campo, porque §7.1 no permite distinguir un código de una nota: un campo que dice
+     * «Código de barra 7460577050229» se lee como si el código fuera esa frase
+     * completa. Contarlo a favor produciría exactamente el falso sí que este veredicto
+     * existe para evitar.
      */
-    if (c.heredado > 0) {
+    if (c.heredadoConTexto > 0) {
       lista.push(
-        `${c.heredado === 1 ? "1 de" : `${c.heredado} de`} ${c.total} ítems trae${c.heredado === 1 ? "" : "n"} el código en perfil heredado, donde no se distingue de una nota`
+        `en ${c.heredadoConTexto} de ${c.total} ítems el Código de Barras no se puede extraer: el campo no trae solo el código`
       );
     }
     if (r.resumen.errores > 0) {
@@ -494,15 +522,45 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     caja.append(titular);
 
     const c = r.cobertura;
+    const cabeceraHeredada = r.documento?.lectura?.perfil === "heredado";
+    const todoFer = !cabeceraHeredada && c.heredado === 0;
     caja.append(
       el(
         "p",
         "veredicto__porque",
         sirve
-          ? `Trae la Orden de Compra y ${c.total === 1 ? "su único ítem trae" : `sus ${c.total} ítems traen`} Código de Barras en bloque FER.`
+          ? `Trae la Orden de Compra y ${c.total === 1 ? "su único ítem trae" : `sus ${c.total} ítems traen`} Código de Barras${todoFer ? " en bloque FER" : ""}.`
           : `${lista[0][0].toUpperCase()}${lista[0].slice(1)}${lista.length > 1 ? `, y ${lista.slice(1).join(", ")}` : ""}.`
       )
     );
+
+    /**
+     * Un sí en perfil heredado es un sí, sin asterisco en el titular: el documento se
+     * lee. Lo que se añade debajo es de dónde viene y hacia dónde va, dicho sin empujar.
+     * Quien ya emite así para otra cadena no tiene nada que corregir hoy, y un «deberías
+     * migrar» en este sitio es exactamente la fricción que el perfil heredado existe
+     * para evitar (§7.1).
+     */
+    if (sirve && !todoFer) {
+      const partes = [
+        cabeceraHeredada && "la cabecera",
+        c.heredado &&
+          (c.heredado === c.total
+            ? c.total === 1
+              ? "el ítem"
+              : `los ${c.total} ítems`
+            : `${c.heredado} de ${c.total} ítems`),
+      ].filter(Boolean) as string[];
+      const quien = partes.join(" y ");
+      const varios = partes.length > 1 || (c.heredado > 1 && !cabeceraHeredada);
+      const heredado = el("p", "veredicto__porque");
+      heredado.append(
+        `${quien[0].toUpperCase()}${quien.slice(1)} ${varios ? "van" : "va"} en el `,
+        enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"),
+        `, que un receptor conforme lee igual. Es un formato transitorio: cuando toque cambiar la emisión, el paso siguiente es el bloque FER.`
+      );
+      caja.append(heredado);
+    }
 
     const alcance = el("p", "veredicto__alcance");
     alcance.append(
@@ -570,24 +628,34 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
       return caja;
     }
 
+    // Una Orden de Compra heredada con una etiqueta pegada llega, pero mal: decir
+    // «conciliable» debajo contradiría el error de §7.1 que la explica.
+    const ocConMarcado = /[<>]/.test(datos.oc ?? "");
     fila.append(
       cifra(
         "Orden de Compra",
         datos.oc ?? null,
-        datos.oc ? "conciliable contra el pedido" : "el receptor no puede conciliar este documento"
+        !datos.oc
+          ? "el receptor no puede conciliar este documento"
+          : ocConMarcado
+            ? "llega con una etiqueta HTML pegada: no concilia"
+            : "conciliable contra el pedido"
       )
     );
-    // Solo los del perfil FER: ver la nota en `faltas()` sobre por qué el heredado
-    // no suma. Aquí se nombra aparte para que se vea qué falta convertir.
+    // Los del bloque y los heredados limpios; los heredados con texto no suman —ver la
+    // nota en `faltas()`— y se nombran aparte para que se vea cuántos hay que tocar.
+    const pie = [
+      c.fer && (c.heredado ? `${c.fer} en bloque FER` : "en bloque FER"),
+      c.heredado && (c.fer ? `${c.heredado} en perfil heredado` : "en perfil heredado"),
+      c.heredadoConTexto && `${c.heredadoConTexto} no ${c.heredadoConTexto === 1 ? "trae" : "traen"} solo el código`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
     fila.append(
       cifra(
         "Código de Barras",
-        c.total ? `${c.fer} de ${c.total}` : null,
-        c.heredado
-          ? `en bloque FER · ${c.heredado} en perfil heredado`
-          : c.total
-            ? "en bloque FER"
-            : "el documento no tiene ítems"
+        c.total ? `${c.fer + c.heredado} de ${c.total}` : null,
+        !c.total ? "el documento no tiene ítems" : pie || "ningún ítem lo trae"
       )
     );
     fila.append(
@@ -654,29 +722,52 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         p.ahora ? recorte(p.ahora) : "el campo no existe"
       )
     );
-    dl.append(el("dt", undefined, "escribe"));
-    const dd = el("dd", "receta__deberia");
-    dd.append(pintarBloque(p.bloque));
-    dl.append(dd);
     paso.append(dl);
 
-    const pie = el("p", "receta__donde");
-    pie.append(p.donde);
-    const copiar = document.createElement("button");
-    copiar.type = "button";
-    copiar.className = "receta__copiar";
-    copiar.textContent = "Copiar";
-    copiar.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(p.bloque);
-        copiar.textContent = "Copiado";
-      } catch {
-        copiar.textContent = "No se pudo";
-      }
-      setTimeout(() => (copiar.textContent = "Copiar"), 2000);
-    });
-    pie.append(copiar);
-    paso.append(pie);
+    /** Una forma que se puede escribir: el bloque, o la heredada. Cada una con su dónde y su botón. */
+    function forma(rotulo: string, bloque: string, donde: string | (string | Node)[]) {
+      const diff = paso.lastElementChild === dl ? dl : el("dl", "receta__diff");
+      diff.append(el("dt", undefined, rotulo));
+      const dd = el("dd", "receta__deberia");
+      dd.append(pintarBloque(bloque));
+      diff.append(dd);
+      if (diff !== dl) paso.append(diff);
+
+      const pie = el("p", "receta__donde");
+      // En un span: el pie es flex, y un enlace suelto dentro se volvería un ítem aparte.
+      const texto = el("span");
+      texto.append(...(typeof donde === "string" ? [donde] : donde));
+      pie.append(texto);
+      const copiar = document.createElement("button");
+      copiar.type = "button";
+      copiar.className = "receta__copiar";
+      copiar.textContent = "Copiar";
+      copiar.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(bloque);
+          copiar.textContent = "Copiado";
+        } catch {
+          copiar.textContent = "No se pudo";
+        }
+        setTimeout(() => (copiar.textContent = "Copiar"), 2000);
+      });
+      pie.append(copiar);
+      paso.append(pie);
+    }
+
+    forma("escribe", p.bloque, p.donde);
+    /**
+     * La forma heredada va debajo y rotulada «o bien»: la ofrece quien ya emite ese
+     * formato para otra cadena y no tiene por qué cambiarlo, pero no al mismo nivel
+     * que el bloque. Ver la nota de `receta()` en revisar-xml.js.
+     */
+    if (p.alternativa) {
+      forma("o bien", p.alternativa.bloque, [
+        "En el ",
+        enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"),
+        `, ${p.alternativa.donde}.`,
+      ]);
+    }
 
     /**
      * El candidato va fuera de lo que se copia y dicho como lo que es. Ver la nota de
@@ -899,7 +990,13 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     const datos = r.documento?.lectura?.datos ?? {};
     L.push(`Orden de Compra: ${datos.oc ?? "no viaja"}`);
     L.push(`Referencia: ${datos.ref ?? "no viaja"}`);
-    L.push(`Código de Barras en bloque FER: ${c.fer} de ${c.total} ítems`);
+    L.push(
+      `Código de Barras: ${c.fer + c.heredado} de ${c.total} ítems` +
+        (c.heredado ? ` (${c.fer} en bloque FER, ${c.heredado} en perfil heredado)` : " en bloque FER")
+    );
+    if (c.heredadoConTexto) {
+      L.push(`  ${c.heredadoConTexto} en perfil heredado con algo más que el código: no se puede extraer`);
+    }
     const todos = hallazgos(r);
     if (todos.length) {
       L.push("", `Hallazgos (${todos.length}):`);
@@ -923,6 +1020,10 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
           L.push(`   ahora:   ${p.ahora ? recorte(p.ahora, 120) : "el campo no existe"}`);
           L.push(`   escribe: ${p.bloque}`);
           L.push(`            ${p.donde}`);
+          if (p.alternativa) {
+            L.push(`   o bien:  ${p.alternativa.bloque}`);
+            L.push(`            en el perfil heredado (§7), ${p.alternativa.donde}`);
+          }
           if (p.candidato) {
             L.push(
               `   ${p.candidato} está ahí y encaja por su forma, pero el documento no lo identifica. Confirmarlo antes de escribirlo.`

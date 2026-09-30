@@ -101,9 +101,13 @@ function mismos(a, b) {
  *
  * El orden de los pasos sí importa —los grupos de ítems salen del más numeroso al menos—
  * y por eso aquí se compara en orden.
+ *
+ * `heredado=` es la forma alternativa del perfil heredado, también literal por la misma
+ * razón que el bloque: también se copia y se pega.
  */
 const linea = (p) =>
-  `${p.clave} | ${p.bloque} | ×${p.cuantos} | candidato=${p.candidato ?? "—"}`;
+  `${p.clave} | ${p.bloque} | ×${p.cuantos} | candidato=${p.candidato ?? "—"}` +
+  ` | heredado=${p.alternativa?.bloque ?? "—"}`;
 
 let fallos = 0;
 const problemas = [];
@@ -159,11 +163,14 @@ for (const c of casos) {
        * bloque siempre deja el hueco.
        */
       for (const p of receta(r)) {
-        if (p.candidato && p.bloque.includes(p.candidato)) {
-          falta.push(`  el candidato ${p.candidato} se coló dentro del bloque: ${p.bloque}`);
-        }
-        if (!/NÚMERO|CÓDIGO/.test(p.bloque)) {
-          falta.push(`  el bloque sugerido no deja hueco para el valor: ${p.bloque}`);
+        // La forma heredada se copia igual que el bloque: la regla la cubre también.
+        for (const s of [p.bloque, p.alternativa?.bloque].filter(Boolean)) {
+          if (p.candidato && s.includes(p.candidato)) {
+            falta.push(`  el candidato ${p.candidato} se coló dentro de lo que se copia: ${s}`);
+          }
+          if (!/NÚMERO|CÓDIGO/.test(s)) {
+            falta.push(`  la forma sugerida no deja hueco para el valor: ${s}`);
+          }
         }
       }
     }

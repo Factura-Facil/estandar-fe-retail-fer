@@ -15,7 +15,7 @@
         "hallazgos": [],
         "oc": "4500000001",
         "ref": "TIENDA RETAIL X",
-        "cobertura": { "total": 1, "fer": 1, "heredado": 0, "sinCampo": 0 },
+        "cobertura": { "total": 1, "fer": 1, "heredado": 0, "heredadoConTexto": 0, "sinCampo": 0 },
         "receta": []
       }
     },
@@ -30,7 +30,7 @@
       "espera": {
         "hallazgos": ["aviso §4.1", "nota §7"],
         "oc": null,
-        "receta": ["oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4500000001"]
+        "receta": ["oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4500000001 | heredado=Orden de compra: NÚMERO"]
       }
     },
 
@@ -59,7 +59,7 @@
         "hallazgos": ["aviso §6"],
         "oc": null,
         "ref": "TIENDA RETAIL X",
-        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=—"]
+        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=— | heredado=—"]
       }
     },
 
@@ -195,23 +195,129 @@
       },
       "espera": {
         "hallazgos": ["aviso §4.2"],
-        "cobertura": { "total": 2, "fer": 1, "heredado": 0, "sinCampo": 1 },
-        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=—"]
+        "cobertura": { "total": 2, "fer": 1, "heredado": 0, "heredadoConTexto": 0, "sinCampo": 1 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=— | heredado=CÓDIGO"]
       }
     },
 
     {
       "id": "item-en-perfil-heredado",
-      "porque": "En el perfil heredado cbar es el campo entero, porque §7.1 no define cómo distinguir un código de una nota. Contarlo como Código de Barras resuelto sería prometer una cobertura que el formato heredado no puede sostener: va en su propia cuenta.",
+      "porque": "En el perfil heredado cbar es el campo entero, porque §7.1 no define cómo distinguir un código de una nota. Un campo con «Código de barra» delante no es un código: contarlo como resuelto sería prometer una cobertura que el formato heredado no puede sostener, así que va en su propia cuenta y el documento hay que corregirlo. La receta ofrece las dos salidas: el bloque, o el código solo en el campo.",
       "documento": {
         "cabecera": "#FER1# oc=4500000001 #FER1#",
         "items": [{ "cod": "50000001", "campo": "Código de barra 7600000000001" }]
       },
       "espera": {
         "hallazgos": ["nota §7"],
-        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "sinCampo": 0 },
-        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7600000000001"]
+        "cobertura": { "total": 1, "fer": 0, "heredado": 0, "heredadoConTexto": 1, "sinCampo": 0 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7600000000001 | heredado=CÓDIGO"]
       }
+    },
+
+    {
+      "id": "item-heredado-solo-codigo",
+      "porque": "El formato heredado tal como lo describe §7: el código solo en el campo. Un receptor conforme lo lee, y §7.1 dice que emisores migrados y no migrados conviven sin cambios en la ingesta, así que cuenta como Código de Barras. Antes el validador le decía «hay que corregirlo» a quien ya emite bien el heredado, y le proponía el bloque con el código en blanco aunque el código estuviera ahí. El criterio —solo dígitos, ocho o más— es de esta herramienta y no de la convención.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [{ "cod": "50000001", "campo": "7600000000001" }]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "heredadoConTexto": 0, "sinCampo": 0 },
+        "receta": []
+      }
+    },
+
+    {
+      "id": "documento-heredado-como-el-ejemplo-de-la-spec",
+      "porque": "El documento de §7 entero, cabecera e ítems. Es lo que ya emite un proveedor que trabaja con el formato previo, y tiene que salir «sirve»: la herramienta no puede ser más estricta que la convención que publica. El código de peso variable está para dejar comprobado que el criterio no exige un GTIN.",
+      "documento": {
+        "cabecera": "Orden de compra: 4500000001 TIENDA RETAIL X",
+        "items": [
+          { "cod": "50000001", "campo": "7600000000001" },
+          { "cod": "50000002", "campo": "2000123456789" }
+        ]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "oc": "4500000001",
+        "ref": "TIENDA RETAIL X",
+        "cobertura": { "total": 2, "fer": 0, "heredado": 2, "heredadoConTexto": 0, "sinCampo": 0 },
+        "receta": []
+      }
+    },
+
+    {
+      "id": "item-heredado-que-no-es-un-codigo",
+      "porque": "Los falsos positivos que la propia §7.1 pone de ejemplo. Una palabra suelta o cuatro cifras son tan fáciles de leer como un código, y no lo son. Por eso el criterio exige dígitos y no se conforma con «sin espacios», que habría dado ROJO por Código de Barras.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [
+          { "cod": "50000001", "campo": "ROJO" },
+          { "cod": "50000002", "campo": "2024" }
+        ]
+      },
+      "espera": {
+        "hallazgos": ["nota §7"],
+        "cobertura": { "total": 2, "fer": 0, "heredado": 0, "heredadoConTexto": 2, "sinCampo": 0 },
+        "receta": [
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=— | heredado=CÓDIGO",
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=— | heredado=CÓDIGO"
+        ]
+      }
+    },
+
+    {
+      "id": "sku-reemplazado-por-cbar-en-heredado",
+      "porque": "§4.2 vale en los dos perfiles. Cuando el campo heredado es un código limpio, que coincida con dCodProd significa lo mismo que en el bloque: el emisor reemplazó su código por el de barras.",
+      "documento": {
+        "cabecera": "#FER1# oc=4500000001 #FER1#",
+        "items": [{ "cod": "7600000000001", "campo": "7600000000001" }]
+      },
+      "espera": {
+        "hallazgos": ["error §4.2", "nota §7"],
+        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "heredadoConTexto": 0, "sinCampo": 0 }
+      }
+    },
+
+    {
+      "id": "cabecera-heredada-pegada-a-html",
+      "porque": "La forma más natural de «ponerle el formato heredado» a una cabecera que ya lleva el texto del ERP, y la que lo rompe: el <br/> de impresión no es un espacio, así que la Orden de Compra se lee con la etiqueta y la palabra siguiente pegadas. El dato llega mal, que es peor que no llegar, porque se concilia. Sin esta comprobación el validador decía «sirve».",
+      "documento": {
+        "cabecera": "Orden de compra: 4506706146<br/>Id cliente Sage 50: X80116",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["error §7.1", "nota §7"],
+        "oc": "4506706146<br/>Id",
+        "ref": "cliente Sage 50: X80116",
+        "receta": []
+      }
+    },
+
+    {
+      "id": "cabecera-heredada-con-texto-detras",
+      "porque": "Con un espacio antes del <br/> la Orden de Compra sale bien, pero la ref se lleva el resto del campo. §7.2 ya lo advierte: el heredado no convive con texto libre.",
+      "documento": {
+        "cabecera": "Orden de compra: 4506706146 <br/>Id cliente Sage 50: X80116",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": {
+        "hallazgos": ["error §7.1", "nota §7"],
+        "oc": "4506706146",
+        "ref": "<br/>Id cliente Sage 50: X80116",
+        "receta": []
+      }
+    },
+
+    {
+      "id": "cabecera-heredada-al-final-del-campo",
+      "porque": "La forma correcta del heredado en una cabecera con más texto: al final y sin nada detrás. Es lo que la receta le dice a quien elige el heredado, así que tiene que leerse limpia.",
+      "documento": {
+        "cabecera": "Id cliente Sage 50: X80116<br/>Terminos: 30 dias<br/>Orden de compra: 4506706146",
+        "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
+      },
+      "espera": { "hallazgos": ["nota §7"], "oc": "4506706146", "ref": null, "receta": [] }
     },
 
     {
@@ -235,7 +341,7 @@
       "espera": {
         "hallazgos": ["nota §5.2.6", "aviso §6"],
         "oc": null,
-        "receta": ["oc | #FER2# oc=NÚMERO | ref=TIENDA RETAIL X #FER2# | ×1 | candidato=—"]
+        "receta": ["oc | #FER2# oc=NÚMERO | ref=TIENDA RETAIL X #FER2# | ×1 | candidato=— | heredado=—"]
       }
     },
 
@@ -249,7 +355,7 @@
       "espera": {
         "hallazgos": ["error §5.2.5", "aviso §6"],
         "ref": "TIENDA RETAIL X",
-        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=—"]
+        "receta": ["oc | #FER1# oc=NÚMERO | ref=TIENDA RETAIL X #FER1# | ×1 | candidato=— | heredado=—"]
       }
     },
 
@@ -266,8 +372,8 @@
       },
       "espera": {
         "hallazgos": ["nota §7"],
-        "cobertura": { "total": 3, "fer": 0, "heredado": 3, "sinCampo": 0 },
-        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×3 | candidato=7600000000001"]
+        "cobertura": { "total": 3, "fer": 0, "heredado": 0, "heredadoConTexto": 3, "sinCampo": 0 },
+        "receta": ["cbar | #FER1# cbar=CÓDIGO #FER1# | ×3 | candidato=7600000000001 | heredado=CÓDIGO"]
       }
     },
 
@@ -284,10 +390,10 @@
       },
       "espera": {
         "hallazgos": ["nota §7", "aviso §4.2"],
-        "cobertura": { "total": 3, "fer": 0, "heredado": 2, "sinCampo": 1 },
+        "cobertura": { "total": 3, "fer": 0, "heredado": 0, "heredadoConTexto": 2, "sinCampo": 1 },
         "receta": [
-          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×2 | candidato=7600000000001",
-          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=—"
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×2 | candidato=7600000000001 | heredado=CÓDIGO",
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=— | heredado=CÓDIGO"
         ]
       }
     },
@@ -303,10 +409,10 @@
         "hallazgos": ["aviso §4.1", "nota §7"],
         "oc": null,
         "ref": null,
-        "cobertura": { "total": 1, "fer": 0, "heredado": 1, "sinCampo": 0 },
+        "cobertura": { "total": 1, "fer": 0, "heredado": 0, "heredadoConTexto": 1, "sinCampo": 0 },
         "receta": [
-          "oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4506706146",
-          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7460577050229"
+          "oc | #FER1# oc=NÚMERO #FER1# | ×1 | candidato=4506706146 | heredado=Orden de compra: NÚMERO",
+          "cbar | #FER1# cbar=CÓDIGO #FER1# | ×1 | candidato=7460577050229 | heredado=CÓDIGO"
         ]
       }
     },

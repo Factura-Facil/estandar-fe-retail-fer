@@ -29,6 +29,31 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
   así que extraerlo con una expresión regular sería hacer lo que la propia convención
   declara imposible. La suite comprueba en todos sus casos que el candidato no aparece
   dentro del bloque y que el bloque siempre deja el hueco.
+- **El perfil heredado limpio sirve.** Un documento escrito como el ejemplo de §7
+  —«Orden de compra: 4500000001 TIENDA RETAIL X» en la cabecera, el código solo en
+  cada ítem— recibía «hay que corregirlo», y la corrección le proponía el bloque con
+  el código en blanco aunque el código ya estuviera ahí. Un receptor conforme lee ese
+  formato y §7.1 dice que emisores migrados y no migrados conviven sin cambios en la
+  ingesta: el validador era más estricto que la convención que publica. Ahora el
+  veredicto es «sirve» y debajo dice que el formato es transitorio, sin pedir nada.
+
+  Para el ítem, la herramienta da por bueno un campo de solo dígitos, ocho o más. Es
+  un criterio suyo y no de la convención, que no define ninguno: deja fuera los falsos
+  positivos que la propia §7.1 pone de ejemplo —ROJO, FRAGIL, LOTE2, 2024— y a cambio
+  marca por corregir un código local con letras aunque sea correcto. Se prefirió eso a
+  «sin espacios», que habría dado ROJO por Código de Barras.
+
+  Cuando el documento no está en ningún formato, la corrección ofrece también la forma
+  heredada, debajo del bloque y rotulada «o bien»: quien ya la emite para otra cadena
+  no tiene que cambiar a otro formato para servirle a esta. Va detrás porque §7.1 la
+  llama transitoria y «no una alternativa equivalente», y porque en una cabecera con
+  más texto es la más difícil de escribir bien.
+- §7.1 — Orden de Compra o referencia heredadas con marcado HTML. El formato heredado
+  no convive con texto libre (§7.2), y en una cabecera que además lleva el texto de
+  impresión del ERP se rompe de dos maneras: con el `<br/>` pegado al número, la Orden
+  de Compra se lee como `4506706146<br/>Id`; con un espacio delante, la referencia se
+  lleva el resto del campo. El validador daba «sirve» en los dos casos. Ahora es un
+  error que dice cómo escribirlo: al final del campo, o en bloque.
 - El informe identifica el documento revisado (número, fecha, emisor con RUC y
   receptor) y destaca las tres cifras que deciden si un receptor puede procesarlo:
   Orden de Compra, cobertura de Código de Barras y referencia.
@@ -57,7 +82,7 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
   - §5.2.6 — bloque que declara una versión superior del registro. Se procesa y se
     extraen las claves conocidas; se reporta como nota y no como defecto, porque es el
     mecanismo por el que el registro crece sin romper a los lectores anteriores.
-- `site/test/` — casos y ejecutor de la revisión de XML, 26 casos que corren con
+- `site/test/` — casos y ejecutor de la revisión de XML, 33 casos que corren con
   `npm test` y bloquean la publicación igual que los de conformidad. No sustituyen a
   `conformidad/casos.json`, que ejercita la implementación de referencia sobre campos
   sueltos: estos cubren la capa que el sitio construye encima, la que recorre un
@@ -74,7 +99,8 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
 - La cobertura de Código de Barras contaba los ítems en perfil heredado como
   resueltos. En ese perfil `cbar` es el campo entero, así que un ítem que dice «Código
   de barra 7460577050229» daba un código extraído que en realidad es esa frase
-  completa. Ahora se cuentan aparte y el veredicto los trata como pendientes.
+  completa. Ahora se cuentan aparte, y el veredicto trata como pendientes los que
+  traen algo más que el código.
 - Los plurales del informe: «1 de 3 ítems no traen» y «1 campos se leen».
 - Contraste de los textos de apoyo. Cuatro colores de la paleta no llegaban al mínimo
   de WCAG AA (4.5:1) y cargaban texto real: el gris más claro estaba en 2.55:1 —por
