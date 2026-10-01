@@ -11,6 +11,15 @@
         "receptor": "Extrae oc y ref de las facturas que procesa para sus clientes, con la convención FER activa en su plataforma.",
         "emisor": "Escribe el bloque en dInfEmFE desde su plataforma de emisión, sin configuración por cadena."
       }
+    },
+    {
+      "nombre": "Supermercados Xtra",
+      "sitio": "https://www.superxtra.com",
+      "custodio": false,
+      "desde": "1.1.1",
+      "roles": {
+        "receptor": "Recibe de sus proveedores la Orden de Compra y el código de cada ítem en el bloque FER de la factura electrónica."
+      }
     }
   ]
 }

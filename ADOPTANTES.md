@@ -7,7 +7,8 @@ aprobación más allá de verificar que la implementación existe.
 
 | Empresa | Rol | Versión | Desde |
 |---|---|---|---|
-| — | — | — | — |
+| [Factura Fácil, S.A.](https://facturafacil.com.pa) | ambos | 1.1.1 | 2026-08-27 |
+| [Supermercados Xtra](https://www.superxtra.com) | receptor | 1.1.1 | 2026-10-01 |
 
 **Rol** es `receptor` (ingiere facturas conforme a FER), `emisor` (emite el bloque) o
 `ambos`.
