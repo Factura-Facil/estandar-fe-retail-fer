@@ -423,19 +423,25 @@ export function revisarXml(texto, parsear) {
     /**
      * §4.2 dice que el emisor NO DEBE reemplazar `dCodProd` por el Código de Barras:
      * `dCodProd` lleva el código del emisor —su SKU— y `cbar` la llave por la que el
-     * receptor identifica el artículo. Cuando coinciden, el receptor se queda sin la
-     * referencia del proveedor, que es la que necesita para devolverle una incidencia
-     * sobre esa línea. En heredado solo se comprueba cuando el campo es un código
-     * limpio: si trae texto alrededor, `cbar` es el campo entero y la coincidencia no
-     * significaría lo mismo.
+     * receptor identifica el artículo. En heredado solo se comprueba cuando el campo es
+     * un código limpio: si trae texto alrededor, `cbar` es el campo entero y la
+     * coincidencia no significaría lo mismo.
+     *
+     * Es aviso y no error porque la coincidencia sola no prueba el defecto. Hay
+     * emisores cuyo código de artículo es el propio código de barras, y ahí los dos
+     * campos coinciden con todo derecho. Lo habitual, sin embargo, es lo contrario: el
+     * SKU copiado en `cbar`, que llega bien formado y no le sirve al receptor para
+     * identificar nada. Esta herramienta no puede distinguir un caso del otro; quien
+     * emite sí.
      */
     if (cbar && codProd && cbar === codProd) {
       avisos.push({
-        grado: "error",
+        grado: "aviso",
         texto:
-          `dCodProd y cbar traen el mismo valor (${cbar}). dCodProd debe conservar el ` +
-          "código del emisor: si se reemplaza por el Código de Barras, el receptor pierde " +
-          "la referencia con la que identificar la línea ante el proveedor.",
+          `dCodProd y cbar traen el mismo valor (${cbar}). Puede ser legítimo, si el ` +
+          "código de artículo del emisor es el propio Código de Barras, pero suele ser un " +
+          "descuido: el código del emisor copiado en cbar. Si ese valor no es el código de " +
+          "barras del artículo, el receptor no tiene con qué identificarlo.",
         ref: "§4.2",
       });
     }

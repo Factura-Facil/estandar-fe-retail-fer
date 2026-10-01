@@ -75,12 +75,12 @@
 
     {
       "id": "sku-reemplazado-por-cbar",
-      "porque": "§4.2: el emisor NO DEBE reemplazar dCodProd por el Código de Barras. dCodProd lleva el código del emisor y cbar la llave con la que el receptor identifica el artículo; si coinciden, el receptor se queda sin la referencia con la que devolverle una incidencia sobre esa línea al proveedor.",
+      "porque": "§4.2: el emisor NO DEBE reemplazar dCodProd por el Código de Barras. dCodProd lleva el código del emisor y cbar la llave con la que el receptor identifica el artículo. Es aviso y no error: la coincidencia puede ser legítima —un emisor cuyo código de artículo es el propio código de barras— y esta herramienta no puede distinguirla del SKU copiado en cbar, que es el descuido habitual.",
       "documento": {
         "cabecera": "#FER1# oc=4500000001 #FER1#",
         "items": [{ "cod": "7600000000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
       },
-      "espera": { "hallazgos": ["error §4.2"] }
+      "espera": { "hallazgos": ["aviso §4.2"] }
     },
 
     {
@@ -269,13 +269,13 @@
 
     {
       "id": "sku-reemplazado-por-cbar-en-heredado",
-      "porque": "§4.2 vale en los dos perfiles. Cuando el campo heredado es un código limpio, que coincida con dCodProd significa lo mismo que en el bloque: el emisor reemplazó su código por el de barras.",
+      "porque": "§4.2 vale en los dos perfiles. Cuando el campo heredado es un código limpio, que coincida con dCodProd significa lo mismo que en el bloque, y tiene el mismo grado: aviso, porque la coincidencia sola no prueba el defecto.",
       "documento": {
         "cabecera": "#FER1# oc=4500000001 #FER1#",
         "items": [{ "cod": "7600000000001", "campo": "7600000000001" }]
       },
       "espera": {
-        "hallazgos": ["error §4.2", "nota §7"],
+        "hallazgos": ["aviso §4.2", "nota §7"],
         "cobertura": { "total": 1, "fer": 0, "heredado": 1, "heredadoConTexto": 0, "sinCampo": 0 }
       }
     },

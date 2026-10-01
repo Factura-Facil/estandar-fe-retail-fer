@@ -171,7 +171,9 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         <span class="grados__pastilla">aviso</span>
         una recomendación de §4.3 o §4.4 sin cumplir: el bloque no está al inicio del campo,
         o pasa de 512 caracteres. El documento se lee igual, pero queda expuesto al recorte
-        silencioso que describe §4.4.
+        silencioso que describe §4.4. También lo que probablemente sea un descuido pero
+        puede ser legítimo, como <code>dCodProd</code> y <code>cbar</code> con el mismo
+        valor: quien emite sabe cuál de los dos es.
       </li>
       <li class="grados--nota">
         <span class="grados__pastilla">nota</span>

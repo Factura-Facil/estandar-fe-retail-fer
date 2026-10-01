@@ -67,9 +67,11 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
   práctica, y cargado detrás del otro muestra la diferencia sin explicarla.
 - Seis comprobaciones que faltaban en la revisión de XML, todas sobre reglas que ya
   estaban en la especificación y que el validador no miraba:
-  - §4.2 — `dCodProd` y `cbar` con el mismo valor. El emisor reemplazó su código por
-    el de barras y el receptor se queda sin la referencia con la que devolverle una
-    incidencia sobre esa línea.
+  - §4.2 — `dCodProd` y `cbar` con el mismo valor. Es aviso y no error: puede ser
+    legítimo, si el código de artículo del emisor es el propio código de barras, pero
+    lo habitual es el SKU copiado en `cbar`, que llega bien formado y no le sirve al
+    receptor para identificar el artículo. La coincidencia sola no distingue un caso
+    del otro.
   - §3.4 — fragmento sin `=` dentro del bloque. Es el rastro que deja un valor que
     contiene el separador `|`: parte el valor en dos y la segunda mitad se descarta.
   - §4.3.1 — más de un bloque en el mismo campo. El segundo cae en el texto libre de
