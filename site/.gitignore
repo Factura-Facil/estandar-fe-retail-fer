@@ -5,3 +5,6 @@ node_modules/
 
 # Generado por scripts/sync-contenido.mjs desde claves/registro.json.
 public/registro.json
+
+# Copiados por scripts/sync-contenido.mjs desde conformidad/xml/.
+public/ejemplos/

@@ -9,6 +9,27 @@ Cambios en el sitio y en los ejemplos. **Ninguna regla cambia:** el texto de la
 especificación, el registro de claves y los 20 casos normativos siguen iguales.
 
 ### Agregado
+- **Validador rediseñado.** El XML es ahora la entrada principal, y revisar un campo
+  suelto queda como enlace secundario. Las reglas no cambian: `fer.js`,
+  `revisar-xml.js` y el criterio del veredicto son los mismos. La diferencia es que
+  cada cosa que afirma la pantalla se puede comprobar en la misma pantalla:
+  - Al abrir la página se corren en el navegador los casos de conformidad contra la
+    misma `fer.js` que revisa la factura, y el resultado se muestra en la cabecera,
+    con cada caso a un clic.
+  - El veredicto positivo dice «Lista para recibir». Debajo van la ficha del
+    documento (número, emisor, receptor, total, ítems) y una línea de procedencia.
+  - «Lo que se revisó» separa en filas las tres condiciones obligatorias del
+    veredicto y dos informativas.
+  - La tabla de ítems siempre está a la vista, con el estado de cada ítem y un
+    filtro «Por corregir».
+  - Un visor del XML resalta los `dInfEmFE`, y cada hallazgo enlaza a su línea.
+  - Se pueden revisar varios XML a la vez: sale una tabla de veredictos y cada
+    archivo se abre en detalle.
+  - Una constancia en PDF, generada en el navegador, lleva el veredicto, lo que se
+    revisó, los ítems y cómo se corrige. El sello de Factura Fácil es informativo: no
+    es una firma digital ni sustituye a la autorización de la DGI.
+  - Los dos XML de `conformidad/xml/` se pueden cargar como ejemplo con un clic.
+  - El correo de soporte (soporte_fer@facturafacil.com.pa) queda a la vista.
 - La revisión de XML abre con un veredicto binario —«sirve» o «hay que corregirlo»— y
   la razón concreta debajo. El resumen anterior encabezaba con el conteo por grado, y
   un documento con avisos pero sin errores se leía como un sí.

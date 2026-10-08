@@ -10,7 +10,9 @@
     "test": "npm run sync && node test/test-revision.mjs"
   },
   "dependencies": {
-    "astro": "^5.18.2"
+    "astro": "^5.18.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8"
   },
   "devDependencies": {
     "@xmldom/xmldom": "^0.9.12"

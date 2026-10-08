@@ -3,43 +3,110 @@ import Base from "../layouts/Base.astro";
 import Icono from "../components/Icono.astro";
 const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
 const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
+const soporte = "soporte_fer@facturafacil.com.pa";
 ---
 
 <Base
   titulo="Validador — FER 1.1.1"
-  descripcion="Comprueba cómo un receptor extrae la Orden de Compra y el Código de Barras de cualquier factura electrónica conforme a FER 1.1.1. Funciona en el navegador, sin subir archivos."
+  descripcion="Comprueba si tu factura electrónica llega completa al receptor: la Orden de Compra y el Código de Barras de cada ítem, con las reglas de FER 1.1.1. Funciona en el navegador, sin subir archivos."
 >
   <section class="cabecera cabecera--tool">
-    <div class="envoltura envoltura--prosa">
-      <p class="rotulo">Herramienta</p>
-      <h1>Comprueba qué extrae un receptor FER</h1>
+    <div class="envoltura envoltura--v">
+      <p class="rotulo">Validador</p>
+      <h1>Comprueba si tu factura llega completa al receptor</h1>
       <p class="cabecera__bajada">
-        Pega el contenido del campo de notas de tu factura o sube el XML completo. La
-        herramienta muestra exactamente lo que extraería un receptor conforme a FER.
+        Sube el XML de tu factura electrónica. El validador revisa si viajan la Orden de
+        Compra y el Código de Barras de cada ítem con las reglas de FER 1.1.1, y te dice qué
+        corregir si falta algo.
       </p>
-      <p class="cabecera__nota">
-        Corre completo en tu navegador. Ni el campo ni el archivo salen de tu máquina.
-      </p>
+      {/* Tres garantías a la vista antes de soltar nada: que el archivo no sale de la
+          máquina, que la implementación que lo revisa pasa los casos de conformidad
+          —comprobado ahí mismo, no afirmado— y que el resultado se puede reenviar. */}
+      <div class="v-pastillas">
+        <span class="v-pastilla v-pastilla--privado">
+          <Icono nombre="escudo" tamano={13} />El archivo no sale de tu navegador
+        </span>
+        <button
+          type="button"
+          class="v-pastilla v-pastilla--conf"
+          id="conf-boton"
+          aria-expanded="false"
+          aria-controls="conf-panel"
+        >
+          <span class="v-pastilla__icono" id="conf-icono"
+            ><Icono nombre="verificado" tamano={13} /></span
+          >
+          <span id="conf-chip">Comprobando la implementación…</span>
+          <span class="v-pastilla__flecha" id="conf-flecha" aria-hidden="true"></span>
+        </button>
+        <span class="v-pastilla">
+          <span class="v-pastilla__icono v-pastilla__icono--cian"
+            ><Icono nombre="documento" tamano={13} /></span
+          >Constancia en PDF para compartir
+        </span>
+      </div>
+      <div class="v-conf" id="conf-panel" hidden></div>
     </div>
   </section>
 
-  <div class="envoltura envoltura--prosa prosa tool">
-    <div class="modos" role="tablist" aria-label="Modo de revisión">
-      <button type="button" class="modo" data-modo="campo" role="tab" aria-selected="true">
-        Un campo
-      </button>
-      <button type="button" class="modo" data-modo="xml" role="tab" aria-selected="false">
-        Un XML completo
-      </button>
+  <div class="envoltura envoltura--v v">
+    <div id="modo-xml">
+      <div id="inicio">
+        <section class="v-subir" aria-label="Subir XML">
+          <div class="v-zona" id="zona">
+            <span class="v-zona__icono"><Icono nombre="subida" tamano={30} /></span>
+            <p class="v-zona__titulo">Arrastra aquí el XML de tu factura</p>
+            <label class="v-boton v-boton--primario v-boton--grande">
+              Elegir archivo
+              <input
+                type="file"
+                id="archivo"
+                accept=".xml,text/xml,application/xml"
+                multiple
+              />
+            </label>
+            <p class="v-zona__nota">
+              .xml · hasta 8 MB por archivo · puedes soltar varios a la vez
+            </p>
+          </div>
+          {/* Dos ejemplos y no uno: el mismo documento antes y después de adoptar la
+              convención. Cargados uno detrás del otro, o los dos a la vez, la diferencia
+              entre lo que un receptor extrae en cada caso se ve sin tener que explicarla. */}
+          <div class="v-demos">
+            <span class="v-demos__rotulo">¿Sin un XML a mano? Prueba con:</span>
+            <button type="button" class="v-chip" data-demo="ejemplo-completo"
+              >ejemplo-completo</button
+            >
+            <button type="button" class="v-chip" data-demo="ejemplo-heredado"
+              >ejemplo-heredado</button
+            >
+            <button type="button" class="v-chip" data-demo="*">los 2 a la vez</button>
+          </div>
+        </section>
+        <p class="v-linea-texto">
+          ¿Solo tienes el texto del campo de notas?
+          <button type="button" class="v-enlace" id="ir-campo"
+            >Revisa un campo suelto →</button
+          >
+        </p>
+        <p class="v-linea-texto v-linea-texto--junta">
+          ¿Dudas con el validador o con un resultado? Escríbenos a <a
+            href={`mailto:${soporte}`}>{soporte}</a
+          >.
+        </p>
+      </div>
+
+      {/* Lo que sigue lo construye el script: sin JS no queda una cabecera vacía
+          anunciando un resultado que no existe. */}
+      <section id="revisando" class="v-tarjeta v-revisando" hidden aria-live="polite"></section>
+      <section id="lote" class="v-lote" hidden></section>
+      <div id="resultado" class="v-resultado" hidden></div>
     </div>
 
-    {/* La garantía de privacidad se repite aquí, al lado del input, y no solo arriba:
-        es donde el usuario decide si pega datos de una factura real. */}
-    <p class="tool__privado">
-      <Icono nombre="escudo" tamano={13} /> Los datos no salen de tu navegador
-    </p>
-
-    <section id="panel-campo">
+    <section id="modo-campo" class="v-campo" hidden aria-label="Revisar un campo">
+      <button type="button" class="v-enlace v-volver" id="ir-xml"
+        >← Volver a revisar un XML</button
+      >
       <label class="tool__rotulo" for="entrada"
         >Campo de notas de la factura (<code>dInfEmFE</code>)</label
       >
@@ -65,8 +132,6 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         </div>
       </div>
 
-      {/* El rótulo de esta fila lo pone el script junto a los botones: si el JS no
-          corre no quedan ni los ejemplos ni un título huérfano anunciándolos. */}
       <div class="tool__ejemplos" id="ejemplos"></div>
 
       <div class="tool__salida">
@@ -81,38 +146,9 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         <p class="tool__sigue" id="sigue"></p>
       </div>
     </section>
+  </div>
 
-    <section id="panel-xml" hidden>
-      <div class="zona" id="zona">
-        <Icono nombre="subida" tamano={30} />
-        <p class="zona__texto">
-          Arrastra un XML aquí, o
-          <label class="zona__boton">
-            elige un archivo
-            <input type="file" id="archivo" accept=".xml,text/xml,application/xml" />
-          </label>
-        </p>
-        {/* Dos ejemplos y no uno: el mismo documento antes y después de adoptar la
-            convención. Cargados uno detrás del otro, la diferencia entre lo que un
-            receptor extrae en cada caso se ve sin tener que explicarla. */}
-        <p class="zona__nota">
-          Si no tienes uno a mano, en el repositorio hay un
-          <a href={`${repo}/blob/main/conformidad/xml/ejemplo-completo.xml`}
-            >documento que aplica la convención</a
-          >
-          y
-          <a href={`${repo}/blob/main/conformidad/xml/ejemplo-heredado.xml`}
-            >el mismo antes de adoptarla</a
-          >.
-        </p>
-      </div>
-
-      {/* La tarjeta del archivo cargado y el informe los construye el script: si el JS
-          no corre no queda una cabecera vacía anunciando un resultado que no existe. */}
-      <div id="cargado"></div>
-      <div id="salida-xml" aria-live="polite"></div>
-    </section>
-
+  <div class="envoltura envoltura--v prosa v-como">
     <h2>Cómo funciona</h2>
     <p>
       Usa la misma implementación de referencia publicada en el repositorio, sin
@@ -122,8 +158,9 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
       <summary>Detalle técnico</summary>
       <p>
         La página importa <code>referencia/javascript/fer.js</code> del repositorio, sin
-        tocarlo. Si el validador y la especificación discrepan, la especificación manda y
-        es un defecto de la implementación: <a href={`${repo}/issues`}>abre un issue</a>.
+        tocarlo, y al abrirse corre contra ella los casos de conformidad: el resultado es la
+        pastilla de arriba. Si el validador y la especificación discrepan, la especificación
+        manda y es un defecto de la implementación: <a href={`${repo}/issues`}>abre un issue</a>.
       </p>
       <p>
         Al revisar un XML se recorre el documento buscando los campos <code>dInfEmFE</code
@@ -154,6 +191,11 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
         no está en ningún formato, la corrección propone primero el bloque y después la
         forma heredada.
       </p>
+      <p>
+        La constancia en PDF también se arma en tu navegador, con lo mismo que ves en
+        pantalla. El sello identifica quién generó la revisión y cuándo: no es una firma
+        digital ni sustituye a la autorización de la DGI.
+      </p>
     </details>
     <p>
       Al subir un XML completo, además de la lectura se revisa <em>cómo está escrito</em> el
@@ -163,13 +205,13 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     <ul class="grados">
       <li class="grados--error">
         <span class="grados__pastilla">error</span>
-        un defecto de emisión que hace que el dato no llegue o llegue ambiguo: un bloque que
+        Un defecto de emisión que hace que el dato no llegue o llegue ambiguo: un bloque que
         abre y no cierra, una clave duplicada, un <code>oc</code> con más de una Orden de Compra,
-        o un campo que pasa los 5.000 caracteres de la Ficha Técnica.
+        o un campo que pasa los 5.000 caracteres de la Ficha Técnica. Cambia el veredicto.
       </li>
       <li class="grados--aviso">
         <span class="grados__pastilla">aviso</span>
-        una recomendación de §4.3 o §4.4 sin cumplir: el bloque no está al inicio del campo,
+        Una recomendación de §4.3 o §4.4 sin cumplir: el bloque no está al inicio del campo,
         o pasa de 512 caracteres. El documento se lee igual, pero queda expuesto al recorte
         silencioso que describe §4.4. También lo que probablemente sea un descuido pero
         puede ser legítimo, como <code>dCodProd</code> y <code>cbar</code> con el mismo
@@ -179,7 +221,7 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
       </li>
       <li class="grados--nota">
         <span class="grados__pastilla">nota</span>
-        información, no defecto: claves fuera del registro, que un receptor conforme ignora,
+        Información, no defecto: claves fuera del registro, que un receptor conforme ignora,
         o campos que se leen con el perfil heredado.
       </li>
     </ul>
@@ -187,8 +229,11 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
 </Base>
 
 <script>
-  import { leer } from "../contenido/fer.js";
+  import * as fer from "../contenido/fer.js";
+  import casosJson from "../contenido/casos.json";
   import { revisarXml, receta, esCodigoHeredado } from "../lib/revisar-xml.js";
+
+  const { leer } = fer;
 
   const NORMATIVAS: Record<string, string[]> = { documento: ["oc", "ref"], item: ["cbar"] };
 
@@ -206,18 +251,51 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     ["heredado en ítem", "item", "7600000000001"],
   ];
 
+  const DEMOS = ["ejemplo-completo", "ejemplo-heredado"];
+
   const BLOQUE = /#FER(\d)#([\s\S]*?)#FER\1#/;
 
   const REPO = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
-  const SPEC = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
+  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const SPEC = `${BASE}/spec/`;
+  const SOPORTE = "soporte_fer@facturafacil.com.pa";
+
+  /**
+   * El sí es una frase fija y no depende de cómo llegó el documento: un sí en perfil
+   * heredado es el mismo sí (ver la nota de `faltas()`). «Lista para recibir» y no
+   * «Sirve» porque dice para quién: el documento está listo para el receptor.
+   */
+  const TITULAR_SI = "Lista para recibir";
+  const TITULAR_NO = "Hay que corregirlo";
+
+  /**
+   * Un visto para el sí y una flecha hacia abajo para el no. Antes había una equis, que
+   * es un sello de examen corregido: califica el trabajo en vez de señalar el siguiente
+   * paso. La flecha apunta a donde está escrito cómo se corrige, que es literalmente lo
+   * que sigue en la pantalla.
+   */
+  const PATH: Record<string, string> = {
+    ok: "M5 12.5l5 5 9-11",
+    mal: "M12 5v12M6.5 11.5l5.5 5.5 5.5-5.5",
+    info: "M12 6.5v7M12 17.5v.01",
+  };
+  const LINEA = "M8 7l-5 5 5 5M16 7l5 5-5 5";
+  const BAJAR = [
+    "M12 4v11.5m0 0l-3.75-3.75M12 15.5l3.75-3.75",
+    "M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3",
+  ];
+  const DOCUMENTO = ["M7.25 7h5.5M7.25 10h5.5M7.25 13h3"];
+  const ESCUDO = "M10 2.75l5.75 2.25v4.75c0 3.3-2.45 5.7-5.75 6.5-3.3-.8-5.75-3.2-5.75-6.5V5L10 2.75z";
 
   const $ = (id: string) => document.getElementById(id)!;
+
   function el(tag: string, clase?: string, texto?: string) {
     const n = document.createElement(tag);
     if (clase) n.className = clase;
     if (texto !== undefined) n.textContent = texto;
     return n;
   }
+
   function enlace(href: string, texto: string) {
     const a = document.createElement("a");
     a.href = href;
@@ -225,15 +303,104 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     return a;
   }
 
-  for (const b of document.querySelectorAll<HTMLButtonElement>(".modo")) {
-    b.addEventListener("click", () => {
-      for (const otro of document.querySelectorAll<HTMLButtonElement>(".modo")) {
-        otro.setAttribute("aria-selected", String(otro === b));
+  type Hijo = Node | string | null | undefined | false;
+
+  /** Un nodo con sus atributos y sus hijos. Los textos van siempre como texto: aquí se pinta contenido de facturas ajenas. */
+  function h(tag: string, props: Record<string, any> | null = null, ...hijos: Hijo[]) {
+    const n = document.createElement(tag);
+    if (props) {
+      for (const [k, v] of Object.entries(props)) {
+        if (v == null || v === false) continue;
+        if (k === "class") n.className = v;
+        else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+        else n.setAttribute(k, v === true ? "" : String(v));
       }
-      ($("panel-campo") as HTMLElement).hidden = b.dataset.modo !== "campo";
-      ($("panel-xml") as HTMLElement).hidden = b.dataset.modo !== "xml";
-    });
+    }
+    for (const x of hijos) if (x != null && x !== false) n.append(x);
+    return n;
   }
+
+  /** replaceChildren sin los null y false de los hijos condicionales, que si no se pintan como texto. */
+  function llenar(n: Element, ...hijos: Hijo[]) {
+    n.replaceChildren(...(hijos.filter((x) => x != null && x !== false) as (Node | string)[]));
+  }
+
+  function svg(trazos: string[], clase: string, tam?: number, caja = 24) {
+    const NS = "http://www.w3.org/2000/svg";
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("class", clase);
+    s.setAttribute("viewBox", `0 0 ${caja} ${caja}`);
+    s.setAttribute("aria-hidden", "true");
+    if (tam) {
+      s.setAttribute("width", String(tam));
+      s.setAttribute("height", String(tam));
+    }
+    for (const d of trazos) {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", d);
+      s.append(p);
+    }
+    return s;
+  }
+
+  const marca = (estado: string, clase: string) => svg([PATH[estado]], `v-ico ${clase}`);
+
+  function iconoDocumento(tam: number) {
+    const s = svg(DOCUMENTO, "v-trazo", tam, 20);
+    const NS = "http://www.w3.org/2000/svg";
+    const r = document.createElementNS(NS, "rect");
+    for (const [k, v] of Object.entries({ x: "4.25", y: "2.5", width: "11.5", height: "15", rx: "2" })) r.setAttribute(k, v);
+    s.prepend(r);
+    return s;
+  }
+
+  function plural(n: number, uno: string, varios: string) {
+    return `${n} ${n === 1 ? uno : varios}`;
+  }
+
+  const mayus = (s: string) => s[0].toUpperCase() + s.slice(1);
+
+  function fechaLegible(iso: string | null) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("es-PA", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function peso(bytes: number) {
+    return bytes < 1024
+      ? `${bytes} B`
+      : bytes < 1024 * 1024
+        ? `${(bytes / 1024).toFixed(1)} kB`
+        : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  /**
+   * Hora corta sin los espacios finos que mete es-PA («2:35 p. m.» lleva U+202F en los
+   * motores nuevos): en pantalla no se notan, pero la fuente estándar del PDF no los
+   * tiene y los pinta como basura.
+   */
+  function horaCorta(f: Date) {
+    return f.toLocaleTimeString("es-PA", { hour: "2-digit", minute: "2-digit" }).replace(/[\u00a0\u202f]/g, " ");
+  }
+
+  /**
+   * Un campo de cabecera puede traer 5.000 caracteres de prosa. Se recorta para que la
+   * línea «ahora» quepa al lado de la línea «escribe» y la diferencia entre las dos se
+   * vea de un golpe, que es lo único que esa fila tiene que conseguir. El campo entero
+   * sigue estando en el XML, sin recortar.
+   */
+  function recorte(s: string, n = 96) {
+    const plano = s.replace(/\s+/g, " ").trim();
+    return plano.length > n ? `${plano.slice(0, n - 1)}…` : plano;
+  }
+
+  const dinero = (v: string | null) =>
+    v == null || Number.isNaN(Number(v))
+      ? null
+      : Number(v).toLocaleString("es-PA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // ── Un campo suelto ─────────────────────────────────────────────────────
 
   const entrada = $("entrada") as HTMLTextAreaElement;
 
@@ -396,36 +563,110 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
   }
   actualizarCampo();
 
-  function listaAvisos(avisos: any[]) {
-    const ul = el("ul", "avisos");
-    for (const a of avisos) {
-      const li = el("li", `aviso--${a.grado}`);
-      li.append(el("span", "aviso__grado", a.grado));
-      li.append(el("span", "aviso__texto", a.texto));
-      li.append(el("span", "aviso__ref", a.ref));
-      ul.append(li);
+  /**
+   * El campo suelto es la herramienta de quien ya sabe qué mirar: va detrás de un
+   * enlace y no en un selector de modos al mismo nivel que el XML, que es lo que trae a
+   * casi todo el mundo hasta aquí.
+   */
+  function irAModo(modo: "xml" | "campo") {
+    ($("modo-xml") as HTMLElement).hidden = modo !== "xml";
+    ($("modo-campo") as HTMLElement).hidden = modo !== "campo";
+    if (modo === "campo") entrada.focus({ preventScroll: true });
+  }
+  $("ir-campo").addEventListener("click", () => irAModo("campo"));
+  $("ir-xml").addEventListener("click", () => irAModo("xml"));
+
+  // ── Conformidad en el navegador ─────────────────────────────────────────
+
+  /**
+   * «Pasa los casos de conformidad» sería una afirmación; esto la comprueba delante de
+   * quien va a confiar en el resultado. Mismo criterio que
+   * referencia/javascript/test-conformidad.mjs y misma fer.js que revisa la factura.
+   */
+  let conf: any = null;
+  let verConf = false;
+
+  function correrConformidad() {
+    const t0 = performance.now();
+    try {
+      const NORM = [...fer.CLAVES_DOCUMENTO, ...fer.CLAVES_ITEM];
+      const res = (casosJson as any).casos.map((c: any) => {
+        const normativo = c.normativo !== false;
+        const r = fer.leer(c.entrada, c.nivel === "documento" ? "documento" : "item");
+        const esperadas = Object.keys(c.esperado);
+        const filtro = esperadas.length ? esperadas : NORM;
+        const obtenido: Record<string, string> = {};
+        for (const k of filtro) if (k in r.datos) obtenido[k] = r.datos[k];
+        const ok = r.perfil === c.perfil && JSON.stringify(obtenido) === JSON.stringify(c.esperado);
+        return { id: c.id, descripcion: c.descripcion, normativo, ok };
+      });
+      conf = { res, ms: Math.max(1, Math.round(performance.now() - t0)) };
+    } catch (e) {
+      console.error(e);
+      conf = { error: true };
     }
-    return ul;
+    pintarConf();
   }
 
-  function plural(n: number, uno: string, varios: string) {
-    return `${n} ${n === 1 ? uno : varios}`;
+  function resumenConf() {
+    if (!conf || conf.error) return null;
+    const norm = conf.res.filter((x: any) => x.normativo);
+    const notas = conf.res.filter((x: any) => !x.normativo);
+    const okN = norm.filter((x: any) => x.ok).length;
+    return { norm, notas, okN, okI: notas.filter((x: any) => x.ok).length, todo: okN === norm.length };
   }
 
-  function fechaLegible(iso: string | null) {
-    if (!iso) return null;
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString("es-PA", { day: "numeric", month: "long", year: "numeric" });
+  function pintarConf() {
+    const boton = $("conf-boton");
+    const panel = $("conf-panel");
+    const c = resumenConf();
+    boton.setAttribute("aria-expanded", String(verConf));
+    if (!c) {
+      $("conf-chip").textContent = conf?.error ? "Implementación de referencia, sin cambios" : "Comprobando la implementación…";
+      return;
+    }
+    boton.classList.toggle("v-pastilla--mal", !c.todo);
+    $("conf-chip").textContent = `${c.okN} de ${c.norm.length} casos de conformidad pasan en tu navegador`;
+    $("conf-flecha").textContent = verConf ? "▴" : "▾";
+    (panel as HTMLElement).hidden = !verConf;
+    if (!verConf) return;
+    llenar(panel,
+      h(
+        "p",
+        { class: "v-conf__texto" },
+        h("b", null, c.todo ? `Los ${c.norm.length} casos normativos pasan.` : `${c.norm.length - c.okN} de ${c.norm.length} casos normativos fallan.`),
+        ` Al abrir esta página se corrieron los casos de conformidad de FER 1.1.1 contra la misma fer.js que revisa tu factura (${conf.ms} ms). Si alguno fallara, lo verías aquí antes de subir nada.`
+      ),
+      h(
+        "ul",
+        { class: "v-conf__casos" },
+        ...conf.res.map((x: any) =>
+          h(
+            "li",
+            null,
+            h("span", { class: `v-conf__marca${x.ok ? "" : " v-conf__marca--mal"}` }, x.ok ? "✓" : "!"),
+            h("span", { class: "v-conf__id" }, x.id),
+            h("span", null, x.descripcion + (x.normativo ? "" : " · nota §5.3"))
+          )
+        )
+      ),
+      h(
+        "p",
+        { class: "v-conf__pie" },
+        `Notas de implementación de §5.3: ${c.okI} de ${c.notas.length} coinciden, no cuentan para la conformidad · `,
+        enlace(`${REPO}/blob/main/conformidad/casos.json`, "ver casos.json")
+      )
+    );
   }
 
-  function peso(bytes: number) {
-    return bytes < 1024
-      ? `${bytes} B`
-      : bytes < 1024 * 1024
-        ? `${(bytes / 1024).toFixed(1)} kB`
-        : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  }
+  $("conf-boton").addEventListener("click", () => {
+    verConf = !verConf;
+    pintarConf();
+  });
+
+  correrConformidad();
+
+  // ── Veredicto ───────────────────────────────────────────────────────────
 
   /**
    * El titular dice qué le pasa al dato, no cuántos hallazgos hubo: quien sube una
@@ -495,48 +736,106 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
   }
 
   /**
-   * Un visto para el sí y una flecha hacia abajo para el no. Antes había una equis, que
-   * es un sello de examen corregido: califica el trabajo en vez de señalar el siguiente
-   * paso. La flecha apunta a donde está escrito cómo se corrige, que es literalmente lo
-   * que sigue en la pantalla.
+   * Por grado y no por orden de aparición: los globales se acumulan antes que los del
+   * campo de cabecera, y sin esto una nota informativa encabeza la lista mientras el
+   * aviso que explica el veredicto queda debajo. Cada hallazgo lleva la línea del XML
+   * donde está su campo, si se conoce.
    */
-  function marca(sirve: boolean) {
-    const NS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("class", "veredicto__marca");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("aria-hidden", "true");
-    const p = document.createElementNS(NS, "path");
-    p.setAttribute("d", sirve ? "M5 12.5l5 5 9-11" : "M12 5v12M6.5 11.5l5.5 5.5 5.5-5.5");
-    p.setAttribute("fill", "none");
-    p.setAttribute("stroke", "currentColor");
-    p.setAttribute("stroke-width", "2.5");
-    p.setAttribute("stroke-linecap", "round");
-    p.setAttribute("stroke-linejoin", "round");
-    svg.append(p);
-    return svg;
+  function hallazgos(r: any, mapa?: any) {
+    const peso = { error: 0, aviso: 1, nota: 2 } as Record<string, number>;
+    return [
+      ...r.globales.map((a: any) => ({ ...a, linea: null })),
+      ...(r.documento ? r.documento.avisos.map((a: any) => ({ ...a, linea: mapa?.doc ?? null })) : []),
+      ...r.items.flatMap((i: any, k: number) =>
+        i.avisos.map((a: any) => ({ ...a, texto: `Ítem ${i.secItem ?? "?"}: ${a.texto}`, linea: mapa?.items[k] ?? null }))
+      ),
+    ].sort((a: any, b: any) => peso[a.grado] - peso[b.grado]);
   }
 
-  function pintarVeredicto(r: any, lista: string[]) {
+  /** Qué le pasa a cada ítem, en las palabras de la columna Estado. */
+  function estadoItem(i: any) {
+    if (!i.conCampo) return { ok: false, estado: "Sin código", detalle: "no trae dInfEmFE" };
+    const p = i.lectura.perfil;
+    if (i.codigo) return { ok: true, estado: p === "fer" ? "Bloque FER" : "Heredado", detalle: "" };
+    if (p === "fer") return { ok: false, estado: "Sin cbar", detalle: "el bloque no trae cbar" };
+    if (i.lectura.datos.cbar) return { ok: false, estado: "No es solo el código", detalle: "" };
+    return { ok: false, estado: "Sin código", detalle: "campo vacío" };
+  }
+
+  /**
+   * Datos de presentación que no evalúa ninguna regla: el total, el ITBMS y la vista
+   * del XML con el mapa de en qué línea está cada dInfEmFE. Los ítems se cuentan en
+   * orden de documento, igual que los recorre revisar-xml.js, así que el ítem k de la
+   * revisión es el gItem k de aquí.
+   */
+  function leerExtra(texto: string) {
+    const vacio = { total: null, itbms: null, lineas: [] as any[], mapa: { doc: null as number | null, items: [] as (number | null)[] } };
+    const dom = new DOMParser().parseFromString(texto, "application/xml");
+    if (dom.getElementsByTagName("parsererror").length) return vacio;
+    const lineas: any[] = [];
+    const mapa = vacio.mapa;
+    let nItem = -1;
+    const corta = (s: string, n = 140) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+    (function recorrer(nodo: Element, d: number, item: number) {
+      if (lineas.length > 4000) return;
+      const sangria = "  ".repeat(d);
+      if (nodo.localName === "gItem") item = ++nItem;
+      const hl = nodo.localName === "dInfEmFE";
+      const attrs: any[] = [];
+      for (const a of Array.from(nodo.attributes)) attrs.push({ t: ` ${a.name}=`, k: "attr" }, { t: `"${corta(a.value, 60)}"`, k: "val" });
+      const hijos = Array.from(nodo.childNodes).filter((n) => n.nodeType === 1) as Element[];
+      const txt = Array.from(nodo.childNodes)
+        .filter((n) => n.nodeType === 3 || n.nodeType === 4)
+        .map((n) => n.nodeValue)
+        .join("")
+        .replace(/\s+/g, " ")
+        .trim();
+      const abre = [{ t: sangria, k: "p" }, { t: "<", k: "p" }, { t: nodo.nodeName, k: "tag" }, ...attrs];
+      const cierra = [{ t: "</", k: "p" }, { t: nodo.nodeName, k: "tag" }, { t: ">", k: "p" }];
+      if (!hijos.length) {
+        if (hl) {
+          const n = lineas.length + 1;
+          if (item >= 0) mapa.items[item] = n;
+          else if (mapa.doc == null) mapa.doc = n;
+        }
+        if (txt) lineas.push({ hl, parts: [...abre, { t: ">", k: "p" }, { t: corta(txt), k: hl ? "hl" : "txt" }, ...cierra] });
+        else lineas.push({ hl, parts: [...abre, { t: "/>", k: "p" }] });
+        return;
+      }
+      lineas.push({ hl: false, parts: [...abre, { t: ">", k: "p" }] });
+      for (const k of hijos) recorrer(k, d + 1, item);
+      lineas.push({ hl: false, parts: [{ t: sangria, k: "p" }, ...cierra] });
+    })(dom.documentElement, 0, -1);
+    lineas.forEach((l, i) => (l.n = i + 1));
+    const primero = (nombre: string) => {
+      const n = dom.getElementsByTagNameNS("*", nombre)[0];
+      return n ? (n.textContent ?? "").trim() : null;
+    };
+    return { total: primero("dVTot"), itbms: primero("dTotITBMS"), lineas, mapa };
+  }
+
+  /**
+   * Todo lo que la pantalla y la constancia dicen de un documento, calculado una vez.
+   * Las filas obligatorias de «Lo que se revisó» son las mismas condiciones de
+   * `faltas()` dichas una por una: el veredicto es positivo si y solo si ninguna de
+   * ellas está mal.
+   */
+  function modelo(fuente: any) {
+    const { r, extra, revisadoEn } = fuente;
+    const mapa = extra?.mapa || { doc: null, items: [] };
+    const lista = faltas(r);
     const sirve = lista.length === 0;
-    const caja = el("div", `veredicto veredicto--${sirve ? "si" : "no"}`);
-
-    const titular = el("p", "veredicto__titular");
-    titular.append(marca(sirve), el("span", undefined, sirve ? "Sirve" : "Hay que corregirlo"));
-    caja.append(titular);
-
     const c = r.cobertura;
-    const cabeceraHeredada = r.documento?.lectura?.perfil === "heredado";
+    const datos = r.documento?.lectura?.datos ?? {};
+    const perfilDoc = r.documento?.lectura?.perfil;
+    const cabeceraHeredada = perfilDoc === "heredado";
     const todoFer = !cabeceraHeredada && c.heredado === 0;
-    caja.append(
-      el(
-        "p",
-        "veredicto__porque",
-        sirve
-          ? `Trae la Orden de Compra y ${c.total === 1 ? "su único ítem trae" : `sus ${c.total} ítems traen`} Código de Barras${todoFer ? " en bloque FER" : ""}.`
-          : `${lista[0][0].toUpperCase()}${lista[0].slice(1)}${lista.length > 1 ? `, y ${lista.slice(1).join(", ")}` : ""}.`
-      )
-    );
+    const todos = hallazgos(r, mapa);
+    const id = r.identificacion;
+
+    const porque = sirve
+      ? `Trae la Orden de Compra y ${c.total === 1 ? "su único ítem trae" : `sus ${c.total} ítems traen`} Código de Barras${todoFer ? " en bloque FER" : ""}.`
+      : `${mayus(lista[0])}${lista.length > 1 ? `, y ${lista.slice(1).join(", ")}` : ""}.`;
 
     /**
      * Un sí en perfil heredado es un sí, sin asterisco en el titular: el documento se
@@ -545,433 +844,143 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
      * migrar» en este sitio es exactamente la fricción que el perfil heredado existe
      * para evitar (§7.1).
      */
+    let heredado: { antes: string; cola: string } | null = null;
     if (sirve && !todoFer) {
       const partes = [
         cabeceraHeredada && "la cabecera",
-        c.heredado &&
-          (c.heredado === c.total
-            ? c.total === 1
-              ? "el ítem"
-              : `los ${c.total} ítems`
-            : `${c.heredado} de ${c.total} ítems`),
+        c.heredado && (c.heredado === c.total ? (c.total === 1 ? "el ítem" : `los ${c.total} ítems`) : `${c.heredado} de ${c.total} ítems`),
       ].filter(Boolean) as string[];
-      const quien = partes.join(" y ");
       const varios = partes.length > 1 || (c.heredado > 1 && !cabeceraHeredada);
-      const heredado = el("p", "veredicto__porque");
-      heredado.append(
-        `${quien[0].toUpperCase()}${quien.slice(1)} ${varios ? "van" : "va"} en el `,
-        enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"),
-        `, que un receptor conforme lee igual. Es un formato transitorio: cuando toque cambiar la emisión, el paso siguiente es el bloque FER.`
-      );
-      caja.append(heredado);
+      heredado = {
+        antes: `${mayus(partes.join(" y "))} ${varios ? "van" : "va"} en el `,
+        cola: ", que un receptor conforme lee igual. Es un formato transitorio: cuando toque cambiar la emisión, el paso siguiente es el bloque FER.",
+      };
     }
 
-    const alcance = el("p", "veredicto__alcance");
-    alcance.append(
-      "Se revisó este archivo, no la implementación de quien lo emitió: para eso están los ",
-      enlace(`${REPO}/blob/main/conformidad/casos.json`, "20 casos de conformidad"),
-      "."
-    );
-    caja.append(alcance);
-    return caja;
-  }
-
-  /**
-   * Para que quien valida reconozca su propia factura y no dude de qué informe está
-   * viendo. Sigue sin ser una rejilla de rótulos —identificar el documento es una
-   * comprobación de un vistazo, no algo que se lea campo a campo— pero va en dos
-   * líneas y no en una: arriba qué documento es, abajo entre quiénes va.
-   *
-   * Antes era una sola línea con los cuatro campos separados por «·», y ahí ese signo
-   * hacía dos trabajos con el mismo peso: separaba campos y separaba el nombre del
-   * emisor de su RUC. Cinco separadores idénticos y ningún agrupamiento visible. El
-   * RUC va ahora entre paréntesis, subordinado al nombre al que pertenece, y «·»
-   * queda solo en el primer nivel.
-   *
-   * «De X para Y» y no una flecha: la frase se lee entera, también en voz alta, y la
-   * dirección emisor→receptor es justo lo que aquí no puede quedar ambiguo. El nombre
-   * del receptor suele traer sus propias comas —«BODEGA, S.A. XTRA JUAN DIAZ»— así
-   * que sin una palabra que lo introduzca se funde con lo que tiene delante.
-   */
-  function pintarFicha(id: any) {
-    const lineas: string[] = [];
-
-    const que = [id.numero, fechaLegible(id.fecha)].filter(Boolean);
-    // Espacios duros alrededor del «·»: con espacios normales el navegador puede
-    // partir la línea justo ahí y dejar el separador colgando al final.
-    if (que.length) lineas.push(que.join("\u00a0·\u00a0"));
-
-    const emisor = id.emisor && (id.ruc ? `${id.emisor} (RUC ${id.ruc})` : id.emisor);
-    // Cuando falta el emisor, «para» encabeza la línea y va en mayúscula.
-    if (emisor && id.receptor) lineas.push(`De ${emisor} para ${id.receptor}`);
-    else if (emisor) lineas.push(`De ${emisor}`);
-    else if (id.receptor) lineas.push(`Para ${id.receptor}`);
-
-    if (!lineas.length) return null;
-    const ficha = el("p", "ficha");
-    for (const l of lineas) ficha.append(el("span", "ficha__linea", l));
-    return ficha;
-  }
-
-  /**
-   * Las tres cifras que decide leer una cadena: si llega la Orden de Compra, cuántos
-   * productos traen Código de Barras y con qué referencia se concilia. Estaban en el
-   * informe, pero dentro de un dl y una tabla, que es donde se buscan cuando ya se
-   * sospecha algo — no donde se ven de entrada.
-   */
-  function pintarCifras(r: any) {
-    const datos = r.documento?.lectura?.datos ?? {};
-    const c = r.cobertura;
-    const fila = el("div", "cifras");
-
-    function cifra(rotulo: string, dato: string | null, pie: string) {
-      const caja = el("div", "cifra");
-      caja.append(el("p", "cifra__rotulo", rotulo));
-      caja.append(el("p", dato ? "cifra__dato" : "cifra__dato cifra__dato--vacio", dato ?? "no viaja"));
-      caja.append(el("p", "cifra__pie", pie));
-      return caja;
-    }
+    const ficha = [
+      { k: "Documento", v: id.numero ?? "—", sub: fechaLegible(id.fecha) },
+      { k: "Emisor", v: id.emisor ?? "—", sub: id.ruc ? `RUC ${id.ruc}` : null },
+      { k: "Receptor", v: id.receptor ?? "—", sub: null },
+      { k: "Total", v: dinero(extra?.total) ?? "—", sub: extra?.itbms != null ? `ITBMS ${dinero(extra.itbms)}` : null },
+      { k: "Ítems", v: String(r.totalItems), sub: id.itemsDeclarados && Number(id.itemsDeclarados) !== r.totalItems ? `declara ${id.itemsDeclarados}` : null },
+    ];
 
     // Una Orden de Compra heredada con una etiqueta pegada llega, pero mal: decir
-    // «conciliable» debajo contradiría el error de §7.1 que la explica.
-    const ocConMarcado = /[<>]/.test(datos.oc ?? "");
-    fila.append(
-      cifra(
-        "Orden de Compra",
-        datos.oc ?? null,
-        !datos.oc
-          ? "el receptor no puede conciliar este documento"
-          : ocConMarcado
-            ? "llega con una etiqueta HTML pegada: no concilia"
-            : "conciliable contra el pedido"
-      )
-    );
-    // Los del bloque y los heredados limpios; los heredados con texto no suman —ver la
-    // nota en `faltas()`— y se nombran aparte para que se vea cuántos hay que tocar.
-    const pie = [
-      c.fer && (c.heredado ? `${c.fer} en bloque FER` : "en bloque FER"),
-      c.heredado && (c.fer ? `${c.heredado} en perfil heredado` : "en perfil heredado"),
-      c.heredadoConTexto && `${c.heredadoConTexto} no ${c.heredadoConTexto === 1 ? "trae" : "traen"} solo el código`,
+    // «conciliable» contradiría el error de §7.1 que la explica.
+    const ocRota = /[<>]/.test(datos.oc ?? "");
+    const conCodigo = c.fer + c.heredado;
+    const sinCodigo = c.total - c.fer - c.heredado - c.heredadoConTexto;
+    const cbDet = [];
+    if (sinCodigo) cbDet.push(`${sinCodigo} sin Código de Barras`);
+    if (c.heredadoConTexto) cbDet.push(`${c.heredadoConTexto} no ${c.heredadoConTexto === 1 ? "trae" : "traen"} solo el código`);
+    const cbOk = [
+      c.fer && (c.heredado ? `${c.fer} en bloque FER` : "Todos en bloque FER"),
+      c.heredado && (c.fer ? `${c.heredado} en perfil heredado` : "Todos en perfil heredado"),
     ]
       .filter(Boolean)
       .join(" · ");
-    fila.append(
-      cifra(
-        "Código de Barras",
-        c.total ? `${c.fer + c.heredado} de ${c.total}` : null,
-        !c.total ? "el documento no tiene ítems" : pie || "ningún ítem lo trae"
-      )
-    );
-    fila.append(
-      cifra(
-        "Referencia",
-        datos.ref ?? null,
-        datos.ref ? "identifica a la cadena en el pedido" : "clave ref ausente en la cabecera"
-      )
-    );
-    return fila;
-  }
+    const checks: any[] = [
+      {
+        estado: datos.oc && !ocRota ? "ok" : "mal",
+        decide: true,
+        titulo: "Orden de Compra",
+        ref: perfilDoc === "fer" ? "§6" : "§4.1 · §7",
+        valor: datos.oc ?? "no viaja",
+        detalle: !datos.oc
+          ? r.documento
+            ? "El campo de cabecera no la trae en un formato que el receptor pueda leer."
+            : "No hay campo dInfEmFE en la cabecera."
+          : ocRota
+            ? "Llega con una etiqueta HTML pegada: no concilia."
+            : perfilDoc === "fer"
+              ? "Viaja en el bloque FER de la cabecera. Conciliable contra el pedido."
+              : "Viaja en el perfil heredado («Orden de compra:»). Conciliable contra el pedido.",
+      },
+      {
+        estado: c.total === 0 ? "info" : conCodigo === c.total ? "ok" : "mal",
+        decide: true,
+        titulo: "Código de Barras en cada ítem",
+        ref: "§4.2 · §7.1",
+        valor: c.total ? `${conCodigo} de ${c.total}` : "sin ítems",
+        detalle:
+          c.total === 0
+            ? "El documento no tiene ítems."
+            : cbDet.length
+              ? `${mayus(cbDet.join(" y "))}. Están marcados en la tabla de ítems.`
+              : `${cbOk}.`,
+      },
+      {
+        estado: r.resumen.errores ? "mal" : "ok",
+        decide: true,
+        titulo: "Sin defectos de emisión",
+        ref: "§3 · §4 · §5",
+        valor: r.resumen.errores ? plural(r.resumen.errores, "error", "errores") : "0 errores",
+        detalle: r.resumen.errores
+          ? "Hay bloques que el receptor no puede leer bien. Están en «Cómo se corrige»."
+          : "Ningún bloque sin cerrar, clave duplicada ni campo fuera de límite.",
+      },
+      {
+        estado: datos.ref ? "ok" : "info",
+        decide: false,
+        titulo: "Referencia (ref)",
+        ref: "§6",
+        valor: datos.ref ? recorte(datos.ref, 32) : "no viaja",
+        detalle: datos.ref ? "Identifica a la cadena en el pedido." : "Clave opcional. No cambia el veredicto.",
+      },
+      {
+        estado: r.resumen.avisos ? "info" : "ok",
+        decide: false,
+        titulo: "Recomendaciones de emisión",
+        ref: "§4.3 · §4.4",
+        valor: r.resumen.avisos ? plural(r.resumen.avisos, "aviso", "avisos") : "0 avisos",
+        detalle: r.resumen.avisos
+          ? "No cambian el veredicto. Están en «Observaciones»."
+          : "Se cumplen las recomendaciones de forma del bloque.",
+      },
+    ];
+    const primeraMala = r.items.findIndex((i: any) => !estadoItem(i).ok);
+    const lineaDe = (g: string) => (todos.find((a: any) => a.grado === g && a.linea) || {}).linea ?? null;
+    checks[0].linea = mapa.doc;
+    checks[1].linea = primeraMala >= 0 ? mapa.items[primeraMala] ?? null : mapa.items.find(Boolean) ?? null;
+    checks[2].linea = lineaDe("error");
+    checks[3].linea = mapa.doc;
+    checks[4].linea = lineaDe("aviso");
+    const decisivas = checks.filter((k) => k.decide);
+    const malas = decisivas.filter((k) => k.estado === "mal").length;
+    const resumenChecks = malas
+      ? `${malas} de ${decisivas.length} obligatorias por corregir`
+      : `${decisivas.length} de ${decisivas.length} obligatorias en orden`;
 
-  /**
-   * Un campo de cabecera puede traer 5.000 caracteres de prosa. Se recorta para que la
-   * línea «ahora» quepa al lado de la línea «escribe» y la diferencia entre las dos se
-   * vea de un golpe, que es lo único que esa fila tiene que conseguir. El campo entero
-   * sigue estando en el detalle, sin recortar.
-   */
-  function recorte(s: string, n = 96) {
-    const plano = s.replace(/\s+/g, " ").trim();
-    return plano.length > n ? `${plano.slice(0, n - 1)}…` : plano;
-  }
+    const items = r.items.map((i: any, k: number) => {
+      const e = estadoItem(i);
+      const cbar = i.conCampo ? i.lectura.datos.cbar : null;
+      return {
+        ...e,
+        sec: i.secItem ?? "—",
+        desc: i.descProd ?? "sin dDescProd",
+        cod: i.codProd ?? "—",
+        cbar: i.codigo ?? (cbar ? recorte(cbar, 40) : e.detalle || "—"),
+        perfil: i.conCampo ? i.lectura.perfil : "—",
+        avisos: i.avisos.length,
+        linea: mapa.items[k] ?? null,
+      };
+    });
+    const porCorregir = items.filter((i: any) => !i.ok).length;
+    const resumenItems =
+      c.total === 0
+        ? "El documento no tiene ítems."
+        : porCorregir
+          ? `${porCorregir} de ${c.total} por corregir`
+          : `Los ${c.total} traen Código de Barras`;
 
-  const HUECOS = /NÚMERO|CÓDIGO|TU-REFERENCIA/g;
-
-  /** El hueco va marcado para que no se pegue tal cual sin verlo. */
-  function pintarBloque(s: string) {
-    const frag = document.createDocumentFragment();
-    let i = 0;
-    HUECOS.lastIndex = 0;
-    for (let m; (m = HUECOS.exec(s)); ) {
-      if (m.index > i) frag.append(el("span", undefined, s.slice(i, m.index)));
-      frag.append(el("span", "receta__hueco", m[0]));
-      i = m.index + m[0].length;
-    }
-    if (i < s.length) frag.append(el("span", undefined, s.slice(i)));
-    return frag;
-  }
-
-  function pintarPaso(p: any) {
-    const paso = el("div", "receta__paso");
-
-    const titulo = el("p", "receta__paso-titulo");
-    titulo.append(el("span", "receta__paso-que", p.titulo));
-    if (p.cuantos > 1) {
-      const cuales = p.ejemplos.slice(0, 6).join(", ");
-      titulo.append(
-        el(
-          "span",
-          "receta__cuantos",
-          `${p.cuantos} ítems${cuales ? ` · ${cuales}${p.ejemplos.length > 6 ? "…" : ""}` : ""}`
-        )
-      );
-    }
-    titulo.append(el("span", "receta__ref", p.ref));
-    paso.append(titulo);
-
-    const dl = el("dl", "receta__diff");
-    dl.append(el("dt", undefined, "ahora"));
-    dl.append(
-      el(
-        "dd",
-        p.ahora ? "receta__ahora" : "receta__ahora receta__ahora--nada",
-        p.ahora ? recorte(p.ahora) : "el campo no existe"
-      )
-    );
-    paso.append(dl);
-
-    /** Una forma que se puede escribir: el bloque, o la heredada. Cada una con su dónde y su botón. */
-    function forma(rotulo: string, bloque: string, donde: string | (string | Node)[]) {
-      const diff = paso.lastElementChild === dl ? dl : el("dl", "receta__diff");
-      diff.append(el("dt", undefined, rotulo));
-      const dd = el("dd", "receta__deberia");
-      dd.append(pintarBloque(bloque));
-      diff.append(dd);
-      if (diff !== dl) paso.append(diff);
-
-      const pie = el("p", "receta__donde");
-      // En un span: el pie es flex, y un enlace suelto dentro se volvería un ítem aparte.
-      const texto = el("span");
-      texto.append(...(typeof donde === "string" ? [donde] : donde));
-      pie.append(texto);
-      const copiar = document.createElement("button");
-      copiar.type = "button";
-      copiar.className = "receta__copiar";
-      copiar.textContent = "Copiar";
-      copiar.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(bloque);
-          copiar.textContent = "Copiado";
-        } catch {
-          copiar.textContent = "No se pudo";
-        }
-        setTimeout(() => (copiar.textContent = "Copiar"), 2000);
-      });
-      pie.append(copiar);
-      paso.append(pie);
-    }
-
-    forma("escribe", p.bloque, p.donde);
-    /**
-     * La forma heredada va debajo y rotulada «o bien»: la ofrece quien ya emite ese
-     * formato para otra cadena y no tiene por qué cambiarlo, pero no al mismo nivel
-     * que el bloque. Ver la nota de `receta()` en revisar-xml.js.
-     */
-    if (p.alternativa) {
-      forma("o bien", p.alternativa.bloque, [
-        "En el ",
-        enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"),
-        `, ${p.alternativa.donde}.`,
-      ]);
-    }
-
-    /**
-     * El candidato va fuera de lo que se copia y dicho como lo que es. Ver la nota de
-     * `receta()` en revisar-xml.js: el validador enseña la forma, no rellena el valor.
-     */
-    if (p.candidato) {
-      const c = el("p", "receta__candidato");
-      c.append(el("b", undefined, p.candidato));
-      c.append(
-        p.clave === "oc"
-          ? " está en el campo y tiene forma de Orden de Compra, pero nada en el documento dice que lo sea. Confírmalo antes de escribirlo: una Orden de Compra equivocada se concilia contra el pedido de otro."
-          : " está en el texto del ítem y parece el código, pero en perfil heredado no hay forma de distinguir un código de una nota. Confírmalo contra tu maestro de artículos."
-      );
-      paso.append(c);
-    }
-
-    if (p.nota) paso.append(el("p", "receta__nota", p.nota));
-    return paso;
-  }
-
-  /**
-   * Lo que hay que escribir para que el documento sirva. Aparece solo cuando no sirve:
-   * si el veredicto es que sí, aquí no hay nada que decir y la pantalla no crece.
-   *
-   * Va abierto y no plegado, al contrario que el detalle. El detalle es el sustento del
-   * veredicto —se abre cuando ya se decidió discutirlo—; esto es la respuesta a la
-   * pregunta que trajo a alguien hasta aquí, y esconderla tras un clic sería dejar la
-   * herramienta diciendo «no» sin decir cómo, que es lo que hacía hasta ahora.
-   */
-  function pintarReceta(r: any) {
-    const pasos = receta(r);
-    const errores = hallazgos(r).filter((a: any) => a.grado === "error");
-    if (!pasos.length && !errores.length) return null;
-
-    const caja = el("section", "receta");
-    caja.append(el("h3", "receta__titulo", "Cómo se corrige"));
-    caja.append(
-      el(
-        "p",
-        "receta__intro",
-        "Los huecos en versales los rellena quien emite: esta herramienta lee el archivo y no puede saber qué número va en cada uno."
-      )
-    );
-
-    // Las variantes que no caben se nombran en una línea en vez de desplegarse: a partir
-    // de cuatro formas distintas lo que hay es un problema de emisión, no de campos.
-    const VISIBLES = 4;
-    for (const p of pasos.slice(0, VISIBLES)) caja.append(pintarPaso(p));
-    if (pasos.length > VISIBLES) {
-      caja.append(
-        el(
-          "p",
-          "receta__resto",
-          `Y ${pasos.length - VISIBLES} ${pasos.length - VISIBLES === 1 ? "variante más" : "variantes más"} con otra forma de campo. Están todas en el detalle.`
-        )
-      );
-    }
-
-    if (errores.length) {
-      caja.append(
-        el(
-          "h4",
-          "receta__aparte",
-          errores.length === 1
-            ? "Y un defecto de emisión que arreglar aparte"
-            : `Y ${errores.length} defectos de emisión que arreglar aparte`
-        )
-      );
-      caja.append(listaAvisos(errores));
-    }
-    return caja;
-  }
-
-  function pintarXml(r: any, nombre = "") {
-    const salida = $("salida-xml");
-    salida.replaceChildren();
-
-    if (!r.ok) {
-      salida.append(el("p", "xml__error", r.error));
-      return;
-    }
-
-    const lista = faltas(r);
-    salida.append(pintarVeredicto(r, lista));
-
-    const ficha = pintarFicha(r.identificacion);
-    if (ficha) salida.append(ficha);
-
-    salida.append(pintarCifras(r));
-
-    if (lista.length) {
-      const como = pintarReceta(r);
-      if (como) salida.append(como);
-    }
-
-    /**
-     * Todo lo que sigue es el sustento del veredicto —qué campo trae cada ítem, qué
-     * se leyó y con qué perfil— y va plegado: sirve para discutir con quien emitió,
-     * no para decidir. Abierto de entrada, compite con la única línea que hay que
-     * leer primero.
-     */
-    const todos = hallazgos(r);
-    const detalle = document.createElement("details");
-    detalle.className = "informe__detalle";
-    const cabeza = document.createElement("summary");
-    cabeza.className = "informe__abrir";
-    cabeza.textContent = todos.length
-      ? `Ver el detalle · ${plural(todos.length, "observación", "observaciones")}`
-      : "Ver el detalle";
-    detalle.append(cabeza);
-    salida.append(detalle);
-
-    if (todos.length) {
-      detalle.append(el("h3", undefined, "Observaciones"));
-      detalle.append(listaAvisos(todos));
-    }
-
-    detalle.append(el("h3", undefined, "Nivel de documento"));
-    if (!r.documento) {
-      detalle.append(el("p", "tool__vacio", "No hay campo dInfEmFE fuera de gItem."));
-    } else {
-      const d = r.documento;
-      const caja = el("div", "campo");
-      caja.append(el("p", "campo__etiqueta", `perfil ${d.lectura.perfil}`));
-      const cadena = el("p", "campo__cadena");
-      pintarMarcado(cadena, d.campo, d.lectura.perfil === "fer");
-      caja.append(cadena);
-      const dl = el("dl", "campo__lectura");
-      for (const k of ["oc", "ref"]) {
-        dl.append(
-          el("dt", undefined, k),
-          el("dd", d.lectura.datos[k] ? undefined : "tool__vacio", d.lectura.datos[k] ?? "ausente")
-        );
-      }
-      caja.append(dl);
-      detalle.append(caja);
-    }
-
-    detalle.append(el("h3", undefined, `Ítems · ${r.totalItems}`));
-    /**
-     * dNroItems es un campo de la Ficha Técnica, no de la convención, así que un
-     * desajuste no es un hallazgo FER. Se muestra igual porque casi siempre significa
-     * que el archivo se truncó en el camino, y entonces todo lo demás sobra.
-     */
-    const declarados = r.identificacion.itemsDeclarados;
-    if (declarados && Number(declarados) !== r.totalItems) {
-      detalle.append(
-        el(
-          "p",
-          "xml__discrepa",
-          `El documento declara ${declarados} ítems en dNroItems pero el archivo trae ${r.totalItems} nodos gItem.`
-        )
-      );
-    }
-    if (r.totalItems === 0) {
-      detalle.append(el("p", "tool__vacio", "El documento no tiene ítems."));
-    } else {
-      const tabla = el("table", "xml__tabla");
-      const thead = el("thead");
-      const trh = el("tr");
-      for (const c of ["#", "Producto", "dCodProd", "Código de Barras", "perfil"]) {
-        trh.append(el("th", undefined, c));
-      }
-      thead.append(trh);
-      tabla.append(thead);
-      const tbody = el("tbody");
-      for (const i of r.items) {
-        const tr = el("tr", i.conCampo ? undefined : "xml__fila--sin");
-        tr.append(el("td", undefined, i.secItem ?? "—"));
-        tr.append(el("td", i.descProd ? "xml__desc" : "tool__vacio", i.descProd ?? "sin dDescProd"));
-        tr.append(el("td", undefined, i.codProd ?? "—"));
-        if (!i.conCampo) {
-          tr.append(el("td", "tool__vacio", "no trae dInfEmFE"));
-          tr.append(el("td", "tool__vacio", "—"));
-        } else {
-          const cbar = i.lectura.datos.cbar;
-          tr.append(el("td", cbar ? "xml__dato" : "tool__vacio", cbar ?? "ausente"));
-          tr.append(el("td", "xml__perfil", i.lectura.perfil));
-        }
-        tbody.append(tr);
-      }
-      tabla.append(tbody);
-      detalle.append(tabla);
-    }
-
-    detalle.append(pintarCopiar(r, nombre));
-  }
-
-  function hallazgos(r: any) {
-    const peso = { error: 0, aviso: 1, nota: 2 } as Record<string, number>;
-    return [
-      ...r.globales,
-      ...(r.documento ? r.documento.avisos : []),
-      ...r.items.flatMap((i: any) =>
-        i.avisos.map((a: any) => ({ ...a, texto: `Ítem ${i.secItem ?? "?"}: ${a.texto}` }))
-      ),
-      // Por grado y no por orden de aparición: los globales se acumulan antes que los
-      // del campo de cabecera, y sin esto una nota informativa encabeza la lista
-      // mientras el aviso que explica el veredicto queda debajo.
-    ].sort((a: any, b: any) => peso[a.grado] - peso[b.grado]);
+    const pasos = sirve ? [] : receta(r);
+    const errores = todos.filter((a: any) => a.grado === "error");
+    const lineaPaso = (p: any) => {
+      if (p.clave === "oc") return mapa.doc;
+      const k = r.items.findIndex((i: any) => i.secItem === p.ejemplos[0]);
+      return k >= 0 ? mapa.items[k] ?? null : null;
+    };
+    return { r, sirve, lista, porque, heredado, ficha, checks, resumenChecks, malas, items, porCorregir, resumenItems, pasos, errores, todos, revisadoEn, lineaPaso };
   }
 
   /**
@@ -985,7 +994,7 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
     const c = r.cobertura;
     const lista = faltas(r);
     const L = [`Revisión FER 1.1.1 — ${nombre || "documento"}`, ""];
-    L.push(lista.length ? `Hay que corregirlo: ${lista.join("; ")}.` : "Sirve.");
+    L.push(lista.length ? `${TITULAR_NO}: ${lista.join("; ")}.` : `${TITULAR_SI}.`);
     L.push("");
     if (id.numero) L.push(`Documento: ${id.numero}`);
     if (id.emisor) L.push(`Emisor: ${id.emisor}${id.ruc ? ` (RUC ${id.ruc})` : ""}`);
@@ -1040,103 +1049,985 @@ const spec = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/spec/`;
 
     L.push("", `Revisado con ${location.href.split("#")[0]}`);
     L.push("La revisión lee el archivo; no certifica la implementación de quien lo emitió.");
+    L.push(`Consultas: ${SOPORTE}`);
     return L.join("\n");
   }
 
-  function pintarCopiar(r: any, nombre: string) {
-    const pie = el("div", "informe__pie");
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "informe__copiar";
-    boton.textContent = "Copiar informe";
-    boton.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(informeTexto(r, nombre));
-        boton.textContent = "Copiado";
-      } catch {
-        boton.textContent = "No se pudo copiar";
-      }
-      setTimeout(() => (boton.textContent = "Copiar informe"), 2000);
-    });
-    pie.append(boton);
-    pie.append(el("span", "informe__pie-nota", "Texto plano, para enviárselo a quien emitió."));
-    return pie;
+  // ── Estado de la revisión de XML ────────────────────────────────────────
+
+  const S: any = {
+    fase: "inicio",
+    r: null,
+    extra: null,
+    archivo: null,
+    revisadoEn: null,
+    lote: null,
+    filtro: "todos",
+    verObs: false,
+    verXml: false,
+    soloInf: false,
+    foco: null,
+  };
+  let timers: number[] = [];
+  const limpiarTimers = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+  };
+
+  const archivo = $("archivo") as HTMLInputElement;
+  const zona = $("zona");
+
+  function mostrar(fase: string) {
+    S.fase = fase;
+    ($("inicio") as HTMLElement).hidden = fase !== "inicio";
+    ($("revisando") as HTMLElement).hidden = fase !== "revisando";
+    ($("lote") as HTMLElement).hidden = fase !== "lote";
+    ($("resultado") as HTMLElement).hidden = fase !== "listo";
   }
+
+  /** La barra fija tapa los primeros 92px: se desplaza a mano y no con scrollIntoView. */
+  function irA(n: HTMLElement, margen = 92) {
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: n.getBoundingClientRect().top + window.scrollY - margen, behavior: "smooth" })
+    );
+  }
+
+  const sinAnimacion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /**
-   * La zona de subida se sustituye por la tarjeta del archivo. Antes seguía diciendo
-   * «Arrastra un XML aquí» después de revisar, y como el informe nacía fuera de la
-   * pantalla la página parecía no haber hecho nada.
+   * Los pasos no esperan a nada: la revisión tarda milisegundos. Están para que quien
+   * suelta el archivo vea qué se está mirando antes de ver el veredicto, y para que el
+   * resultado no aparezca de golpe fuera de la pantalla. Con movimiento reducido no hay
+   * pasos.
    */
-  function pintarCargado(f: File) {
-    const caja = $("cargado");
-    const tarjeta = el("div", "cargado");
-    const dato = el("div", "cargado__dato");
-    dato.append(el("p", "cargado__nombre", f.name));
-    dato.append(
-      el(
-        "p",
-        "cargado__meta",
-        `${peso(f.size)} · revisado a las ${new Date().toLocaleTimeString("es-PA", { hour: "2-digit", minute: "2-digit" })}`
-      )
+  function animarHasta(fase: "listo" | "lote", destino: () => HTMLElement) {
+    if (sinAnimacion()) {
+      mostrar(fase);
+      irA(destino());
+      return;
+    }
+    pintarRevisando();
+    mostrar("revisando");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    [1, 2, 3, 4].forEach((p, i) => timers.push(window.setTimeout(() => avanzarRevisando(p), 380 * (i + 1))));
+    timers.push(
+      window.setTimeout(() => {
+        mostrar(fase);
+        irA(destino());
+      }, 380 * 4 + 300)
     );
-    tarjeta.append(dato);
-    const otro = document.createElement("button");
-    otro.type = "button";
-    otro.className = "cargado__otro";
-    otro.textContent = "Revisar otro archivo";
-    otro.addEventListener("click", reiniciar);
-    tarjeta.append(otro);
-    caja.replaceChildren(tarjeta);
-    zona.hidden = true;
   }
 
-  function reiniciar() {
-    $("cargado").replaceChildren();
-    $("salida-xml").replaceChildren();
-    zona.hidden = false;
-    // Sin esto, volver a soltar el mismo archivo no dispara `change`.
-    archivo.value = "";
-    zona.scrollIntoView({ behavior: "smooth", block: "center" });
+  function iniciar(texto: string, nombre: string, size: number) {
+    limpiarTimers();
+    const r = revisarXml(texto);
+    const ahora = new Date();
+    Object.assign(S, {
+      r,
+      extra: r.ok ? leerExtra(texto) : null,
+      archivo: { nombre, meta: `${peso(size)} · revisado a las ${horaCorta(ahora)}`, size },
+      revisadoEn: ahora,
+      lote: null,
+      filtro: "todos",
+      verObs: false,
+      verXml: false,
+      soloInf: false,
+      foco: null,
+    });
+    pintarResultado();
+    animarHasta("listo", () => $("resultado"));
+  }
+
+  function errorArchivo(nombre: string, size: number, error: string) {
+    limpiarTimers();
+    Object.assign(S, { r: { ok: false, error }, extra: null, archivo: { nombre, meta: peso(size), size }, lote: null, revisadoEn: new Date() });
+    pintarResultado();
+    mostrar("listo");
+    irA($("resultado"));
   }
 
   function leerArchivo(f: File) {
-    pintarCargado(f);
-    $("cargado").scrollIntoView({ behavior: "smooth", block: "start" });
-
-    if (f.size > 8 * 1024 * 1024) {
-      pintarXml({ ok: false, error: "El archivo pesa más de 8 MB." });
-      return;
-    }
-
-    $("salida-xml").replaceChildren(el("p", "xml__leyendo", "Leyendo el archivo…"));
+    if (f.size > 8 * 1024 * 1024) return errorArchivo(f.name, f.size, "El archivo pesa más de 8 MB.");
     const fr = new FileReader();
-    fr.onload = () => pintarXml(revisarXml(String(fr.result)), f.name);
-    fr.onerror = () => pintarXml({ ok: false, error: "No se pudo leer el archivo." });
+    fr.onload = () => iniciar(String(fr.result), f.name, f.size);
+    fr.onerror = () => errorArchivo(f.name, f.size, "No se pudo leer el archivo.");
     fr.readAsText(f, "utf-8");
   }
 
-  const archivo = $("archivo") as HTMLInputElement;
-  archivo.addEventListener("change", () => {
-    const f = archivo.files?.[0];
-    if (f) leerArchivo(f);
-  });
+  function leerArchivos(lista: FileList | File[]) {
+    const fs = Array.from(lista);
+    if (!fs.length) return;
+    if (fs.length === 1) return leerArchivo(fs[0]);
+    Promise.all(
+      fs.map((f) =>
+        f.size > 8 * 1024 * 1024
+          ? Promise.resolve({ nombre: f.name, size: f.size, texto: null })
+          : f.text().then((t) => ({ nombre: f.name, size: f.size, texto: t }))
+      )
+    ).then(iniciarLote);
+  }
 
-  const zona = $("zona");
+  function iniciarLote(arr: { nombre: string; size: number; texto: string | null }[]) {
+    limpiarTimers();
+    const ahora = new Date();
+    const lote = arr.map((a) => {
+      const r = a.texto == null ? { ok: false, error: "El archivo pesa más de 8 MB." } : revisarXml(a.texto);
+      return { nombre: a.nombre, size: a.size, r, extra: r.ok && a.texto ? leerExtra(a.texto) : null, revisadoEn: ahora };
+    });
+    Object.assign(S, {
+      lote,
+      r: null,
+      extra: null,
+      revisadoEn: ahora,
+      foco: null,
+      archivo: {
+        nombre: plural(lote.length, "archivo", "archivos"),
+        meta: `${peso(arr.reduce((t, a) => t + a.size, 0))} · revisado a las ${horaCorta(ahora)}`,
+      },
+    });
+    pintarLote();
+    animarHasta("lote", () => $("lote"));
+  }
+
+  function abrirDelLote(i: number) {
+    const e = S.lote[i];
+    Object.assign(S, {
+      r: e.r,
+      extra: e.extra,
+      revisadoEn: e.revisadoEn,
+      archivo: { nombre: e.nombre, meta: `${peso(e.size)} · archivo ${i + 1} de ${S.lote.length}`, size: e.size },
+      filtro: "todos",
+      verObs: false,
+      verXml: false,
+      soloInf: false,
+      foco: null,
+    });
+    pintarResultado();
+    mostrar("listo");
+    irA($("resultado"));
+  }
+
+  function reiniciar() {
+    limpiarTimers();
+    // Sin esto, volver a soltar el mismo archivo no dispara `change`.
+    archivo.value = "";
+    Object.assign(S, { r: null, extra: null, archivo: null, lote: null, foco: null });
+    mostrar("inicio");
+    irA(zona, 140);
+  }
+
+  function cargarDemos(nombres: string[]) {
+    Promise.all(
+      nombres.map((d) =>
+        fetch(`${BASE}/ejemplos/${encodeURIComponent(d)}.xml`)
+          .then((x) => (x.ok ? x.text() : Promise.reject(new Error(String(x.status)))))
+          .then((t) => ({ nombre: `${d}.xml`, size: new Blob([t]).size, texto: t }))
+      )
+    )
+      .then((arr) => (arr.length === 1 ? iniciar(arr[0].texto, arr[0].nombre, arr[0].size) : iniciarLote(arr)))
+      .catch((e) => console.error("No se pudo cargar el ejemplo", e));
+  }
+
+  for (const b of document.querySelectorAll<HTMLButtonElement>("[data-demo]")) {
+    b.addEventListener("click", () => cargarDemos(b.dataset.demo === "*" ? DEMOS : [b.dataset.demo!]));
+  }
+
+  archivo.addEventListener("change", () => {
+    if (archivo.files?.length) leerArchivos(archivo.files);
+  });
   for (const ev of ["dragenter", "dragover"]) {
     zona.addEventListener(ev, (e) => {
       e.preventDefault();
-      zona.classList.add("zona--activa");
+      zona.classList.add("v-zona--activa");
     });
   }
   for (const ev of ["dragleave", "drop"]) {
     zona.addEventListener(ev, (e) => {
       e.preventDefault();
-      zona.classList.remove("zona--activa");
+      zona.classList.remove("v-zona--activa");
     });
   }
   zona.addEventListener("drop", (e) => {
-    const f = (e as DragEvent).dataTransfer?.files?.[0];
-    if (f) leerArchivo(f);
+    const fs = (e as DragEvent).dataTransfer?.files;
+    if (fs?.length) leerArchivos(fs);
   });
+
+  // ── Revisando ───────────────────────────────────────────────────────────
+
+  function pintarRevisando() {
+    const fuentes = S.lote ? S.lote.map((e: any) => e.r).filter((x: any) => x.ok) : S.r?.ok ? [S.r] : [];
+    const nCampos = fuentes.reduce((t: number, x: any) => t + (x.documento ? 1 : 0) + x.items.filter((i: any) => i.conCampo).length, 0);
+    const nItems = fuentes.reduce((t: number, x: any) => t + x.totalItems, 0);
+    const pasos = [
+      [S.lote ? `Leyendo ${plural(S.lote.length, "archivo", "archivos")}` : "Leyendo el archivo", S.archivo.meta.split(" · ")[0]],
+      ["Buscando los campos dInfEmFE", fuentes.length ? plural(nCampos, "campo", "campos") : ""],
+      ["Aplicando las reglas de FER 1.1.1", fuentes.length ? plural(nItems, "ítem", "ítems") : ""],
+      [S.lote ? "Armando los veredictos" : "Armando el veredicto", ""],
+    ];
+    llenar($("revisando"),
+      h("p", { class: "v-revisando__archivo" }, S.archivo.nombre),
+      h("p", { class: "v-revisando__titulo" }, S.lote ? `Revisando ${plural(S.lote.length, "factura", "facturas")}…` : "Revisando la factura…"),
+      h("div", { class: "v-progreso" }, h("div", { class: "v-progreso__barra", id: "progreso" })),
+      h(
+        "ol",
+        { class: "v-pasos" },
+        ...pasos.map(([texto, detalle], i) =>
+          h(
+            "li",
+            { class: `v-paso${i === 0 ? " v-paso--actual" : ""}`, "data-detalle": detalle },
+            h("span", { class: "v-paso__marca" }, marca("ok", "v-paso__visto")),
+            h("span", null, texto),
+            h("span", { class: "v-paso__detalle" })
+          )
+        )
+      ),
+      h("p", { class: "v-revisando__privado" }, svg([ESCUDO], "v-trazo", 13, 20), "Todo ocurre en tu navegador. Nada se envía.")
+    );
+  }
+
+  function avanzarRevisando(paso: number) {
+    ($("progreso") as HTMLElement).style.width = `${Math.min(100, paso * 25)}%`;
+    document.querySelectorAll<HTMLElement>("#revisando .v-paso").forEach((li, i) => {
+      li.classList.toggle("v-paso--hecho", paso > i);
+      li.classList.toggle("v-paso--actual", paso === i);
+      li.querySelector(".v-paso__detalle")!.textContent = paso > i ? li.dataset.detalle ?? "" : "";
+    });
+  }
+
+  // ── Resultado de un archivo ─────────────────────────────────────────────
+
+  function botonLinea(n: number | null, texto: string) {
+    if (!n) return null;
+    return h("button", { type: "button", class: "v-linea", onclick: () => verLinea(n) }, svg([LINEA], "v-trazo", 12), texto);
+  }
+
+  function botonPdf(onclick: () => void, texto = "Descargar constancia PDF", datos: Record<string, any> = { "data-pdf": true }) {
+    return h(
+      "button",
+      { type: "button", class: "v-boton v-boton--primario", onclick, ...datos },
+      svg(BAJAR, "v-trazo", 16),
+      h("span", { class: "v-boton__texto", "data-defecto": texto }, texto)
+    );
+  }
+
+  function boton(texto: string, onclick: () => void, clase = "") {
+    return h("button", { type: "button", class: `v-boton${clase ? ` ${clase}` : ""}`, onclick }, texto);
+  }
+
+  /** Cambia el texto de un botón un momento —«Copiado», «Descargada»— y lo devuelve. */
+  function etiqueta(span: Element, texto: string | null, ms = 0) {
+    const defecto = (span as HTMLElement).dataset.defecto ?? span.textContent ?? "";
+    if (!(span as HTMLElement).dataset.defecto) (span as HTMLElement).dataset.defecto = defecto;
+    span.textContent = texto ?? defecto;
+    if (ms) window.setTimeout(() => (span.textContent = defecto), ms);
+  }
+
+  async function copiar(b: HTMLElement, texto: string) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      etiqueta(b, "Copiado", 2000);
+    } catch {
+      etiqueta(b, "No se pudo copiar", 2000);
+    }
+  }
+
+  function partesBloque(s: string) {
+    const frag = document.createDocumentFragment();
+    const re = /NÚMERO|CÓDIGO|TU-REFERENCIA/g;
+    let i = 0;
+    for (let m; (m = re.exec(s)); ) {
+      if (m.index > i) frag.append(s.slice(i, m.index));
+      // El hueco va marcado para que no se pegue tal cual sin verlo.
+      frag.append(h("span", { class: "receta__hueco" }, m[0]));
+      i = m.index + m[0].length;
+    }
+    if (i < s.length) frag.append(s.slice(i));
+    return frag;
+  }
+
+  function grado(a: any) {
+    return h("span", { class: `v-grado v-grado--${a.grado}` }, a.grado);
+  }
+
+  function pintarResultado() {
+    const r = S.r;
+    const raiz = $("resultado");
+    const archivoBarra = h(
+      "div",
+      { class: "v-archivo" },
+      h("span", { class: "v-archivo__icono" }, iconoDocumento(20)),
+      h(
+        "div",
+        { class: "v-archivo__dato" },
+        h("p", { class: "v-archivo__nombre" }, S.archivo.nombre),
+        h("p", { class: "v-archivo__meta" }, S.archivo.meta)
+      ),
+      S.lote
+        ? boton(`← Todos los archivos (${S.lote.length})`, () => {
+            S.foco = null;
+            mostrar("lote");
+            irA($("lote"));
+          }, "v-boton--cian")
+        : boton("Revisar otro", reiniciar),
+      r.ok && botonPdf(() => generarPdf())
+    );
+    if (!r.ok) {
+      llenar(raiz, archivoBarra, h("p", { class: "v-error" }, r.error));
+      return;
+    }
+
+    const m = modelo(S);
+    const c = resumenConf();
+    const sep = () => h("span", { class: "v-procedencia__sep", "aria-hidden": "true" }, "·");
+    const f = m.revisadoEn as Date;
+
+    const veredicto = h(
+      "section",
+      { class: `v-veredicto v-veredicto--${m.sirve ? "si" : "no"}`, "aria-label": "Veredicto" },
+      h(
+        "div",
+        { class: "v-veredicto__cabeza" },
+        h("p", { class: "v-veredicto__titular" }, marca(m.sirve ? "ok" : "mal", "v-veredicto__marca"), h("span", null, m.sirve ? TITULAR_SI : TITULAR_NO)),
+        h("p", { class: "v-veredicto__porque" }, m.porque),
+        m.heredado &&
+          h("p", { class: "v-veredicto__heredado" }, m.heredado.antes, enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"), m.heredado.cola)
+      ),
+      h(
+        "dl",
+        { class: "v-ficha" },
+        ...m.ficha.map((x: any) =>
+          h("div", null, h("dt", null, x.k), h("dd", null, x.v), x.sub && h("dd", { class: "v-ficha__sub" }, x.sub))
+        )
+      ),
+      h(
+        "p",
+        { class: "v-procedencia" },
+        h("span", null, `Revisado el ${f.toLocaleDateString("es-PA", { day: "numeric", month: "long", year: "numeric" })} a las ${horaCorta(f)}`),
+        sep(),
+        h("span", null, "en tu navegador"),
+        sep(),
+        h("span", null, "reglas FER 1.1.1 con fer.js de referencia"),
+        c && sep(),
+        c && h("span", { class: c.todo ? "v-procedencia--ok" : "v-procedencia--mal" }, `${c.okN}/${c.norm.length} casos de conformidad pasan`)
+      )
+    );
+
+    const revisado = h(
+      "section",
+      { class: "v-tarjeta v-checks" },
+      h(
+        "div",
+        { class: "v-seccion__cabeza" },
+        h("h2", { class: "v-h2" }, "Lo que se revisó"),
+        h("span", { class: `v-resumen v-resumen--${m.malas ? "mal" : "ok"}` }, m.resumenChecks)
+      ),
+      h(
+        "p",
+        { class: "v-seccion__intro" },
+        "Las ",
+        h("b", null, "obligatorias"),
+        " deciden el veredicto: si una falla, hay que corregir. Las ",
+        h("b", null, "informativas"),
+        " no lo cambian."
+      ),
+      h(
+        "ul",
+        { class: "v-checks__lista" },
+        ...m.checks.map((k: any) =>
+          h(
+            "li",
+            { class: `v-check v-check--${k.estado}` },
+            marca(k.estado, "v-check__icono"),
+            h(
+              "div",
+              { class: "v-check__cuerpo" },
+              h("p", { class: "v-check__titulo" }, h("span", null, k.titulo), h("span", { class: "v-check__ref" }, k.ref)),
+              h("p", { class: "v-check__detalle" }, k.detalle),
+              k.linea && h("p", { class: "v-check__ver" }, botonLinea(k.linea, `Ver en el XML · línea ${k.linea}`))
+            ),
+            h(
+              "div",
+              { class: "v-check__lado" },
+              h("span", { class: "v-check__valor" }, k.valor),
+              h("span", { class: `v-tipo${k.decide ? " v-tipo--obligatoria" : ""}` }, k.decide ? "obligatoria" : "informativa")
+            )
+          )
+        )
+      )
+    );
+
+    llenar(raiz,
+      archivoBarra,
+      veredicto,
+      revisado,
+      pintarReceta(m),
+      h("section", { class: "v-tarjeta v-items", id: "v-items" }),
+      h("section", { class: "v-tarjeta v-plegable", id: "v-obs" }),
+      h("section", { class: "v-tarjeta v-plegable", id: "v-xml" }),
+      h(
+        "div",
+        { class: "v-llevar" },
+        h(
+          "div",
+          { class: "v-llevar__texto" },
+          h("p", { class: "v-llevar__titulo" }, "Llévate el resultado"),
+          h(
+            "p",
+            null,
+            "La constancia lleva el veredicto, lo que se revisó, los ítems y cómo se corrige, con el sello de Factura Fácil y la hora de la revisión."
+          )
+        ),
+        h(
+          "button",
+          {
+            type: "button",
+            class: "v-boton",
+            onclick: (e: Event) => copiar(e.currentTarget as HTMLElement, informeTexto(S.r, S.archivo?.nombre)),
+          },
+          "Copiar informe en texto"
+        ),
+        botonPdf(() => generarPdf())
+      ),
+      h(
+        "p",
+        { class: "v-pie-nota" },
+        "Se revisó este archivo, no la implementación de quien lo emitió: para eso están los ",
+        enlace(`${REPO}/blob/main/conformidad/casos.json`, "casos de conformidad"),
+        ". ¿Dudas con este resultado? Escribe a ",
+        enlace(`mailto:${SOPORTE}`, SOPORTE),
+        "."
+      )
+    );
+    pintarItems(m);
+    pintarObs(m);
+    pintarXmlVista();
+  }
+
+  /**
+   * Lo que hay que escribir para que el documento sirva. Aparece solo cuando no sirve:
+   * si el veredicto es que sí, aquí no hay nada que decir y la pantalla no crece.
+   *
+   * Va abierto y no plegado: es la respuesta a la pregunta que trajo a alguien hasta
+   * aquí, y esconderla tras un clic sería dejar la herramienta diciendo «no» sin decir
+   * cómo.
+   */
+  function pintarReceta(m: any) {
+    if (m.sirve || (!m.pasos.length && !m.errores.length)) return null;
+    // Las variantes que no caben se nombran en una línea en vez de desplegarse: a partir
+    // de cuatro formas distintas lo que hay es un problema de emisión, no de campos.
+    const VISIBLES = 4;
+
+    function forma(rotulo: string, bloque: string) {
+      return h(
+        "dl",
+        { class: "receta__diff" },
+        h("dt", null, rotulo),
+        h("dd", { class: "receta__deberia" }, partesBloque(bloque))
+      );
+    }
+    function pie(donde: Hijo[], bloque: string, linea?: Hijo) {
+      return h(
+        "p",
+        { class: "receta__donde" },
+        h("span", null, ...donde),
+        linea,
+        h("button", { type: "button", class: "receta__copiar", onclick: (e: Event) => copiarBloque(e.currentTarget as HTMLElement, bloque) }, "Copiar")
+      );
+    }
+
+    const pasos = m.pasos.slice(0, VISIBLES).map((p: any, i: number) => {
+      const linea = m.lineaPaso(p);
+      const cuales = p.ejemplos.slice(0, 6).join(", ");
+      return h(
+        "div",
+        { class: "receta__paso" },
+        h(
+          "p",
+          { class: "receta__paso-titulo" },
+          h("span", { class: "receta__n" }, String(i + 1)),
+          h("span", { class: "receta__paso-que" }, p.titulo),
+          p.cuantos > 1 && h("span", { class: "receta__cuantos" }, `${p.cuantos} ítems${cuales ? ` · ${cuales}${p.ejemplos.length > 6 ? "…" : ""}` : ""}`),
+          h("span", { class: "receta__ref" }, p.ref)
+        ),
+        h(
+          "dl",
+          { class: "receta__diff" },
+          h("dt", null, "ahora"),
+          h("dd", { class: p.ahora ? "receta__ahora" : "receta__ahora receta__ahora--nada" }, p.ahora ? recorte(p.ahora) : "el campo no existe")
+        ),
+        forma("escribe", p.bloque),
+        pie([p.donde], p.bloque, linea && botonLinea(linea, `ver en el XML · línea ${linea}`)),
+        /**
+         * La forma heredada va debajo y rotulada «o bien»: la ofrece quien ya emite ese
+         * formato para otra cadena y no tiene por qué cambiarlo, pero no al mismo nivel
+         * que el bloque. Ver la nota de `receta()` en revisar-xml.js.
+         */
+        p.alternativa && forma("o bien", p.alternativa.bloque),
+        p.alternativa && pie(["En el ", enlace(`${SPEC}#7-perfil-heredado`, "perfil heredado"), `, ${p.alternativa.donde}.`], p.alternativa.bloque),
+        /**
+         * El candidato va fuera de lo que se copia y dicho como lo que es. Ver la nota de
+         * `receta()` en revisar-xml.js: el validador enseña la forma, no rellena el valor.
+         */
+        p.candidato &&
+          h(
+            "p",
+            { class: "receta__candidato" },
+            h("b", null, p.candidato),
+            p.clave === "oc"
+              ? " está en el campo y tiene forma de Orden de Compra, pero nada en el documento dice que lo sea. Confírmalo antes de escribirlo: una Orden de Compra equivocada se concilia contra el pedido de otro."
+              : " está en el texto del ítem y parece el código, pero en perfil heredado no hay forma de distinguir un código de una nota. Confírmalo contra tu maestro de artículos."
+          ),
+        p.nota && h("p", { class: "receta__nota" }, p.nota)
+      );
+    });
+
+    const resto = m.pasos.length - VISIBLES;
+    return h(
+      "section",
+      { class: "v-tarjeta receta" },
+      h("h2", { class: "v-h2" }, "Cómo se corrige"),
+      h(
+        "p",
+        { class: "receta__intro" },
+        "Los huecos en versales los rellena quien emite: esta herramienta lee el archivo y no puede saber qué número va en cada uno."
+      ),
+      ...pasos,
+      resto > 0 &&
+        h(
+          "p",
+          { class: "receta__resto" },
+          `Y ${resto} ${resto === 1 ? "variante más" : "variantes más"} con otra forma de campo. Están todas en el informe copiado y en la constancia.`
+        ),
+      m.errores.length > 0 &&
+        h(
+          "h3",
+          { class: "receta__aparte" },
+          m.errores.length === 1 ? "Y un defecto de emisión que arreglar aparte" : `Y ${m.errores.length} defectos de emisión que arreglar aparte`
+        ),
+      m.errores.length > 0 &&
+        h(
+          "ul",
+          { class: "v-obs__lista v-obs__lista--errores" },
+          ...m.errores.map((a: any) =>
+            h("li", null, grado(a), h("span", { class: "v-obs__texto" }, a.texto), h("span", { class: "v-obs__lado" }, h("span", { class: "v-obs__ref" }, a.ref), botonLinea(a.linea, `línea ${a.linea}`)))
+          )
+        )
+    );
+  }
+
+  async function copiarBloque(b: HTMLElement, bloque: string) {
+    try {
+      await navigator.clipboard.writeText(bloque);
+      etiqueta(b, "Copiado", 2000);
+    } catch {
+      etiqueta(b, "No se pudo", 2000);
+    }
+  }
+
+  function pintarItems(m = modelo(S)) {
+    const caja = $("v-items");
+    const filas = S.filtro === "corregir" ? m.items.filter((i: any) => !i.ok) : m.items;
+    const filtro = (id: string, texto: string) =>
+      h(
+        "button",
+        {
+          type: "button",
+          role: "tab",
+          class: "v-segmento__opcion",
+          "aria-selected": String(S.filtro === id),
+          onclick: () => {
+            S.filtro = id;
+            pintarItems();
+          },
+        },
+        texto
+      );
+    const declarados = m.r.identificacion.itemsDeclarados;
+    llenar(caja,
+      h(
+        "div",
+        { class: "v-items__cabeza" },
+        h("div", null, h("h2", { class: "v-h2" }, "Ítems"), h("p", { class: "v-items__resumen" }, m.resumenItems)),
+        m.items.length > 0 &&
+          h(
+            "div",
+            { class: "v-segmento", role: "tablist", "aria-label": "Filtrar ítems" },
+            filtro("todos", `Todos · ${m.items.length}`),
+            filtro("corregir", `Por corregir · ${m.porCorregir}`)
+          )
+      ),
+      /**
+       * dNroItems es un campo de la Ficha Técnica, no de la convención, así que un
+       * desajuste no es un hallazgo FER. Se muestra igual porque casi siempre significa
+       * que el archivo se truncó en el camino, y entonces todo lo demás sobra.
+       */
+      declarados &&
+        Number(declarados) !== m.r.totalItems &&
+        h("p", { class: "v-items__discrepa" }, `El documento declara ${declarados} ítems en dNroItems pero el archivo trae ${m.r.totalItems} nodos gItem.`),
+      filas.length
+        ? h(
+            "div",
+            { class: "v-scroll" },
+            h(
+              "table",
+              { class: "v-tabla" },
+              h("thead", null, h("tr", null, ...["Estado", "#", "Producto", "dCodProd", "Código de Barras", "Perfil"].map((t) => h("th", null, t)))),
+              h(
+                "tbody",
+                null,
+                ...filas.map((i: any) =>
+                  h(
+                    "tr",
+                    { class: i.ok ? null : "v-tabla__fila--mal" },
+                    h("td", null, h("span", { class: `v-estado v-estado--${i.ok ? "ok" : "mal"}` }, marca(i.ok ? "ok" : "mal", "v-estado__icono"), i.estado)),
+                    h("td", { class: "v-tabla__mono v-tabla__tenue" }, i.sec),
+                    h("td", { class: "v-tabla__producto" }, i.desc, i.avisos > 0 && h("span", { class: "v-tabla__avisos" }, plural(i.avisos, "observación", "observaciones"))),
+                    h("td", { class: "v-tabla__mono v-tabla__tenue" }, i.cod),
+                    h("td", { class: "v-tabla__mono v-tabla__cbar" }, h("span", { class: i.ok ? "v-cbar v-cbar--ok" : "v-cbar" }, i.cbar)),
+                    h("td", { class: "v-tabla__perfil" }, h("span", null, i.perfil), i.linea && h("span", null, botonLinea(i.linea, `línea ${i.linea}`)))
+                  )
+                )
+              )
+            )
+          )
+        : h("p", { class: "v-items__vacio" }, m.items.length === 0 ? "El documento no tiene ítems." : "Ningún ítem por corregir.")
+    );
+  }
+
+  /** Cabecera de una sección plegable: un botón, no un <details>, para poder abrirla desde un enlace de línea. */
+  function cabezaPlegable(abierta: boolean, onclick: () => void, ...hijos: Hijo[]) {
+    return h(
+      "button",
+      { type: "button", class: "v-plegable__cabeza", "aria-expanded": String(abierta), onclick },
+      h("span", { class: "v-chevron", "aria-hidden": "true" }),
+      ...hijos
+    );
+  }
+
+  function pintarObs(m = modelo(S)) {
+    const cont: Record<string, number> = { error: 0, aviso: 0, nota: 0 };
+    m.todos.forEach((a: any) => cont[a.grado]++);
+    const nombres: Record<string, [string, string]> = { error: ["error", "errores"], aviso: ["aviso", "avisos"], nota: ["nota", "notas"] };
+    const conteos = Object.entries(cont)
+      .filter(([, n]) => n)
+      .map(([g, n]) => h("span", { class: `v-grado v-grado--${g} v-grado--conteo` }, plural(n, ...nombres[g])));
+    if (!conteos.length) conteos.push(h("span", { class: "v-grado v-grado--nota v-grado--conteo" }, "ninguna"));
+    llenar($("v-obs"),
+      cabezaPlegable(
+        S.verObs,
+        () => {
+          S.verObs = !S.verObs;
+          pintarObs();
+        },
+        h("span", { class: "v-plegable__titulo" }, "Observaciones"),
+        ...conteos,
+        h("span", { class: "v-plegable__nota" }, "Los avisos y las notas no cambian el veredicto")
+      ),
+      S.verObs &&
+        h(
+          "ul",
+          { class: "v-obs__lista" },
+          ...m.todos.map((a: any) =>
+            h("li", null, grado(a), h("span", { class: "v-obs__texto" }, a.texto), h("span", { class: "v-obs__lado" }, h("span", { class: "v-obs__ref" }, a.ref), botonLinea(a.linea, `línea ${a.linea}`)))
+          ),
+          m.todos.length === 0 && h("li", { class: "v-obs__vacio" }, "Sin observaciones.")
+        )
+    );
+  }
+
+  /**
+   * El XML tal como llegó, con los dInfEmFE resaltados: para que quien discute un
+   * hallazgo con su proveedor pueda señalar la línea y no describirla. Solo
+   * presentación; las reglas no lo leen.
+   */
+  function pintarXmlVista() {
+    const lineas = S.extra?.lineas ?? [];
+    const conInf = lineas.filter((l: any) => l.hl);
+    const visibles = S.soloInf ? conInf : lineas;
+    llenar($("v-xml"),
+      cabezaPlegable(
+        S.verXml,
+        () => {
+          S.verXml = !S.verXml;
+          pintarXmlVista();
+        },
+        h("span", { class: "v-plegable__titulo" }, "El XML"),
+        h("span", { class: "v-plegable__resumen" }, `${lineas.length} líneas · ${plural(conInf.length, "campo dInfEmFE", "campos dInfEmFE")} resaltados`)
+      ),
+      S.verXml &&
+        h(
+          "div",
+          { class: "v-xml" },
+          h(
+            "div",
+            { class: "v-xml__barra" },
+            S.foco && h("span", { class: "v-xml__foco" }, `Línea ${S.foco}`),
+            h(
+              "label",
+              { class: "v-xml__solo" },
+              h("input", {
+                type: "checkbox",
+                checked: S.soloInf,
+                onchange: () => {
+                  S.soloInf = !S.soloInf;
+                  pintarXmlVista();
+                },
+              }),
+              "Solo las líneas con dInfEmFE"
+            ),
+            h("span", { class: "v-xml__leyenda" }, h("span", { class: "v-xml__muestra" }), "lo que lee el receptor")
+          ),
+          h(
+            "div",
+            { class: "v-xml__caja", id: "xml-caja", tabindex: "0", "aria-label": "Contenido del XML" },
+            ...visibles.map((l: any) =>
+              h(
+                "div",
+                { class: `v-xml__linea${l.hl ? " v-xml__linea--inf" : ""}${l.n === S.foco ? " v-xml__linea--foco" : ""}`, "data-n": l.n },
+                h("span", { class: "v-xml__n" }, String(l.n)),
+                h("span", { class: "v-xml__codigo" }, ...l.parts.map((p: any) => h("span", { class: `v-x-${p.k}` }, p.t)))
+              )
+            )
+          )
+        )
+    );
+  }
+
+  /** Abre el visor en la línea pedida y la centra. A mano, sin scrollIntoView: la barra fija se comería la línea. */
+  function verLinea(n: number) {
+    Object.assign(S, { verXml: true, soloInf: false, foco: n });
+    pintarXmlVista();
+    requestAnimationFrame(() => {
+      const caja = document.getElementById("xml-caja");
+      if (!caja) return;
+      const fila = caja.querySelector<HTMLElement>(`[data-n="${n}"]`);
+      if (fila) caja.scrollTop = fila.offsetTop - caja.clientHeight / 2;
+      window.scrollTo({ top: caja.getBoundingClientRect().top + window.scrollY - 150, behavior: "smooth" });
+    });
+  }
+
+  // ── Varios archivos ─────────────────────────────────────────────────────
+
+  function pintarLote() {
+    const filas = S.lote.map((e: any, i: number) => {
+      const abrir = () => abrirDelLote(i);
+      if (!e.r.ok) {
+        return { sirve: false, abrir, nombre: e.nombre, veredicto: "No se pudo leer", sub: e.r.error, oc: "—", cb: "—", err: "—", ocMal: false, cbMal: false, errMal: false };
+      }
+      const lista = faltas(e.r);
+      const d = e.r.documento?.lectura?.datos ?? {};
+      const c = e.r.cobertura;
+      const id = e.r.identificacion;
+      return {
+        sirve: !lista.length,
+        abrir,
+        nombre: e.nombre,
+        veredicto: lista.length ? TITULAR_NO : TITULAR_SI,
+        sub: [id.numero, id.emisor].filter(Boolean).join(" · "),
+        oc: d.oc ?? "no viaja",
+        ocMal: !d.oc,
+        cb: c.total ? `${c.fer + c.heredado} de ${c.total}` : "sin ítems",
+        cbMal: c.fer + c.heredado !== c.total,
+        err: e.r.resumen.errores ? plural(e.r.resumen.errores, "error", "errores") : "0",
+        errMal: e.r.resumen.errores > 0,
+      };
+    });
+    const listos = filas.filter((f: any) => f.sirve).length;
+    const celda = (texto: string, mal: boolean, extra = "") => h("td", { class: `v-tabla__mono${mal ? " v-tabla__mal" : ""}${extra}` }, texto);
+    llenar($("lote"),
+      h(
+        "div",
+        { class: "v-lote__cabeza" },
+        h(
+          "div",
+          { class: "v-lote__titulo" },
+          h("h2", { class: "v-h2 v-h2--grande" }, plural(filas.length, "factura revisada", "facturas revisadas")),
+          h(
+            "p",
+            { class: "v-lote__cuenta" },
+            h("span", { class: "v-resumen v-resumen--ok" }, `${listos} ${listos === 1 ? "lista" : "listas"} para recibir`),
+            h("span", { class: "v-resumen v-resumen--mal" }, `${filas.length - listos} por corregir`)
+          )
+        ),
+        boton("Revisar otros", reiniciar),
+        h("button", { type: "button", class: "v-boton", onclick: (e: Event) => copiar(e.currentTarget as HTMLElement, resumenLote()) }, "Copiar resumen"),
+        botonPdf(pdfLote, "Descargar constancias", { id: "pdf-lote" })
+      ),
+      h(
+        "div",
+        { class: "v-tarjeta v-tarjeta--tabla" },
+        h(
+          "div",
+          { class: "v-scroll" },
+          h(
+            "table",
+            { class: "v-tabla v-tabla--lote" },
+            h("thead", null, h("tr", null, ...["Veredicto", "Archivo", "Orden de Compra", "Códigos", "Errores", ""].map((t) => h("th", null, t)))),
+            h(
+              "tbody",
+              null,
+              ...filas.map((f: any) =>
+                h(
+                  "tr",
+                  { class: `v-tabla__abre${f.sirve ? "" : " v-tabla__fila--mal"}`, onclick: f.abrir },
+                  h("td", null, h("span", { class: `v-estado v-estado--${f.sirve ? "ok" : "mal"}` }, marca(f.sirve ? "ok" : "mal", "v-estado__icono"), f.veredicto)),
+                  h("td", { class: "v-tabla__archivo" }, h("span", { class: "v-tabla__nombre" }, f.nombre), h("span", { class: "v-tabla__sub" }, f.sub)),
+                  celda(f.oc, f.ocMal),
+                  celda(f.cb, f.cbMal, " v-tabla__corto"),
+                  celda(f.err, f.errMal, " v-tabla__corto v-tabla__tenue"),
+                  h(
+                    "td",
+                    { class: "v-tabla__ver" },
+                    h(
+                      "button",
+                      {
+                        type: "button",
+                        class: "v-enlace",
+                        onclick: (e: Event) => {
+                          e.stopPropagation();
+                          f.abrir();
+                        },
+                      },
+                      "Ver detalle →"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      h(
+        "p",
+        { class: "v-pie-nota" },
+        "Cada fila es una revisión independiente con las mismas reglas. Abre una para ver lo que se revisó, los ítems y cómo se corrige."
+      )
+    );
+  }
+
+  function resumenLote() {
+    const L = [`Revisión FER 1.1.1 — ${plural(S.lote.length, "archivo", "archivos")}`, ""];
+    for (const e of S.lote) {
+      if (!e.r.ok) {
+        L.push(`- ${e.nombre}: no se pudo leer (${e.r.error})`);
+        continue;
+      }
+      const lista = faltas(e.r);
+      L.push(`- ${e.nombre}: ${lista.length ? `${TITULAR_NO}: ${lista.join("; ")}.` : `${TITULAR_SI}.`}`);
+    }
+    L.push("", `Revisado con ${location.href.split("#")[0]}`, `Consultas: ${SOPORTE}`);
+    return L.join("\n");
+  }
+
+  // ── Constancia en PDF ───────────────────────────────────────────────────
+
+  let pdf: Promise<[any, string | null]> | null = null;
+
+  /** jsPDF y el logo se piden la primera vez que alguien pulsa el botón, no antes. */
+  function cargarPdf() {
+    pdf ??= Promise.all([
+      import("../lib/constancia-pdf.js"),
+      fetch(`${BASE}/logo-facturafacil.png`)
+        .then((x) => (x.ok ? x.blob() : Promise.reject(new Error(String(x.status)))))
+        .then(
+          (b) =>
+            new Promise<string>((ok) => {
+              const fr = new FileReader();
+              fr.onload = () => ok(String(fr.result));
+              fr.readAsDataURL(b);
+            })
+        )
+        .catch(() => null),
+    ]);
+    pdf.catch(() => (pdf = null));
+    return pdf;
+  }
+
+  function vmPdf(fuente: any, nombre: string) {
+    const m = modelo(fuente);
+    const f: Date = m.revisadoEn || new Date();
+    // DD/MM/AAAA a mano: es-PA formatea como MM/DD y confunde el 6 de octubre con el 10 de junio.
+    const dd = (n: number) => String(n).padStart(2, "0");
+    const fechaCorta = `${dd(f.getDate())}/${dd(f.getMonth() + 1)}/${f.getFullYear()}`;
+    const hora = horaCorta(f);
+    const pasos = m.pasos.map((p: any) => {
+      const cuales = p.ejemplos.slice(0, 6).join(", ");
+      return {
+        titulo: p.titulo,
+        ref: p.ref,
+        cuantos: p.cuantos > 1 ? `${p.cuantos} ítems${cuales ? ` (${cuales}${p.ejemplos.length > 6 ? "…" : ""})` : ""}` : null,
+        ahora: p.ahora ? recorte(p.ahora, 160) : "el campo no existe",
+        bloque: p.bloque,
+        donde: mayus(p.donde) + ".",
+        alternativa: p.alternativa,
+        candidato: p.candidato ? `${p.candidato} está en el campo y encaja por su forma, pero el documento no lo identifica. Confirmarlo antes de escribirlo.` : null,
+        nota: p.nota,
+      };
+    });
+    const heredado = m.heredado ? `${m.heredado.antes}perfil heredado${m.heredado.cola}` : null;
+    return {
+      archivo: nombre,
+      nombrePdf: `${nombre.replace(/\.xml$/i, "")}_constancia-FER.pdf`,
+      generado: `${fechaCorta} a las ${hora}`,
+      selloFecha: fechaCorta,
+      selloHora: hora,
+      sirve: m.sirve,
+      titular: m.sirve ? TITULAR_SI : TITULAR_NO,
+      porque: m.porque,
+      heredado,
+      ficha: [["Archivo", nombre], ...m.ficha.map((x: any) => [x.k, x.sub ? `${x.v} · ${x.sub}` : x.v])],
+      checks: m.checks,
+      resumenChecks: m.resumenChecks,
+      pasos,
+      pasosResto: null,
+      items: m.items.map((i: any) => ({ sec: i.sec, desc: i.desc, cod: i.cod, cbar: i.cbar, ok: i.ok, estadoTexto: i.estado })),
+      resumenItems: m.resumenItems,
+      obs: m.todos.map((a: any) => ({ grado: a.grado, texto: a.texto, ref: a.ref })),
+      resumenObs: `${plural(m.todos.length, "observación", "observaciones")} · los avisos y las notas no cambian el veredicto`,
+      alcance: `Esta constancia describe lo que un receptor conforme a FER 1.1.1 extrae de este archivo XML, revisado con la implementación de referencia publicada (fer.js) en el navegador de quien la generó. Revisa el archivo, no la implementación de quien lo emitió, y no sustituye a la autorización de la DGI. Consultas: ${SOPORTE}.`,
+    };
+  }
+
+  async function generarPdf(fuente: any = S, nombre: string = S.archivo?.nombre) {
+    const etiquetas = document.querySelectorAll("[data-pdf] .v-boton__texto");
+    const poner = (t: string | null, ms = 0) => etiquetas.forEach((s) => etiqueta(s, t, ms));
+    poner("Preparando…");
+    try {
+      const [mod, logo] = await cargarPdf();
+      mod.generarConstancia(vmPdf(fuente, nombre), logo);
+      poner("Descargada", 2500);
+    } catch (e) {
+      console.error(e);
+      poner("No se pudo generar", 2500);
+    }
+  }
+
+  /** Una constancia por archivo, espaciadas: el navegador bloquea varias descargas de golpe. */
+  async function pdfLote() {
+    const span = document.querySelector("#pdf-lote .v-boton__texto")!;
+    const ok = S.lote.filter((e: any) => e.r.ok);
+    if (!ok.length) return;
+    etiqueta(span, "Preparando…");
+    let mod: any, logo: string | null;
+    try {
+      [mod, logo] = await cargarPdf();
+    } catch (e) {
+      console.error(e);
+      etiqueta(span, "No se pudo generar", 2500);
+      return;
+    }
+    ok.forEach((e: any, i: number) =>
+      timers.push(
+        window.setTimeout(() => {
+          try {
+            mod.generarConstancia(vmPdf(e, e.nombre), logo);
+          } catch (err) {
+            console.error(err);
+          }
+          const fin = i + 1 === ok.length;
+          etiqueta(span, fin ? "Descargadas" : `Descargando ${i + 1} de ${ok.length}…`, fin ? 2500 : 0);
+        }, 600 * i)
+      )
+    );
+  }
 </script>

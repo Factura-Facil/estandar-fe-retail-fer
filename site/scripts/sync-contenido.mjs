@@ -93,4 +93,15 @@ writeFileSync(
   readFileSync(join(raiz, "adoptantes", "registro.json"), "utf8")
 );
 
-console.log(`sync: spec + ${n} decisiones + casos + parser + registro + adoptantes`);
+// Ejemplos que el validador ofrece cargar sin tener un XML a mano. Solo los de la
+// convención: las facturas reales que se prueban en local llevan RUC y razón social
+// de clientes y no se publican.
+const EJEMPLOS = ["ejemplo-completo.xml", "ejemplo-heredado.xml"];
+const ejemplos = join(aqui, "..", "public", "ejemplos");
+rmSync(ejemplos, { recursive: true, force: true });
+mkdirSync(ejemplos, { recursive: true });
+for (const e of EJEMPLOS) {
+  writeFileSync(join(ejemplos, e), readFileSync(join(raiz, "conformidad", "xml", e), "utf8"));
+}
+
+console.log(`sync: spec + ${n} decisiones + casos + parser + registro + adoptantes + ${EJEMPLOS.length} ejemplos`);

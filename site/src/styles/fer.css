@@ -1787,74 +1787,1471 @@ a:hover {
 
 /* ── Validador ──────────────────────────────────────────────────────────── */
 
-/* Solo el margen inferior: el atajo `margin` pisaría el `margin-inline: auto` de
-   .envoltura y la columna dejaría de estar centrada. Los controles arrancan un poco
-   antes que un texto corrido: son la razón de estar de la página. */
-.tool {
-  padding-top: 36px;
-  margin-bottom: 40px;
+/* Un poco más ancho que la prosa: la tabla de ítems y el visor del XML son piezas de
+   interfaz, y a 900px la columna del Código de Barras parte los EAN-13 en dos. */
+.envoltura--v {
+  max-width: 960px;
 }
 
-/* La medida de lectura es de la prosa. Los paneles de la herramienta son piezas de
-   interfaz: su ancho lo fija la tarjeta que los aloja, no el largo de la línea.
-   Van con `.prosa` delante para ganarle en especificidad a `.prosa p`. */
-.prosa .tool__perfil,
-.prosa .tool__privado,
-.prosa .tool__sigue,
-.prosa .campo__etiqueta,
-.prosa .campo__cadena,
-.prosa .campo__paso,
-.prosa .campo__nota,
-.prosa .zona__texto,
-.prosa .zona__nota,
-.prosa .xml__error,
-.prosa .xml__leyendo,
-.prosa .xml__discrepa,
-.prosa .cargado__nombre,
-.prosa .cargado__meta,
-#salida-xml > p {
-  max-width: none;
+.v {
+  padding-block: 32px 80px;
 }
 
-/* Control segmentado: los dos modos son la misma operación sobre entradas
-   distintas, no dos herramientas. */
-.modos {
+/* La barra fija tapa el principio de lo que se enfoca desde un enlace de línea. */
+.v [id] {
+  scroll-margin-top: 92px;
+}
+
+.v-ico,
+.v-trazo {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.v-ico {
+  stroke-width: 2.5;
+}
+
+.v-trazo {
+  stroke-width: 1.6;
+}
+
+/* ── Pastillas de la cabecera ── */
+
+.v-pastillas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.v-pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--navy);
+}
+
+.v-pastilla svg {
+  flex: none;
+}
+
+.v-pastilla__icono {
+  display: inline-flex;
+  color: var(--verde-rotulo);
+}
+
+.v-pastilla__icono--cian {
+  color: var(--cian-texto);
+}
+
+.v-pastilla--privado {
+  background: var(--marcador-tenue);
+  border-color: var(--marcador-borde);
+  color: var(--verde-rotulo);
+}
+
+.v-pastilla--conf {
+  appearance: none;
+  border-color: var(--marcador-borde);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.v-pastilla--conf:hover {
+  border-color: var(--marcador-firme);
+}
+
+.v-pastilla--mal {
+  border-color: var(--rojo-borde);
+}
+
+.v-pastilla--mal .v-pastilla__icono {
+  color: var(--rojo);
+}
+
+.v-pastilla__flecha {
+  color: var(--tinta-fantasma);
+}
+
+/* ── Panel de casos de conformidad ── */
+
+.v-conf {
+  margin-top: 16px;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 18px 20px;
+}
+
+.v-conf__texto {
+  max-width: 72ch;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.v-conf__texto b {
+  color: var(--tinta);
+}
+
+.v-conf__casos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px 18px;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v-conf__casos li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--tinta-tenue);
+}
+
+.v-conf__marca {
+  flex: none;
+  font-weight: 700;
+  color: var(--verde-rotulo);
+}
+
+.v-conf__marca--mal {
+  color: var(--rojo);
+}
+
+.v-conf__id {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--tinta-fantasma);
+}
+
+.v-conf__pie {
+  margin: 14px 0 0;
+  border-top: 1px solid var(--linea-tenue);
+  padding-top: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-fantasma);
+}
+
+/* ── Botones ── */
+
+.v-boton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  appearance: none;
+  background: var(--papel);
+  border: 1px solid var(--linea-firme);
+  border-radius: var(--r-md);
+  padding: 11px 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--tinta-tenue);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    color 0.15s;
+}
+
+.v-boton:hover {
+  border-color: var(--cian);
+  color: var(--navy);
+}
+
+.v-boton--cian {
+  color: var(--cian-texto);
+}
+
+.v-boton--primario {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+  box-shadow: var(--sombra-boton);
+}
+
+.v-boton--primario:hover {
+  background: #16256b;
+  border-color: #16256b;
+  color: #fff;
+}
+
+.v-boton--grande {
+  padding: 13px 22px;
+  font-size: 15px;
+}
+
+/* El input va encima del botón, invisible: así el clic y el foco son los del sistema. */
+.v-boton input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.v-boton:focus-visible,
+.v-boton:focus-within {
+  outline: 2px solid var(--cian);
+  outline-offset: 2px;
+}
+
+.v-enlace {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--cian-texto);
+  cursor: pointer;
+}
+
+.v-enlace:hover {
+  text-decoration: underline;
+}
+
+/* «Ver en el XML · línea N»: un enlace con su glifo, en mono para que el número se lea
+   como lo que es. */
+.v-linea {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--cian-texto);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.v-linea:hover {
+  text-decoration: underline;
+}
+
+/* ── Subir ── */
+
+.v-subir {
+  background: var(--papel);
+  border: 1px solid #e0e9f3;
+  border-radius: var(--r-2xl);
+  box-shadow: var(--sombra-heroe);
+  padding: 10px;
+}
+
+.v-zona {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  border: 1.5px dashed var(--linea-firme);
+  border-radius: var(--r-lg);
+  padding: 48px 24px 40px;
+  text-align: center;
+  background: var(--papel-hondo);
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.v-zona--activa {
+  border-color: var(--marcador-firme);
+  background: #fafdf3;
+}
+
+.v-zona__icono {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+}
+
+.v-zona__titulo {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.v-zona__nota {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-rotulo);
+}
+
+.v-demos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 6px;
+}
+
+.v-demos__rotulo {
+  margin-right: 4px;
+  font-size: 13.5px;
+  color: var(--tinta-tenue);
+}
+
+.v-chip {
+  appearance: none;
+  background: var(--papel);
+  border: 1px solid var(--linea-nav);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.v-chip:hover {
+  border-color: var(--cian);
+  color: var(--cian-texto);
+}
+
+.v-linea-texto {
+  margin: 22px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+.v-linea-texto--junta {
+  margin-top: 6px;
+}
+
+/* ── Tarjetas y encabezados ── */
+
+.v-tarjeta {
+  margin-top: 20px;
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-2xl);
+  padding: 22px 24px;
+}
+
+.v-h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.v-h2--grande {
+  font-size: 24px;
+}
+
+.v-seccion__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.v-seccion__intro {
+  margin: 8px 0 4px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.v-seccion__intro b {
+  color: var(--tinta);
+}
+
+.v-resumen {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.v-resumen--ok {
+  background: var(--marcador-tenue);
+  color: var(--verde-rotulo);
+}
+
+.v-resumen--mal {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+/* ── Revisando ── */
+
+.v-revisando {
+  margin-top: 0;
+  border-color: #e0e9f3;
+  box-shadow: var(--sombra-heroe);
+  padding: 28px;
+}
+
+.v-revisando__archivo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta-fantasma);
+  overflow-wrap: anywhere;
+}
+
+.v-revisando__titulo {
+  margin: 6px 0 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.v-progreso {
+  height: 6px;
+  margin: 18px 0 20px;
+  border-radius: 999px;
+  background: var(--linea-tenue);
+  overflow: hidden;
+}
+
+.v-progreso__barra {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cian);
+  transition: width 0.3s ease;
+}
+
+.v-pasos {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v-paso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--tinta-fantasma);
+}
+
+.v-paso__marca {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--linea-tenue);
+  color: var(--verde-hondo);
+}
+
+.v-paso__visto {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.8;
+  visibility: hidden;
+}
+
+.v-paso--actual {
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.v-paso--actual .v-paso__marca {
+  background: var(--cian-tenue);
+}
+
+.v-paso--hecho {
+  color: var(--tinta);
+}
+
+.v-paso--hecho .v-paso__marca {
+  background: var(--marcador);
+}
+
+.v-paso--hecho .v-paso__visto {
+  visibility: visible;
+}
+
+.v-paso__detalle {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tinta-fantasma);
+}
+
+.v-revisando__privado {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 22px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--verde-rotulo);
+}
+
+/* ── Barra del archivo ── */
+
+.v-archivo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  background: var(--papel-hondo);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-xl);
+  padding: 14px 16px 14px 20px;
+}
+
+.v-archivo__icono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+}
+
+.v-archivo__icono rect {
+  fill: none;
+}
+
+.v-archivo__dato {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.v-archivo__nombre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.v-archivo__meta {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--tinta-fantasma);
+}
+
+.v-error {
+  margin: 20px 0 0;
+  background: var(--rojo-tenue);
+  border: 1px solid var(--rojo-borde);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--rojo);
+}
+
+/* ── Veredicto ── */
+
+.v-veredicto {
+  margin-top: 20px;
+  border: 1px solid var(--marcador-borde);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  background: var(--papel);
+}
+
+.v-veredicto--no {
+  border-color: var(--rojo-borde);
+}
+
+.v-veredicto__cabeza {
+  padding: 28px 28px 24px;
+  background: var(--marcador-tenue);
+}
+
+.v-veredicto--no .v-veredicto__cabeza {
+  background: var(--rojo-tenue);
+}
+
+.v-veredicto__titular {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--verde-hondo);
+}
+
+.v-veredicto--no .v-veredicto__titular {
+  color: var(--rojo);
+}
+
+.v-veredicto__marca {
+  width: 40px;
+  height: 40px;
+  padding: 7px;
+  border-radius: 50%;
+  background: var(--marcador);
+}
+
+.v-veredicto--no .v-veredicto__marca {
+  background: var(--rojo-pastilla);
+}
+
+.v-veredicto__porque {
+  max-width: 62ch;
+  margin: 14px 0 0;
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--tinta);
+}
+
+.v-veredicto__heredado {
+  max-width: 62ch;
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #3c4556;
+}
+
+.v-ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 18px 24px;
+  margin: 0;
+  border-top: 1px solid var(--marcador-borde);
+  padding: 20px 28px;
+}
+
+.v-veredicto--no .v-ficha {
+  border-top-color: var(--rojo-borde);
+}
+
+.v-ficha dt {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-rotulo);
+}
+
+.v-ficha dd {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.v-ficha .v-ficha__sub {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tinta-fantasma);
+}
+
+.v-procedencia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0;
+  background: var(--papel-hondo);
+  border-top: 1px solid var(--linea);
+  padding: 12px 28px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tinta-tenue);
+}
+
+.v-procedencia__sep {
+  color: var(--linea-firme);
+}
+
+.v-procedencia--ok {
+  color: var(--verde-hondo);
+}
+
+.v-procedencia--mal {
+  color: var(--rojo);
+}
+
+/* ── Lo que se revisó ── */
+
+.v-checks {
+  padding-bottom: 10px;
+}
+
+.v-checks__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v-check {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 4px 14px;
+  border-top: 1px solid var(--linea-tenue);
+  padding: 14px 0;
+}
+
+.v-check:first-child {
+  margin-top: 10px;
+}
+
+.v-check__icono {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 50%;
+  stroke-width: 2.6;
+  background: var(--marcador);
+  color: var(--verde-hondo);
+}
+
+.v-check--mal .v-check__icono {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.v-check--info .v-check__icono {
+  background: var(--cian-tenue);
+  color: var(--cian-texto);
+}
+
+.v-check__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 3px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.v-check__ref {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--tinta-fantasma);
+}
+
+.v-check__detalle {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.v-check__ver {
+  margin: 6px 0 0;
+}
+
+.v-check__lado {
+  display: grid;
+  justify-items: end;
+  align-content: start;
+  gap: 6px;
+  max-width: 220px;
+  padding-top: 3px;
+  text-align: right;
+}
+
+.v-check__valor {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.v-check--mal .v-check__valor {
+  color: var(--rojo);
+}
+
+.v-tipo {
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: var(--linea-tenue);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+}
+
+.v-tipo--obligatoria {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ── Cómo se corrige: lo que cambia en v3 ── */
+
+.receta.v-tarjeta {
+  border-left: 3px solid var(--cian);
+}
+
+.receta__n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--cian-tenue);
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cian-texto);
+  align-self: center;
+}
+
+/* Lo que hay ahora, tachado: la fila de abajo lo reemplaza. */
+.receta__ahora:not(.receta__ahora--nada) {
+  text-decoration: line-through;
+  text-decoration-color: rgba(164, 52, 42, 0.45);
+}
+
+.v-obs__lista--errores {
+  margin-top: 12px;
+}
+
+/* ── Ítems ── */
+
+.v-items {
+  padding: 0;
+  overflow: hidden;
+}
+
+.v-items__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 20px 24px 16px;
+}
+
+.v-items__resumen {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  color: var(--tinta-tenue);
+}
+
+.v-items__discrepa {
+  margin: 0;
+  padding: 0 24px 14px;
+  font-size: 14px;
+  color: var(--rojo);
+}
+
+.v-items__vacio {
+  margin: 0;
+  border-top: 1px solid var(--linea);
+  padding: 18px 24px 22px;
+  font-size: 14px;
+  color: var(--tinta-fantasma);
+}
+
+.v-segmento {
   display: inline-flex;
   gap: 4px;
-  margin: 0 0 20px;
   background: #f3f8fd;
   border: 1px solid var(--linea);
   border-radius: var(--r-md);
   padding: 4px;
 }
 
-.modo {
+.v-segmento__opcion {
   appearance: none;
   border: 0;
   background: none;
   border-radius: 9px;
-  padding: 9px 16px;
+  padding: 7px 14px;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--tinta-tenue);
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
 }
 
-.modo:hover {
+.v-segmento__opcion:hover {
   color: var(--navy);
 }
 
-.modo[aria-selected="true"] {
+.v-segmento__opcion[aria-selected="true"] {
   background: var(--papel);
-  color: var(--navy);
   font-weight: 600;
+  color: var(--navy);
   box-shadow: 0 2px 6px rgba(14, 26, 71, 0.1);
 }
+
+.v-scroll {
+  overflow-x: auto;
+}
+
+.v-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.v-tabla th,
+.v-tabla td {
+  border-top: 1px solid var(--linea-tenue);
+  padding: 11px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.v-tabla th:first-child,
+.v-tabla td:first-child {
+  padding-left: 24px;
+}
+
+.v-tabla th:last-child,
+.v-tabla td:last-child {
+  padding-right: 24px;
+}
+
+.v-tabla th {
+  border-top-color: var(--linea);
+  background: var(--papel-hondo);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tinta-rotulo);
+}
+
+.v-tabla__fila--mal td {
+  background: var(--rojo-tenue);
+}
+
+.v-tabla__mono {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.v-tabla__tenue {
+  color: var(--tinta-fantasma);
+}
+
+.v-tabla__mal {
+  color: var(--rojo);
+}
+
+.v-tabla__corto {
+  white-space: nowrap;
+}
+
+.v-tabla__producto {
+  min-width: 180px;
+  color: var(--tinta);
+}
+
+.v-tabla__avisos {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--verde-rotulo);
+}
+
+.v-tabla__cbar {
+  min-width: 150px;
+}
+
+.v-cbar {
+  overflow-wrap: anywhere;
+  color: var(--tinta-tenue);
+}
+
+.v-cbar--ok {
+  border-radius: 5px;
+  background: var(--marcador-tenue);
+  padding: 1px 6px;
+  color: var(--tinta);
+}
+
+.v-tabla__perfil {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--tinta-fantasma);
+  white-space: nowrap;
+}
+
+.v-tabla__perfil > span {
+  display: block;
+}
+
+.v-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 3px 10px 3px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--marcador-tenue);
+  color: var(--verde-hondo);
+}
+
+.v-estado__icono {
+  width: 18px;
+  height: 18px;
+  padding: 3px;
+  border-radius: 50%;
+  stroke-width: 3;
+  background: var(--marcador);
+}
+
+.v-estado--mal {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.v-estado--mal .v-estado__icono {
+  background: var(--rojo-borde);
+}
+
+/* ── Plegables: observaciones y XML ── */
+
+.v-plegable {
+  padding: 0;
+  overflow: hidden;
+}
+
+.v-plegable__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 18px 24px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.v-plegable__cabeza:hover .v-plegable__titulo {
+  color: var(--cian-texto);
+}
+
+.v-chevron {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 3px 2px;
+  border-right: 2px solid var(--tinta-fantasma);
+  border-bottom: 2px solid var(--tinta-fantasma);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+
+.v-plegable__cabeza[aria-expanded="true"] .v-chevron {
+  margin-bottom: 0;
+  margin-top: -3px;
+  transform: rotate(45deg);
+}
+
+.v-plegable__titulo {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  transition: color 0.15s;
+}
+
+.v-plegable__nota,
+.v-plegable__resumen {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--tinta-fantasma);
+}
+
+.v-plegable__resumen {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.v-grado {
+  flex: none;
+  align-self: start;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.v-grado--conteo {
+  align-self: center;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+
+.v-grado--error {
+  background: var(--rojo-pastilla);
+  color: var(--rojo);
+}
+
+.v-grado--aviso {
+  background: var(--marcador-tenue);
+  color: var(--verde-rotulo);
+}
+
+.v-grado--nota {
+  background: var(--linea-tenue);
+  color: var(--tinta-tenue);
+}
+
+.v-obs__lista {
+  margin: 0;
+  padding: 0 24px 10px;
+  list-style: none;
+}
+
+.v-obs__lista--errores {
+  padding: 0;
+}
+
+.v-obs__lista li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 6px 14px;
+  border-top: 1px solid var(--linea-tenue);
+  padding: 12px 0;
+}
+
+.v-obs__texto {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--tinta);
+}
+
+.v-obs__lado {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.v-obs__ref {
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--tinta-fantasma);
+}
+
+.v-obs__lista .v-obs__vacio {
+  display: block;
+  font-size: 14px;
+  color: var(--tinta-fantasma);
+}
+
+/* ── Visor del XML ── */
+
+.v-xml {
+  padding: 0 24px 24px;
+}
+
+.v-xml__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-bottom: 12px;
+  font-size: 13.5px;
+  color: var(--tinta-tenue);
+}
+
+.v-xml__foco {
+  border-radius: 999px;
+  background: var(--cian-tenue);
+  padding: 3px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--cian-texto);
+}
+
+.v-xml__solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.v-xml__solo input {
+  accent-color: var(--navy);
+}
+
+.v-xml__leyenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-size: 12.5px;
+}
+
+.v-xml__muestra {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--marcador);
+}
+
+.v-xml__caja {
+  position: relative;
+  max-height: 460px;
+  overflow: auto;
+  border-radius: var(--r-lg);
+  background: var(--navy);
+  padding: 10px 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+}
+
+.v-xml__caja:focus-visible {
+  outline: 2px solid var(--cian);
+  outline-offset: 2px;
+}
+
+.v-xml__linea {
+  display: flex;
+  min-width: max-content;
+  border-left: 3px solid transparent;
+  padding-right: 16px;
+}
+
+.v-xml__linea--inf {
+  background: rgba(198, 225, 122, 0.14);
+  border-left-color: var(--marcador);
+}
+
+.v-xml__linea--foco {
+  background: rgba(37, 186, 240, 0.32);
+  border-left-color: var(--cian);
+}
+
+.v-xml__n {
+  flex: none;
+  width: 52px;
+  padding-right: 14px;
+  text-align: right;
+  color: #5d6c95;
+  user-select: none;
+}
+
+.v-xml__codigo {
+  white-space: pre;
+}
+
+.v-x-p {
+  color: #6f7fa8;
+}
+
+.v-x-tag {
+  color: #7fd0f5;
+}
+
+.v-x-attr {
+  color: #f2c879;
+}
+
+.v-x-val {
+  color: #b9d98a;
+}
+
+.v-x-txt {
+  color: #e8eef7;
+}
+
+.v-x-hl {
+  border-radius: 3px;
+  background: var(--marcador);
+  padding: 0 3px;
+  color: var(--navy);
+}
+
+/* ── Cierre ── */
+
+.v-llevar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  background: var(--cian-papel);
+  border: 1px solid #d8ecf8;
+  border-radius: var(--r-2xl);
+  padding: 22px 24px;
+}
+
+.v-llevar__texto {
+  flex: 1 1 320px;
+}
+
+.v-llevar__texto p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--tinta-tenue);
+}
+
+.v-llevar__texto .v-llevar__titulo {
+  margin-bottom: 4px;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.v-pie-nota {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--tinta-fantasma);
+}
+
+/* ── Varios archivos ── */
+
+.v-lote__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.v-lote__titulo {
+  flex: 1 1 280px;
+}
+
+.v-lote__cuenta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.v-tarjeta--tabla {
+  padding: 0;
+  overflow: hidden;
+}
+
+.v-tabla--lote td {
+  vertical-align: middle;
+}
+
+.v-tabla__abre {
+  cursor: pointer;
+}
+
+.v-tabla__abre:hover td {
+  background: var(--cian-papel);
+}
+
+.v-tabla--lote .v-tabla__fila--mal td {
+  background: #fffafa;
+}
+
+.v-tabla--lote .v-tabla__fila--mal:hover td {
+  background: var(--cian-papel);
+}
+
+.v-tabla__archivo {
+  min-width: 200px;
+}
+
+.v-tabla__nombre {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.v-tabla__sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--tinta-fantasma);
+}
+
+.v-tabla__ver {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 13.5px;
+}
+
+/* ── Un campo ── */
+
+.v-volver {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.v-como {
+  border-top: 1px solid var(--linea);
+}
+
+/* ── Un campo: controles ─────────────────────────────────────────────── */
 
 .tool__campo {
   width: 100%;
@@ -2107,291 +3504,6 @@ a:hover {
   font-weight: 600;
 }
 
-/* ── Zona de archivo ────────────────────────────────────────────────────── */
-
-.zona {
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-  border: 1.5px dashed var(--linea-firme);
-  border-radius: var(--r-xl);
-  padding: 44px 24px;
-  text-align: center;
-  background: var(--papel-hondo);
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease;
-}
-
-.zona--activa {
-  border-color: var(--marcador-firme);
-  background: #fafdf3;
-}
-
-.zona svg {
-  color: var(--cian-texto);
-}
-
-.zona__texto {
-  margin: 0;
-  font-size: 15.5px;
-  color: var(--tinta);
-}
-
-.zona__nota {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--tinta-rotulo);
-}
-
-.zona__boton {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 4px;
-  background: var(--papel);
-  border: 1px solid var(--linea-firme);
-  border-radius: var(--r-sm);
-  padding: 7px 13px;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--tinta);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease;
-}
-
-.zona__boton:hover {
-  border-color: var(--cian);
-  background: var(--cian-papel);
-}
-
-.zona__boton input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.zona__boton:focus-within {
-  outline: 2px solid var(--cian);
-  outline-offset: 3px;
-}
-
-/* ── Revisión de XML ────────────────────────────────────────────────────── */
-
-/* El resultado empieza aquí: al soltar un archivo la página desplaza hasta este
-   punto, y el margen evita que la barra fija se coma la tarjeta. */
-#cargado {
-  scroll-margin-top: 92px;
-}
-
-.cargado {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 8px 0 0;
-  background: var(--papel-hondo);
-  border: 1px solid var(--linea);
-  border-radius: var(--r-xl);
-  padding: 16px 20px;
-}
-
-.cargado__nombre {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 14px;
-  color: var(--tinta);
-  overflow-wrap: anywhere;
-}
-
-.cargado__meta {
-  margin: 3px 0 0;
-  font-size: 13px;
-  color: var(--tinta-fantasma);
-}
-
-.cargado__otro {
-  flex: none;
-  background: var(--papel);
-  border: 1px solid var(--linea-firme);
-  border-radius: 999px;
-  padding: 9px 18px;
-  font-family: inherit;
-  font-size: 13.5px;
-  color: var(--tinta-tenue);
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.cargado__otro:hover {
-  border-color: var(--cian);
-  color: var(--cian-texto);
-}
-
-.xml__leyendo {
-  margin: 24px 0;
-  font-size: 14.5px;
-  color: var(--tinta-fantasma);
-}
-
-/* ── Veredicto ──────────────────────────────────────────────────────────── */
-
-/* Dos estados y nada más. Un veredicto graduado se lee como un sí a la primera
-   pasada, que es justo lo que no puede pasar cuando de aquí sale la respuesta a
-   un proveedor. Deliberadamente no dice «documento conforme»: esto lee un
-   archivo, no audita al emisor, y por eso el titular habla del dato («sirve»),
-   no del estándar. */
-.veredicto {
-  margin: 28px 0 0;
-  background: var(--papel-hondo);
-  border: 1px solid var(--linea);
-  border-radius: var(--r-2xl);
-  padding: 26px 28px;
-}
-
-.veredicto--si {
-  background: var(--marcador-tenue);
-  border-color: var(--marcador-borde);
-}
-
-.veredicto--no {
-  background: var(--rojo-tenue);
-  border-color: var(--rojo-borde);
-}
-
-.veredicto__titular {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: none;
-  margin: 0;
-  font-family: var(--display);
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.veredicto--si .veredicto__titular {
-  color: var(--verde-hondo);
-}
-
-.veredicto--no .veredicto__titular {
-  color: var(--rojo);
-}
-
-.veredicto__marca {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  padding: 5px;
-}
-
-.veredicto--si .veredicto__marca {
-  background: var(--marcador);
-  color: var(--verde-hondo);
-}
-
-.veredicto--no .veredicto__marca {
-  background: var(--rojo-pastilla);
-  color: var(--rojo);
-}
-
-.veredicto__porque {
-  max-width: 62ch;
-  margin: 14px 0 0;
-  font-size: 16.5px;
-  line-height: 1.5;
-  color: var(--tinta);
-}
-
-.veredicto__alcance {
-  max-width: 62ch;
-  margin: 12px 0 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--tinta-fantasma);
-}
-
-/* ── Ficha y cifras del documento ───────────────────────────────────────── */
-
-/* Para reconocer la propia factura de un vistazo. Son campos de la Ficha
-   Técnica, no de la convención: por eso van en gris de apoyo, en una línea, y su
-   ausencia no marca nada. */
-.ficha {
-  max-width: none;
-  margin: 12px 0 0;
-  padding: 0 4px;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--tinta-fantasma);
-}
-
-/* Dos líneas: arriba qué documento es, abajo entre quiénes va. Bloque en el span y
-   no un <br>, para que cada una tenga su propia caja y el nombre largo de un
-   receptor envuelva dentro de la suya sin empujar a la de arriba. */
-.ficha__linea {
-  display: block;
-}
-
-/* Las tres cifras que decide leer una cadena antes de abrir el detalle. */
-.cifras {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
-  margin: 20px 0 4px;
-}
-
-.cifra {
-  background: var(--papel);
-  border: 1px solid var(--linea);
-  border-radius: var(--r-xl);
-  padding: 18px 20px;
-}
-
-.cifra__rotulo {
-  margin: 0;
-  font-family: var(--mono);
-  /* 10.5px en versales con letter-spacing es el texto más difícil de leer de la
-     página; el medio punto que se gana aquí cuesta menos que el rótulo ilegible. */
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--tinta-rotulo);
-}
-
-.cifra__dato {
-  max-width: none;
-  margin: 8px 0 0;
-  font-family: var(--mono);
-  font-size: 22px;
-  line-height: 1.2;
-  color: var(--tinta);
-  overflow-wrap: anywhere;
-}
-
-/* «no viaja» es la respuesta de la tarjeta, no una ausencia de respuesta: era lo más
-   pálido que había en ella justo cuando es lo que hay que leer. Va más pequeño que un
-   valor presente —el dato tiene más peso que su falta— pero no más tenue. */
-.cifra__dato--vacio {
-  font-size: 17px;
-  color: var(--tinta-tenue);
-}
-
-.cifra__pie {
-  max-width: none;
-  margin: 8px 0 0;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--tinta-fantasma);
-}
 
 /* ── Cómo se corrige ────────────────────────────────────────────────────── */
 
@@ -2616,233 +3728,6 @@ a:hover {
   }
 }
 
-.xml__error {
-  margin: 20px 0;
-  background: var(--rojo-tenue);
-  border: 1px solid var(--rojo-borde);
-  border-left: 3px solid var(--rojo);
-  border-radius: 0 var(--r-md) var(--r-md) 0;
-  padding: 14px 18px;
-  font-size: 14.5px;
-  color: var(--rojo);
-}
-
-#salida-xml .campo {
-  margin: 0 0 8px;
-}
-
-/* El script crea la tabla suelta, sin envoltura donde recortar las esquinas: el
-   recorte lo hace la propia tabla, que para eso separa los bordes. */
-.xml__tabla {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 1px solid var(--linea);
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  font-size: 14px;
-}
-
-.xml__tabla th,
-.xml__tabla td {
-  padding: 12px 16px;
-  text-align: left;
-  vertical-align: top;
-  border-bottom: 1px solid var(--linea);
-}
-
-.xml__tabla tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.xml__tabla th {
-  background: var(--papel-hondo);
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--tinta-rotulo);
-}
-
-/* La clase la pone el script solo cuando el ítem trae cbar, que es el caso que la
-   convención vino a resolver: va marcado, como en la portada. */
-.xml__dato {
-  background: var(--marcador-tenue);
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--tinta);
-  overflow-wrap: anywhere;
-}
-
-.xml__perfil {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--tinta-fantasma);
-}
-
-.xml__desc {
-  color: var(--tinta);
-}
-
-/* Los ítems sin dInfEmFE se listan igual que los demás: un «faltan siete» no dice
-   cuáles revisar. Van atenuados porque no hay nada que leer en ellos. */
-.xml__fila--sin td {
-  background: var(--papel-hondo);
-  color: var(--tinta-fantasma);
-}
-
-.xml__discrepa {
-  margin: 0 0 14px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--rojo);
-}
-
-/* ── Detalle plegado ────────────────────────────────────────────────────── */
-
-/* El sustento del veredicto: sirve para discutir con quien emitió el documento,
-   no para decidir. Abierto de entrada competiría con la única línea que hay que
-   leer primero. */
-.informe__detalle {
-  margin: 28px 0 0;
-  border-top: 1px solid var(--linea);
-  padding-top: 4px;
-}
-
-.informe__abrir {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 4px;
-  padding: 14px 2px;
-  font-size: 14.5px;
-  color: var(--cian-texto);
-  cursor: pointer;
-  list-style: none;
-}
-
-.informe__abrir::-webkit-details-marker {
-  display: none;
-}
-
-.informe__abrir::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-right: 1.6px solid currentColor;
-  border-bottom: 1.6px solid currentColor;
-  transform: rotate(45deg) translate(-2px, -2px);
-  transition: transform 0.15s;
-}
-
-.informe__detalle[open] > .informe__abrir::before {
-  transform: rotate(225deg) translate(-1px, -1px);
-}
-
-.informe__abrir:hover {
-  color: var(--navy);
-}
-
-.informe__detalle > h3:first-of-type {
-  margin-top: 8px;
-}
-
-/* ── Llevarse el informe ────────────────────────────────────────────────── */
-
-.informe__pie {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  margin: 28px 0 0;
-  border-top: 1px solid var(--linea);
-  padding-top: 20px;
-}
-
-.informe__copiar {
-  background: var(--papel);
-  border: 1px solid var(--linea-firme);
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--tinta);
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.informe__copiar:hover {
-  border-color: var(--cian);
-  color: var(--cian-texto);
-}
-
-.informe__pie-nota {
-  font-size: 13px;
-  color: var(--tinta-fantasma);
-}
-
-/* ── Avisos ─────────────────────────────────────────────────────────────── */
-
-.avisos {
-  display: grid;
-  gap: 10px;
-  margin: 20px 0;
-  padding: 0;
-  list-style: none;
-}
-
-.avisos li {
-  max-width: none;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 90px 1fr auto;
-  align-items: start;
-  gap: 14px;
-  background: var(--papel-hondo);
-  border: 1px solid var(--linea);
-  border-radius: var(--r-md);
-  padding: 14px 16px;
-}
-
-.aviso__grado {
-  justify-self: start;
-  border-radius: 999px;
-  padding: 4px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.aviso--error .aviso__grado {
-  background: var(--rojo-pastilla);
-  color: var(--rojo);
-}
-
-.aviso--aviso .aviso__grado {
-  background: var(--marcador-tenue);
-  color: var(--verde-rotulo);
-}
-
-.aviso--nota .aviso__grado {
-  background: var(--linea-tenue);
-  color: var(--tinta-tenue);
-}
-
-.aviso__texto {
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: var(--tinta-tenue);
-}
-
-.aviso__ref {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--tinta-fantasma);
-  white-space: nowrap;
-}
 
 /* Los tres grados, enunciados una vez al pie de la revisión. */
 .grados {
@@ -2909,6 +3794,7 @@ a:hover {
   background: var(--linea-tenue);
   color: var(--tinta-tenue);
 }
+
 
 /* ── Móvil ──────────────────────────────────────────────────────────────── */
 
@@ -2992,21 +3878,69 @@ a:hover {
     color: var(--tinta-fantasma);
   }
 
-  .avisos li {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .aviso__ref {
-    white-space: normal;
-  }
-
   .vecinas__enlace--sig {
     text-align: left;
     grid-column: auto;
   }
 
-  .zona {
+  .v-zona {
     padding: 32px 20px;
+  }
+
+  .v-veredicto__cabeza,
+  .v-ficha,
+  .v-procedencia {
+    padding-inline: 20px;
+  }
+
+  .v-veredicto__titular {
+    font-size: 27px;
+  }
+
+  .v-veredicto__marca {
+    width: 34px;
+    height: 34px;
+  }
+
+  .v-tarjeta {
+    padding: 20px 18px;
+  }
+
+  .v-items,
+  .v-plegable,
+  .v-tarjeta--tabla {
+    padding: 0;
+  }
+
+  /* El valor y el tipo bajan debajo del texto: a la derecha dejarían el detalle en
+     una columna de tres palabras. */
+  .v-check {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .v-check__lado {
+    grid-column: 2;
+    justify-items: start;
+    max-width: none;
+    text-align: left;
+  }
+
+  .v-obs__lista li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .v-obs__lado {
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .v-obs__ref {
+    white-space: normal;
+  }
+
+  .v-plegable__nota,
+  .v-plegable__resumen,
+  .v-xml__leyenda {
+    margin-left: 0;
   }
 }
