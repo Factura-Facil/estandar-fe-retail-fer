@@ -52,8 +52,10 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
   no convive con texto libre (§7.2), y en una cabecera que además lleva el texto de
   impresión del ERP se rompe de dos maneras: con el `<br/>` pegado al número, la Orden
   de Compra se lee como `4506706146<br/>Id`; con un espacio delante, la referencia se
-  lleva el resto del campo. El validador daba «sirve» en los dos casos. Ahora es un
-  error que dice cómo escribirlo: al final del campo, o en bloque.
+  lleva el resto del campo. El validador daba «sirve» en los dos casos. Ahora la
+  Orden de Compra rota es un error y la referencia arrastrada un aviso —la Orden de
+  Compra llega limpia, y es la que se concilia—, y los dos dicen cómo escribirlo: al
+  final del campo, o en bloque.
 - El informe identifica el documento revisado (número, fecha, emisor con RUC y
   receptor) y destaca las tres cifras que deciden si un receptor puede procesarlo:
   Orden de Compra, cobertura de Código de Barras y referencia.

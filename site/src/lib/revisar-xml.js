@@ -313,8 +313,12 @@ function revisarCampo(valor, nivel) {
    * además lleva el texto que imprime el ERP —con su HTML de impresión, `<br/>`— lo
    * rompe de dos maneras, y las dos pasan en la práctica: pegado al número, el `<br/>`
    * no es un espacio y la Orden de Compra se lee como «4506706146<br/>Id»; con un
-   * espacio delante, la ref se lleva el resto del campo. El dato llega, pero llega
-   * mal, que es peor que no llegar: se concilia.
+   * espacio delante, la ref se lleva el resto del campo.
+   *
+   * Los grados no son iguales. La Orden de Compra rota es error: llega mal, que es peor
+   * que no llegar, porque se concilia. La ref arrastrada es aviso: la Orden de Compra
+   * llega limpia, y es lo que los receptores usan en la práctica para conciliar; la ref
+   * es la referencia legible, y que lleve texto de más no impide procesar el documento.
    *
    * Solo se mira el marcado porque es lo único que delata el problema sin adivinar.
    * Una ref que es prosa sin etiquetas no se distingue de una ref legítima.
@@ -335,11 +339,12 @@ function revisarCampo(valor, nivel) {
     }
     if (/[<>]/.test(lectura.datos.ref ?? "")) {
       avisos.push({
-        grado: "error",
+        grado: "aviso",
         texto:
           `La referencia se lee como "${citar(lectura.datos.ref)}": el formato heredado ` +
-          "toma como ref todo lo que sigue a la Orden de Compra, incluido el resto del campo." +
-          arreglo,
+          "toma como ref todo lo que sigue a la Orden de Compra, incluido el resto del campo. " +
+          "La Orden de Compra llega bien; para que la referencia también llegue limpia," +
+          arreglo.replace(" Pon", " pon"),
         ref: "§7.1",
       });
     }

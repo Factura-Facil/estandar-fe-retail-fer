@@ -297,13 +297,13 @@
 
     {
       "id": "cabecera-heredada-con-texto-detras",
-      "porque": "Con un espacio antes del <br/> la Orden de Compra sale bien, pero la ref se lleva el resto del campo. §7.2 ya lo advierte: el heredado no convive con texto libre.",
+      "porque": "Con un espacio antes del <br/> la Orden de Compra sale bien, pero la ref se lleva el resto del campo. §7.2 ya lo advierte: el heredado no convive con texto libre. Es aviso y no error, al contrario que el caso anterior: la Orden de Compra llega limpia y es la que se concilia; la ref sucia no impide procesar el documento.",
       "documento": {
         "cabecera": "Orden de compra: 4506706146 <br/>Id cliente Sage 50: X80116",
         "items": [{ "cod": "50000001", "campo": "#FER1# cbar=7600000000001 #FER1#" }]
       },
       "espera": {
-        "hallazgos": ["error §7.1", "nota §7"],
+        "hallazgos": ["aviso §7.1", "nota §7"],
         "oc": "4506706146",
         "ref": "<br/>Id cliente Sage 50: X80116",
         "receta": []
