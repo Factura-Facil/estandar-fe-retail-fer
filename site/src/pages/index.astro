@@ -9,11 +9,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const repo = "https://github.com/Factura-Facil/estandar-fe-retail-fer";
 
 // Un adoptante puede estar en los dos lados, con una nota distinta en cada uno.
+// Sin logos en el registro: cada fila lleva un monograma con las iniciales.
+const iniciales = (n) =>
+  n.replace(/,?\s*S\.A\.?$/i, "").split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 const receptores = [];
 const emisores = [];
 for (const a of registroAdoptantes.adoptantes) {
-  if (a.roles.receptor) receptores.push({ ...a, nota: a.roles.receptor });
-  if (a.roles.emisor) emisores.push({ ...a, nota: a.roles.emisor });
+  const ini = iniciales(a.nombre);
+  if (a.roles.receptor) receptores.push({ ...a, ini, nota: a.roles.receptor });
+  if (a.roles.emisor) emisores.push({ ...a, ini, nota: a.roles.emisor });
 }
 
 // Las tres variantes de "antes" son los falsos positivos que §7.1 enuncia: sin un
@@ -58,6 +62,9 @@ const despues = [
     nota: "ref es opcional. La regla de lectura no cambia.",
   },
 ];
+
+// Cada fila de la sección enfrenta el mismo emisor antes y después.
+const casos = antes.map((a, i) => ({ ...a, despues: despues[i] }));
 
 const tabla = [
   {
@@ -167,37 +174,56 @@ const tabla = [
         cada proveedor.
       </p>
 
-      <div class="comparativa">
-        <div class="comparativa__lado comparativa__lado--antes">
-          <p class="comparativa__titulo">Hoy, sin convención</p>
-          {
-            antes.map((c) => (
-              <div class="comparativa__caso">
-                <p class="comparativa__emisor">{c.emisor}</p>
-                <p class="comparativa__cadena">{c.cadena}</p>
-                <p class="comparativa__nota">{c.nota}</p>
-              </div>
-            ))
-          }
-          <p class="comparativa__cierre">
-            Reglas de ingesta por proveedor, rechazos y reproceso manual.
-          </p>
+      <div class="contraste">
+        <div class="contraste__fila contraste__fila--cab">
+          <p class="contraste__rotulo">Emisor</p>
+          <div class="contraste__cab contraste__cab--antes">
+            <span class="contraste__icono" aria-hidden="true">×</span>
+            <div>
+              <p class="contraste__titulo">Hoy, sin convención</p>
+              <p class="contraste__sub">Un formato por proveedor</p>
+            </div>
+          </div>
+          <div class="contraste__eje" aria-hidden="true"></div>
+          <div class="contraste__cab contraste__cab--despues">
+            <span class="contraste__icono" aria-hidden="true">✓</span>
+            <div>
+              <p class="contraste__titulo">Con la convención</p>
+              <p class="contraste__sub">Una sola regla de lectura</p>
+            </div>
+          </div>
         </div>
 
-        <div class="comparativa__lado comparativa__lado--despues">
-          <p class="comparativa__titulo">Con la convención</p>
-          {
-            despues.map((c) => (
-              <div class="comparativa__caso">
-                <p class="comparativa__emisor">{c.emisor}</p>
-                {/* Sin saltos de línea entre nodos: .comparativa__cadena es pre-wrap
-                    y cualquier espacio del template se renderiza. */}
-                <p class="comparativa__cadena">{c.libre ? <span class="campo__libre">{c.libre} </span> : null}<span class="marca">{c.bloque}</span></p>
-                <p class="comparativa__nota">{c.nota}</p>
+        {
+          casos.map((c) => (
+            <div class="contraste__fila">
+              <p class="contraste__emisor">{c.emisor}</p>
+              <div class="contraste__celda contraste__celda--antes">
+                <p class="contraste__cadena">{c.cadena}</p>
+                <p class="contraste__nota">{c.nota}</p>
               </div>
-            ))
-          }
-          <p class="comparativa__cierre">
+              <div class="contraste__eje" aria-hidden="true">
+                <svg width="28" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 7h25M20 1l6 6-6 6" />
+                </svg>
+              </div>
+              <div class="contraste__celda contraste__celda--despues">
+                {/* Sin saltos de línea entre nodos: .contraste__cadena es pre-wrap. */}
+                <p class="contraste__cadena">{c.despues.libre ? <span class="campo__libre">{c.despues.libre} </span> : null}<span class="marca">{c.despues.bloque}</span></p>
+                <p class="contraste__nota">{c.despues.nota}</p>
+              </div>
+            </div>
+          ))
+        }
+
+        <div class="contraste__fila contraste__fila--pie">
+          <span></span>
+          <p class="contraste__cierre contraste__cierre--antes">
+            Reglas de ingesta por proveedor, rechazos y reproceso manual.
+          </p>
+          <span class="contraste__eje"></span>
+          <p class="contraste__cierre contraste__cierre--despues">
             Una sola regla de lectura para todos los emisores, verificable.
           </p>
         </div>
@@ -387,45 +413,49 @@ const tabla = [
         darse de alta es un PR a <code>adoptantes/registro.json</code>, no un trámite
         con nadie.
       </p>
-      <div class="lados">
-        <div class="lado">
-          <p class="lado__quien">Cadenas de retail · receptores</p>
-          <ul class="adoptantes">
-            {
-              receptores.map((a) => (
-                <li class="adoptante">
-                  <p class="adoptante__nombre">
-                    <a href={a.sitio}>{a.nombre}</a>
-                    {a.custodio && <span class="adoptante__sello">custodio</span>}
-                  </p>
-                  <p class="adoptante__nota">{a.nota}</p>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-        <div class="lado">
-          <p class="lado__quien">Proveedores · emisores</p>
-          <ul class="adoptantes">
-            {
-              emisores.map((a) => (
-                <li class="adoptante">
-                  <p class="adoptante__nombre">
-                    <a href={a.sitio}>{a.nombre}</a>
-                    {a.custodio && <span class="adoptante__sello">custodio</span>}
-                  </p>
-                  <p class="adoptante__nota">{a.nota}</p>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
+      <div class="registro">
+        {
+          [
+            { titulo: "Receptores", sub: "Cadenas de retail que leen el bloque", lista: receptores, lado: "receptor" },
+            { titulo: "Emisores", sub: "Sistemas de facturación que escriben el bloque", lista: emisores, lado: "emisor" },
+          ].map((col) => (
+            <div class="registro__col">
+              <div class="registro__cab">
+                <p class="registro__titulo">{col.titulo}</p>
+                <p class="registro__sub">{col.sub}</p>
+              </div>
+              <ul class="registro__lista">
+                {col.lista.map((a) => (
+                  <li class="registro__fila">
+                    <span class={`registro__ini registro__ini--${a.custodio ? "custodio" : col.lado}`}>{a.ini}</span>
+                    <div class="registro__cuerpo">
+                      <p class="adoptante__nombre">
+                        {a.sitio ? <a href={a.sitio}>{a.nombre}</a> : <span>{a.nombre}</span>}
+                        {a.custodio && <span class="adoptante__sello">custodio</span>}
+                      </p>
+                      {col.lado === "emisor" && a.emite ? (
+                        <p class="registro__claves">
+                          Emite el bloque con {a.emite.map((c) => <code>{c}</code>)}
+                        </p>
+                      ) : (
+                        <p class="adoptante__nota">{a.nota}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
       </div>
-      <p class="seccion__nota">
-        Estar en esta lista es una declaración de quien se lista, no una certificación:
-        la convención no tiene autoridad que certifique a nadie. Lo verificable son los
-        20 casos de conformidad, que cualquiera puede correr contra una implementación.
-      </p>
+      <div class="registro__pie">
+        <p class="seccion__nota">
+          Estar en esta lista es una declaración de quien se lista, no una certificación:
+          la convención no tiene autoridad que certifique a nadie. Lo verificable son los
+          20 casos de conformidad, que cualquiera puede correr contra una implementación.
+        </p>
+        <a class="registro__alta" href={`${repo}/edit/main/adoptantes/registro.json`}>Darse de alta →</a>
+      </div>
     </div>
   </section>
 

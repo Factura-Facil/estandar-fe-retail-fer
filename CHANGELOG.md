@@ -141,6 +141,15 @@ especificación, el registro de claves y los 20 casos normativos siguen iguales.
   contraste que su propia explicación.
 
 ### Cambiado
+- **Portada.** «El problema» es ahora una sola tabla: cada fila enfrenta al mismo
+  emisor sin la convención y con ella, en lugar de dos paneles que había que leer en
+  paralelo. En móvil cada fila se apila como antes → después.
+- «Adoptantes» se presenta como un registro de dos columnas, receptores y emisores,
+  con un monograma por empresa —el registro no lleva logos—, las claves que emite
+  cada emisor y un enlace para darse de alta editando `adoptantes/registro.json`.
+  Un adoptante sin sitio web aparece sin enlace.
+- Se suman al registro tres emisores: Innova Soft Pro, Retailspos e Innova Emisión.
+- La tipografía monoespaciada pasa de IBM Plex Mono a Geist Mono.
 - `conformidad/xml/ejemplo-completo.xml` aplica la convención en sus tres ítems. El
   tercero emitía en perfil heredado para ilustrar §7; ese escenario ya está en
   `item-heredado.xml` y ahora también, completo, en `ejemplo-heredado.xml`.
